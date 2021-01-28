@@ -1,0 +1,6 @@
+name: MUtility
+version: ${project.version}
+main: mutility.mutility.MUtilitySpigot
+api-version: 1.16
+authors: [ Menshons ]
+description: Plugin dodatečných funkcí určený exkluzivně pro server Kostkuj.cz

@@ -1,0 +1,4 @@
+name: MUtility
+version: ${project.version}
+main: mutility.mutility.MUtilityBungeeCord
+description: Plugin dodatečných funkcí určený exkluzivně pro server Kostkuj.cz
