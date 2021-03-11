@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Objects;
 
 public class Checker {
     public boolean checkInt(String number) {
@@ -53,6 +54,16 @@ public class Checker {
 
     public boolean checkPermissions(String playerName, String permission) {
         Player player = Bukkit.getServer().getPlayer(playerName);
-        return player.hasPermission(permission);
+        if(permission.contains(";")) {
+            String[] permissions = permission.split(";");
+            for (String perm : permissions) {
+                if (Objects.requireNonNull(player).hasPermission(perm)) {
+                    return true;
+                }
+            }
+            return false;
+        } else {
+            return player.hasPermission(permission);
+        }
     }
 }

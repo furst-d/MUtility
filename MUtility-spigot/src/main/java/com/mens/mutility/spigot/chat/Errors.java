@@ -1,20 +1,46 @@
 package com.mens.mutility.spigot.chat;
 
 public class Errors {
-    public String errWrongArguments() {
-        return "Chybné argumenty!";
+    private final PluginColors colors;
+
+    public Errors() {
+        colors = new PluginColors();
+    }
+
+    public PluginColors getColors() {
+        return colors;
     }
 
     public String errTooMuchArguments() {
-        return "Příliš argumentů!";
+        return "Příliš mnoho argumentů!";
     }
 
     public String errNotEnoughArguments() {
         return "Nedostatek argumentů!";
     }
 
-    public String errWrongArgument() {
-        return "Chybný argument ?!";
+    public String errWrongArgument(String arg) {
+        return "Chybný argument " +getColors().getPrimaryColor() + arg + getColors().getSecondaryColor() + "!";
+    }
+
+    public String errWrongArgumentNumber(String arg) {
+        return "Chybný argument " +getColors().getPrimaryColor() + arg + getColors().getSecondaryColor()
+                + " - argument musí být číslo!";
+    }
+
+    public String errWrongArgumentBoolean(String arg) {
+        return "Chybný argument " +getColors().getPrimaryColor() + arg + getColors().getSecondaryColor()
+                + " - argument musí být True nebo False!";
+    }
+
+    public String errWrongArgumentDate(String arg) {
+        return "Chybný argument " +getColors().getPrimaryColor() + arg + getColors().getSecondaryColor()
+                + " - argument musí být datum!";
+    }
+
+    public String errWrongArgumentOnlinePlayer(String arg) {
+        return "Chybný argument " +getColors().getPrimaryColor() + arg + getColors().getSecondaryColor()
+                + " - argument musí být jméno online hráče!";
     }
 
     public String errNotInGame() {
@@ -22,7 +48,7 @@ public class Errors {
     }
 
     public String errNoPermission() {
-        return "Nemáte dostatečná oprávnění na použití tohoto příkazu!";
+        return "Na použití tohoto příkazu nemáte dostatečná oprávnění!";
     }
 
     public String errWrongNick() {
@@ -32,4 +58,5 @@ public class Errors {
     public String errDenied() {
         return "Přístup zamítnut!";
     }
+
 }

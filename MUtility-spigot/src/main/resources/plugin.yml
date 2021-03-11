@@ -7,7 +7,46 @@ description: Plugin dodatečných funkcí určený exkluzivně pro server Kostku
 commands:
   mstavba:
     description: Stavba mesice
+  event:
+    description: Eventy
 permissions:
   mutility.stavba:
     default: op
     description: Napoveda ke stavbe mesice
+  mutility.eventy:
+    default: op
+    description: Napoveda k eventum
+  mutility.eventy.otazky.create:
+    default: op
+    description: Vytvareni otazek k eventu Ano/Ne
+  mutility.eventy.create:
+    default: op
+    description: Vytvareni eventu
+  mutility.eventy.manage:
+    default: op
+    description: Sprava eventu
+  mutility.eventy.hledacka.create:
+    default: op
+    description: Vytvareni eventu Hledacka
+  mutility.eventy.hrbitov.create:
+    default: op
+    description: Vytvareni eventu Hrbitov
+  mutility.eventy.message:
+    default: op
+    description: Posilani zprav o eventech
+  mutility.eventy.tp:
+    default: op
+    description: Teleportace na eventy
+  mutility.eventy.delete:
+    default: op
+    description: Mazani eventu
+  mutility.eventy.otazky.reset:
+    default: op
+    description: Reset eventu Ano/Ne
+  mutility.eventy.otazky.vote:
+    default: op
+    description: Hlasovani v eventu Ano/Ne
+  mutility.eventy.disableflybypass:
+    default: op
+    description: Nevypne fly pri teleportaci
+

@@ -1,12 +1,12 @@
 /**
  * TODO
- * Příkazy - výpisy chyb
  * Příkazy - řešit, jestli to odeslal hráč nebo console
  * TabCompleter na hráče nejspíše nebude fungovat pro bungee, bude zobrazovat pouze hráče na jednom serveru
  */
 package com.mens.mutility.spigot;
 
 import com.mens.mutility.spigot.commands.commands.mstavba.Mstavba;
+import com.mens.mutility.spigot.commands.event.Event;
 import com.mens.mutility.spigot.commands.system.CommandData;
 import com.mens.mutility.spigot.commands.system.CommandListener;
 import com.mens.mutility.spigot.messages.MessageChannelListener;
@@ -46,8 +46,10 @@ public final class MUtilitySpigot extends JavaPlugin {
     private void loadCommands() {
         commands = new ArrayList<>();
         commands.add(Mstavba.create());
+        commands.add(Event.create());
 
         Objects.requireNonNull(getCommand("mstavba")).setExecutor(new CommandListener(this));
+        Objects.requireNonNull(getCommand("event")).setExecutor(new CommandListener(this));
     }
 
     /**

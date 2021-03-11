@@ -24,6 +24,14 @@ public class CommandData {
         next = new ArrayList<>();
     }
 
+    public CommandData(String commandName, String permission, CommandExecutors executor, Consumer<String[]> execute) {
+        this.commandName = commandName;
+        this.permission = permission;
+        this.executor = executor;
+        this.execute = execute;
+        next = new ArrayList<>();
+    }
+
     public CommandData(ArgumentTypes argumentType, TabCompleterTypes tc, String permission) {
         this.argumentType = argumentType;
         this.tc = tc;
@@ -39,10 +47,11 @@ public class CommandData {
         next = new ArrayList<>();
     }
 
-    public CommandData(ArgumentTypes argumentType, TabCompleterTypes tc, String permission, Consumer<String[]> execute) {
+    public CommandData(ArgumentTypes argumentType, TabCompleterTypes tc, String permission, CommandExecutors executor, Consumer<String[]> execute) {
         this.argumentType = argumentType;
         this.tc = tc;
         this.permission = permission;
+        this.executor = executor;
         this.execute = execute;
         next = new ArrayList<>();
     }
@@ -54,6 +63,13 @@ public class CommandData {
         this.permission = permission;
         this.executor = executor;
         this.execute = execute;
+        next = new ArrayList<>();
+    }
+
+    public CommandData(ArgumentTypes argumentType, String subcommand, TabCompleterTypes tc) {
+        this.argumentType = argumentType;
+        this.subcommand= subcommand;
+        this.tc = tc;
         next = new ArrayList<>();
     }
 
