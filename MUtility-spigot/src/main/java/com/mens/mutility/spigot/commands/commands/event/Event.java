@@ -1,21 +1,29 @@
-package com.mens.mutility.spigot.commands.event;
+package com.mens.mutility.spigot.commands.commands.event;
 
+import com.mens.mutility.spigot.chat.PluginColors;
 import com.mens.mutility.spigot.commands.system.CommandData;
 import com.mens.mutility.spigot.commands.system.enums.ArgumentTypes;
 import com.mens.mutility.spigot.commands.system.enums.CommandExecutors;
 import com.mens.mutility.spigot.commands.system.enums.TabCompleterTypes;
 
 public class Event {
+
     /**
      * Metoda slouzici k definovani a sestaveni prikazu a jeho parametru v ramci vlastniho prikazovaho systemu
      */
     public static CommandData create() {
-        CommandData event = new CommandData("event");
+        PluginColors colors = new PluginColors();
+        CommandData event = new CommandData("event", colors.getSecondaryColor() + "["
+                + colors.getPrimaryColor() + "Event"
+                + colors.getSecondaryColor() + "] "
+                + colors.getSecondaryColor(), "mutility.eventy.help", CommandExecutors.BOTH, t -> {
+            System.out.println("Event");
+        });
 
         // 1. stupeň
-        CommandData run = new CommandData(ArgumentTypes.DEFAULT, "run", TabCompleterTypes.DEFAULT, "mutility.eventy.otazky.create");
-        CommandData create = new CommandData(ArgumentTypes.DEFAULT, "create", TabCompleterTypes.DEFAULT, "mutility.eventy.create");
-        CommandData manage = new CommandData(ArgumentTypes.DEFAULT, "manage", TabCompleterTypes.DEFAULT, "mutility.eventy.manage", CommandExecutors.PLAYER, t -> {
+        CommandData spust = new CommandData(ArgumentTypes.DEFAULT, "spust", TabCompleterTypes.DEFAULT, "mutility.eventy.otazky.create");
+        CommandData vytvor = new CommandData(ArgumentTypes.DEFAULT, "vytvor", TabCompleterTypes.DEFAULT, "mutility.eventy.create");
+        CommandData spravuj = new CommandData(ArgumentTypes.DEFAULT, "spravuj", TabCompleterTypes.DEFAULT, "mutility.eventy.manage", CommandExecutors.PLAYER, t -> {
             //TODO
             System.out.println("Manage");
         });
@@ -74,8 +82,8 @@ public class Event {
             //TODO
             System.out.println("Stop hledacka");
         });
-        CommandData setBlockHledacka = new CommandData(ArgumentTypes.DEFAULT, "setblock", TabCompleterTypes.DEFAULT, "mutility.eventy.hledacka.create");
-        CommandData setFogHledacka = new CommandData(ArgumentTypes.DEFAULT, "setfog", TabCompleterTypes.DEFAULT, "mutility.eventy.hledacka.create");
+        CommandData setBlockHledacka = new CommandData(ArgumentTypes.DEFAULT, "block", TabCompleterTypes.DEFAULT, "mutility.eventy.hledacka.create");
+        CommandData setFogHledacka = new CommandData(ArgumentTypes.DEFAULT, "mlha", TabCompleterTypes.DEFAULT, "mutility.eventy.hledacka.create");
         CommandData startHrbitov = new CommandData(ArgumentTypes.DEFAULT, "start", TabCompleterTypes.DEFAULT, "mutility.eventy.hrbitov.create", CommandExecutors.BOTH, t -> {
             //TODO
             System.out.println("Start hrbitov");
@@ -84,8 +92,8 @@ public class Event {
             //TODO
             System.out.println("Stop hrbitov");
         });
-        CommandData setBlockHrbitov = new CommandData(ArgumentTypes.DEFAULT, "setblock", TabCompleterTypes.DEFAULT, "mutility.eventy.hrbitov.create");
-        CommandData setFogHrbitov = new CommandData(ArgumentTypes.DEFAULT, "setfog", TabCompleterTypes.DEFAULT, "mutility.eventy.hrbitov.create");
+        CommandData setBlockHrbitov = new CommandData(ArgumentTypes.DEFAULT, "blok", TabCompleterTypes.DEFAULT, "mutility.eventy.hrbitov.create");
+        CommandData setFogHrbitov = new CommandData(ArgumentTypes.DEFAULT, "mlha", TabCompleterTypes.DEFAULT, "mutility.eventy.hrbitov.create");
         CommandData setTP = new CommandData(ArgumentTypes.DEFAULT, "settp", TabCompleterTypes.NONE);
         CommandData setRequired = new CommandData(ArgumentTypes.DEFAULT, "setrequired", TabCompleterTypes.NONE);
         CommandData setForbidden = new CommandData(ArgumentTypes.DEFAULT, "setforbidden", TabCompleterTypes.NONE);
@@ -117,11 +125,11 @@ public class Event {
             //TODO
             System.out.println("Hledacka block");
         });
-        CommandData fogHledackaTrue = new CommandData(ArgumentTypes.DEFAULT,"true", TabCompleterTypes.DEFAULT, "mutility.eventy.hledacka.create", CommandExecutors.BOTH, t -> {
+        CommandData fogHledackaTrue = new CommandData(ArgumentTypes.DEFAULT,"ano", TabCompleterTypes.DEFAULT, "mutility.eventy.hledacka.create", CommandExecutors.BOTH, t -> {
             //TODO
             System.out.println("Hledacka fog true");
         });
-        CommandData fogHledackaFalse = new CommandData(ArgumentTypes.DEFAULT,"false", TabCompleterTypes.DEFAULT, "mutility.eventy.hledacka.create", CommandExecutors.BOTH, t -> {
+        CommandData fogHledackaFalse = new CommandData(ArgumentTypes.DEFAULT,"ne", TabCompleterTypes.DEFAULT, "mutility.eventy.hledacka.create", CommandExecutors.BOTH, t -> {
             //TODO
             System.out.println("Hledacka fog false");
         });
@@ -129,11 +137,11 @@ public class Event {
             //TODO
             System.out.println("Hrbitov block");
         });
-        CommandData fogHrbitovTrue = new CommandData(ArgumentTypes.DEFAULT,"true", TabCompleterTypes.DEFAULT, "mutility.eventy.hrbitov.create", CommandExecutors.BOTH, t -> {
+        CommandData fogHrbitovTrue = new CommandData(ArgumentTypes.DEFAULT,"ano", TabCompleterTypes.DEFAULT, "mutility.eventy.hrbitov.create", CommandExecutors.BOTH, t -> {
             //TODO
             System.out.println("Hrbitov fog true");
         });
-        CommandData fogHrbitovFalse = new CommandData(ArgumentTypes.DEFAULT,"false", TabCompleterTypes.DEFAULT, "mutility.eventy.hrbitov.create", CommandExecutors.BOTH, t -> {
+        CommandData fogHrbitovFalse = new CommandData(ArgumentTypes.DEFAULT,"ne", TabCompleterTypes.DEFAULT, "mutility.eventy.hrbitov.create", CommandExecutors.BOTH, t -> {
             //TODO
             System.out.println("Hrbitov fog false");
         });
@@ -164,20 +172,20 @@ public class Event {
             System.out.println("SetTP");
         });
 
-        event.link(run);
-        event.link(create);
-        event.link(manage);
+        event.link(spust);
+        event.link(vytvor);
+        event.link(spravuj);
         event.link(message);
         event.link(fakeMessage);
         event.link(tp);
         event.link(delete);
 
-        run.link(otazky);
-        run.link(hledacka);
-        run.link(hrbitov);
-        create.link(nazev);
-        manage.link(manageID);
-        manage.link(page);
+        spust.link(otazky);
+        spust.link(hledacka);
+        spust.link(hrbitov);
+        vytvor.link(nazev);
+        spravuj.link(manageID);
+        spravuj.link(page);
         message.link(messageID);
         fakeMessage.link(fakeMessageID);
         tp.link(tpID);

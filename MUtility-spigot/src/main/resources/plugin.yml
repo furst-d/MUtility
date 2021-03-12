@@ -5,15 +5,46 @@ api-version: 1.16
 authors: [ Menshons ]
 description: Plugin dodatečných funkcí určený exkluzivně pro server Kostkuj.cz
 commands:
+  mutility:
+    description: Sprava pluginu
   mstavba:
     description: Stavba mesice
   event:
     description: Eventy
+  mresidence:
+    description: Residence zprava
+  mres:
+    description: Residence zprava
+  minv:
+    description: Inventare
+  anketa:
+    description: Ankety
+  zalohy:
+    description: Zalohy
+  navrh:
+    description: Navrh
+  navrhy:
+    description: Navrhy
 permissions:
-  mutility.stavba:
+  mutility.help:
+    default: op
+    description: Napoveda k pluginu
+  mutility.reload:
+    default: op
+    description: Reload pluginu
+  mutility.stavba.help:
     default: op
     description: Napoveda ke stavbe mesice
-  mutility.eventy:
+  mutility.stavba.manage:
+    default: op
+    description: Sprava stavby mesice
+  mutility.stavba.create:
+    default: op
+    description: Vytvareni stavby mesice
+  mutility.stavba.vote:
+    default: op
+    description: Hlasovani ve stavbe mesice
+  mutility.eventy.help:
     default: op
     description: Napoveda k eventum
   mutility.eventy.otazky.create:
@@ -49,4 +80,83 @@ permissions:
   mutility.eventy.disableflybypass:
     default: op
     description: Nevypne fly pri teleportaci
+  mutility.residence:
+    default: op
+    description: Poslani residence zpravy
+  mutility.inventory.help:
+    default: op
+    description: Napoveda k prikazu MInv
+  mutility.inventory.save:
+    default: op
+    description: Ukladani inventare
+  mutility.inventory.load:
+    default: op
+    description: Nacitani inventare
+  mutility.inventory.delete:
+    default: op
+    description: Mazani inventare
+  mutility.inventory.manage:
+    default: op
+    description: Sprava inventare
+  mutility.anketa.help:
+    default: op
+    description: Napoveda k anketam
+  mutility.anketa.create:
+    default: op
+    description: Vytvareni ankety
+  mutility.anketa.add:
+    default: op
+    description: Pridavani moznosti do ankety
+  mutility.anketa.run:
+    default: op
+    description: Spousteni a vypinani ankety
+  mutility.zalohy.help:
+    default: op
+    description: Napoveda k zaloham
+  mutility.zalohy.create:
+    default: op
+    description: Vytvareni zaloh
+  mutility.zalohy.manage:
+    default: op
+    description: Sprava zaloh
+  mutility.zalohy.admin:
+    default: op
+    description: Sprava ostatnich zaloh
+  mutility.zalohy.delete:
+    default: op
+    description: Mazani zaloh
+  mutility.navrh.help:
+    default: op
+    description: Napoveda k navrhu
+  mutility.navrh.add:
+    default: op
+    description: Pridavani navrhu
+  mutility.navrhy.help:
+    default: op
+    description: Napoveda k navrhum
+  mutility.navrhy.get:
+    default: op
+    description: Vraceni nevyrizenych navrhu
+  mutility.navrhy.getall:
+    default: op
+    description: Vraceni vsech navrhu
+  mutility.navrhy.getrejected:
+    default: op
+    description: Vraceni zamitnutych navrhu
+  mutility.navrhy.getaccepted:
+    default: op
+    description: Vraceni schvalenych navrhu
+  mutility.navrhy.accept:
+    default: op
+    description: Schvalovani navrhu
+  mutility.navrhy.reject:
+    default: op
+    description: Zamitani navrhu
+  mutility.navrhy.return:
+    default: op
+    description: Vraceni zamitnuteho navrhu do nevyrizenych
+
+
+
+
 

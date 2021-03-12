@@ -5,8 +5,15 @@
  */
 package com.mens.mutility.spigot;
 
-import com.mens.mutility.spigot.commands.commands.mstavba.Mstavba;
-import com.mens.mutility.spigot.commands.event.Event;
+import com.mens.mutility.spigot.commands.commands.anketa.Anketa;
+import com.mens.mutility.spigot.commands.commands.minv.MInv;
+import com.mens.mutility.spigot.commands.commands.mresidence.MResidence;
+import com.mens.mutility.spigot.commands.commands.mstavba.MStavba;
+import com.mens.mutility.spigot.commands.commands.event.Event;
+import com.mens.mutility.spigot.commands.commands.mutility.MUtility;
+import com.mens.mutility.spigot.commands.commands.navrhy.Navrh;
+import com.mens.mutility.spigot.commands.commands.navrhy.Navrhy;
+import com.mens.mutility.spigot.commands.commands.zalohy.Zalohy;
 import com.mens.mutility.spigot.commands.system.CommandData;
 import com.mens.mutility.spigot.commands.system.CommandListener;
 import com.mens.mutility.spigot.messages.MessageChannelListener;
@@ -45,11 +52,27 @@ public final class MUtilitySpigot extends JavaPlugin {
      */
     private void loadCommands() {
         commands = new ArrayList<>();
-        commands.add(Mstavba.create());
+        commands.add(MUtility.create());
+        commands.add(MStavba.create());
         commands.add(Event.create());
+        commands.add(MResidence.create());
+        commands.add(MInv.create());
+        commands.add(Anketa.create());
+        commands.add(Zalohy.create());
+        commands.add(Navrh.create());
+        commands.add(Navrhy.create());
 
-        Objects.requireNonNull(getCommand("mstavba")).setExecutor(new CommandListener(this));
-        Objects.requireNonNull(getCommand("event")).setExecutor(new CommandListener(this));
+        CommandListener commandListener = new CommandListener(this);
+        Objects.requireNonNull(getCommand("mutility")).setExecutor(commandListener);
+        Objects.requireNonNull(getCommand("mstavba")).setExecutor(commandListener);
+        Objects.requireNonNull(getCommand("event")).setExecutor(commandListener);
+        Objects.requireNonNull(getCommand("mresidence")).setExecutor(commandListener);
+        Objects.requireNonNull(getCommand("mres")).setExecutor(commandListener);
+        Objects.requireNonNull(getCommand("minv")).setExecutor(commandListener);
+        Objects.requireNonNull(getCommand("anketa")).setExecutor(commandListener);
+        Objects.requireNonNull(getCommand("zalohy")).setExecutor(commandListener);
+        Objects.requireNonNull(getCommand("navrh")).setExecutor(commandListener);
+        Objects.requireNonNull(getCommand("navrhy")).setExecutor(commandListener);
     }
 
     /**

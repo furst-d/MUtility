@@ -3,6 +3,7 @@ package com.mens.mutility.spigot.commands.system;
 import com.mens.mutility.spigot.commands.system.enums.ArgumentTypes;
 import com.mens.mutility.spigot.commands.system.enums.CommandExecutors;
 import com.mens.mutility.spigot.commands.system.enums.TabCompleterTypes;
+import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +11,8 @@ import java.util.function.Consumer;
 
 public class CommandData {
     String commandName;
+    String alias;
+    String prefix;
     ArgumentTypes argumentType;
     String subcommand;
     TabCompleterTypes tc;
@@ -18,17 +21,43 @@ public class CommandData {
     CommandExecutors executor;
     Consumer<String[]> execute;
     List<CommandData> next;
+    CommandSender sender;
 
-    public CommandData(String commandName) {
+    public CommandData(String commandName, String prefix) {
         this.commandName = commandName;
+        this.prefix = prefix;
         next = new ArrayList<>();
     }
 
-    public CommandData(String commandName, String permission, CommandExecutors executor, Consumer<String[]> execute) {
+    public CommandData(String commandName, String alias, String prefix) {
         this.commandName = commandName;
+        this.alias = alias;
+        this.prefix = prefix;
+        next = new ArrayList<>();
+    }
+
+    public CommandData(String commandName, String prefix, String permission, CommandExecutors executor, Consumer<String[]> execute) {
+        this.commandName = commandName;
+        this.prefix = prefix;
         this.permission = permission;
         this.executor = executor;
         this.execute = execute;
+        next = new ArrayList<>();
+    }
+
+    public CommandData(String commandName, String alias, String prefix, String permission, CommandExecutors executor, Consumer<String[]> execute) {
+        this.commandName = commandName;
+        this.alias = alias;
+        this.prefix = prefix;
+        this.permission = permission;
+        this.executor = executor;
+        this.execute = execute;
+        next = new ArrayList<>();
+    }
+
+    public CommandData(ArgumentTypes argumentType, TabCompleterTypes tc) {
+        this.argumentType = argumentType;
+        this.tc = tc;
         next = new ArrayList<>();
     }
 
@@ -119,6 +148,14 @@ public class CommandData {
         return commandName;
     }
 
+    public String getAlias() {
+        return alias;
+    }
+
+    public String getPrefix() {
+        return prefix;
+    }
+
     public String getSubcommand() {
         return subcommand;
     }
@@ -141,5 +178,13 @@ public class CommandData {
 
     public void link(CommandData data) {
         next.add(data);
+    }
+
+    public CommandSender getSender() {
+        return sender;
+    }
+
+    public void setSender(CommandSender sender) {
+        this.sender = sender;
     }
 }

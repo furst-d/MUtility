@@ -3,7 +3,6 @@ package com.mens.mutility.spigot.commands.system;
 import com.mens.mutility.spigot.MUtilitySpigot;
 import com.mens.mutility.spigot.chat.Errors;
 import com.mens.mutility.spigot.chat.PluginColors;
-import com.mens.mutility.spigot.chat.Prefix;
 import com.mens.mutility.spigot.commands.system.enums.ArgumentTypes;
 import com.mens.mutility.spigot.commands.system.enums.TabCompleterTypes;
 import com.mens.mutility.spigot.utils.Checker;
@@ -24,8 +23,6 @@ public class CommandListener implements CommandExecutor, TabCompleter {
     private final MUtilitySpigot plugin;
     private final Checker checker;
     private final Errors errors;
-    private final Prefix prefix;
-    private final PluginColors colors;
     private String errorMessage;
     private boolean error;
 
@@ -33,8 +30,6 @@ public class CommandListener implements CommandExecutor, TabCompleter {
         this.plugin = plugin;
         checker = new Checker();
         errors = new Errors();
-        prefix = new Prefix();
-        colors = new PluginColors();
         error = false;
     }
 
@@ -48,14 +43,6 @@ public class CommandListener implements CommandExecutor, TabCompleter {
 
     public Errors getErrors() {
         return errors;
-    }
-
-    public Prefix getPrefix() {
-        return prefix;
-    }
-
-    public PluginColors getColors() {
-        return colors;
     }
 
     public String getErrorMessage() {
@@ -79,20 +66,22 @@ public class CommandListener implements CommandExecutor, TabCompleter {
         setError(false);
         List<CommandData> commands = getPlugin().getCommands();
         for (CommandData commandData: commands) {
-            if(command.getName().equalsIgnoreCase(commandData.getCommandName())) {
+            if((command.getName().equalsIgnoreCase(commandData.getCommandName()))
+                    || (command.getName().equalsIgnoreCase(commandData.getAlias()))) {
                 //Prikaz nalezen
                 if(args.length == 0) {
                     if(commandData.getExecute() != null) {
                         if(getChecker().checkPermissions(sender.getName(), commandData.getPermission())) {
+                            commandData.setSender(sender);
                             commandData.getExecute().accept(args);
                             return true;
                         } else {
                             setError(true);
-                            setErrorMessage(getPrefix().getMainPrefix()+ getErrors().errNoPermission());
+                            setErrorMessage(commandData.getPrefix() + getErrors().errNoPermission());
                         }
                     } else {
                         setError(true);
-                        setErrorMessage(getPrefix().getMainPrefix()+ getErrors().errNotEnoughArguments());
+                        setErrorMessage(commandData.getPrefix() + getErrors().errNotEnoughArguments());
                     }
                 }
                 List<CommandData> subcommands = commandData.next;
@@ -100,10 +89,10 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                 for (int i = 0; i < args.length; i++) {
                     if(subcommands.size() == 0) {
                         setError(true);
-                        setErrorMessage(getPrefix().getMainPrefix()+ getErrors().errTooMuchArguments());
+                        setErrorMessage(commandData.getPrefix() + getErrors().errTooMuchArguments());
                     }
                     for (CommandData subcommand: subcommands) {
-                        if(checkSubcommand(args, subcommand, i)) {
+                        if(checkSubcommand(args, commandData.getPrefix(), subcommand, i)) {
                             if(subcommand.getArgumentType() == ArgumentTypes.STRINGINF) {
                                 i = args.length -1;
                             }
@@ -111,16 +100,17 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                             if(i == args.length -1) {
                                 if(subcommand.getExecute() != null) {
                                     if(getChecker().checkPermissions(sender.getName(), subcommand.getPermission())) {
+                                        commandData.setSender(sender);
                                         subcommand.getExecute().accept(args);
                                         return true;
                                     } else {
                                         setError(true);
-                                        setErrorMessage(getPrefix().getMainPrefix()+ getErrors().errNoPermission());
+                                        setErrorMessage(commandData.getPrefix() + getErrors().errNoPermission());
                                     }
                                 } else {
                                     if(!isError()) {
                                         setError(true);
-                                        setErrorMessage(getPrefix().getMainPrefix()+ getErrors().errNotEnoughArguments());
+                                        setErrorMessage(commandData.getPrefix() + getErrors().errNotEnoughArguments());
                                     }
                                 }
                             }
@@ -141,7 +131,7 @@ public class CommandListener implements CommandExecutor, TabCompleter {
         return false;
     }
 
-    private boolean checkSubcommand(String[] args, CommandData subcommand, int i) {
+    private boolean checkSubcommand(String[] args, String prefix, CommandData subcommand, int i) {
         switch(subcommand.getArgumentType()) {
             case DEFAULT:
                 if(subcommand.getSubcommand().equalsIgnoreCase(args[i])) {
@@ -149,7 +139,7 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                     return true;
                 } else {
                     setError(true);
-                    setErrorMessage(getPrefix().getMainPrefix()+ getErrors().errWrongArgument(args[i]));
+                    setErrorMessage(prefix + getErrors().errWrongArgument(args[i]));
                 }
                 break;
             case INTEGER:
@@ -158,7 +148,7 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                     return true;
                 } else {
                     setError(true);
-                    setErrorMessage(getPrefix().getMainPrefix()+ getErrors().errWrongArgumentNumber(args[i]));
+                    setErrorMessage(prefix + getErrors().errWrongArgumentNumber(args[i]));
                 }
                 break;
             case DOUBLE:
@@ -167,7 +157,7 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                     return true;
                 } else {
                     setError(true);
-                    setErrorMessage(getPrefix().getMainPrefix()+ getErrors().errWrongArgumentNumber(args[i]));
+                    setErrorMessage(prefix + getErrors().errWrongArgumentNumber(args[i]));
                 }
                 break;
             case FLOAT:
@@ -176,7 +166,7 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                     return true;
                 } else {
                     setError(true);
-                    setErrorMessage(getPrefix().getMainPrefix()+ getErrors().errWrongArgumentNumber(args[i]));
+                    setErrorMessage(prefix + getErrors().errWrongArgumentNumber(args[i]));
                 }
                 break;
             case STRING:
@@ -189,7 +179,7 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                     return true;
                 } else {
                     setError(true);
-                    setErrorMessage(getPrefix().getMainPrefix()+ getErrors().errWrongArgumentDate(args[i]));
+                    setErrorMessage(prefix + getErrors().errWrongArgumentDate(args[i]));
                 }
                 break;
             case ONLINE_PLAYER:
@@ -198,7 +188,7 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                     return true;
                 } else {
                     setError(true);
-                    setErrorMessage(getPrefix().getMainPrefix()+ getErrors().errWrongArgumentOnlinePlayer(args[i]));
+                    setErrorMessage(prefix + getErrors().errWrongArgumentOnlinePlayer(args[i]));
                 }
                 break;
         }
@@ -215,7 +205,7 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                 List<CommandData> subcommands = commandData.next;
                 for (int i = 0; i < args.length; i++) {
                     for (CommandData subcommand: subcommands) {
-                        if(checkSubcommand(args, subcommand, i)) {
+                        if(checkSubcommand(args, commandData.getPrefix(), subcommand, i)) {
                             if(subcommand.getArgumentType() == ArgumentTypes.STRINGINF) {
                                 i = args.length -1;
                             } else {
