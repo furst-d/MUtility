@@ -2,9 +2,9 @@ package com.mens.mutility.spigot.commands.system;
 
 import com.mens.mutility.spigot.MUtilitySpigot;
 import com.mens.mutility.spigot.chat.Errors;
-import com.mens.mutility.spigot.chat.PluginColors;
 import com.mens.mutility.spigot.commands.system.enums.ArgumentTypes;
 import com.mens.mutility.spigot.commands.system.enums.TabCompleterTypes;
+import com.mens.mutility.spigot.database.Database;
 import com.mens.mutility.spigot.utils.Checker;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -73,7 +73,7 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                     if(commandData.getExecute() != null) {
                         if(getChecker().checkPermissions(sender.getName(), commandData.getPermission())) {
                             commandData.setSender(sender);
-                            commandData.getExecute().accept(args);
+                            commandData.getExecute().accept(new CommandParams(sender, args));
                             return true;
                         } else {
                             setError(true);
@@ -101,7 +101,7 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                                 if(subcommand.getExecute() != null) {
                                     if(getChecker().checkPermissions(sender.getName(), subcommand.getPermission())) {
                                         commandData.setSender(sender);
-                                        subcommand.getExecute().accept(args);
+                                        subcommand.getExecute().accept(new CommandParams(sender, args));
                                         return true;
                                     } else {
                                         setError(true);
@@ -189,6 +189,15 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                 } else {
                     setError(true);
                     setErrorMessage(prefix + getErrors().errWrongArgumentOnlinePlayer(args[i]));
+                }
+                break;
+            case POSITIVE_INTEGER:
+                if(getChecker().checkPositiveInt(args[i])) {
+                    setError(false);
+                    return true;
+                } else {
+                    setError(true);
+                    setErrorMessage(prefix + getErrors().errWrongArgumentPositiveNumber(args[i]));
                 }
                 break;
         }

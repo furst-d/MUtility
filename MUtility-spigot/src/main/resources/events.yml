@@ -1,0 +1,29 @@
+Hledacka:
+  Enable: false
+  Block: carved_pumpkin
+  Fog: false
+  PosX1: 75774
+  PosY1: 0
+  PosZ1: -97
+  PosX2: 75145
+  PosY2: 256
+  PosZ2: 502
+
+Otazky:
+  PosX1: 154447
+  PosY1: 60
+  PosZ1: 65608
+  PosX2: 154413
+  PosY2: 80
+  PosZ2: 65645
+
+Hrbitov:
+  Enable: false
+  Block: gravel
+  Fog: true
+  PosX1: 154251
+  PosY1: 63
+  PosZ1: 65618
+  PosX2: 154168
+  PosY2: 88
+  PosZ2: 65531

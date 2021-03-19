@@ -19,7 +19,7 @@ public class CommandData {
     String tcCustom;
     String permission;
     CommandExecutors executor;
-    Consumer<String[]> execute;
+    Consumer<CommandParams> execute;
     List<CommandData> next;
     CommandSender sender;
 
@@ -36,7 +36,7 @@ public class CommandData {
         next = new ArrayList<>();
     }
 
-    public CommandData(String commandName, String prefix, String permission, CommandExecutors executor, Consumer<String[]> execute) {
+    public CommandData(String commandName, String prefix, String permission, CommandExecutors executor, Consumer<CommandParams> execute) {
         this.commandName = commandName;
         this.prefix = prefix;
         this.permission = permission;
@@ -45,7 +45,7 @@ public class CommandData {
         next = new ArrayList<>();
     }
 
-    public CommandData(String commandName, String alias, String prefix, String permission, CommandExecutors executor, Consumer<String[]> execute) {
+    public CommandData(String commandName, String alias, String prefix, String permission, CommandExecutors executor, Consumer<CommandParams> execute) {
         this.commandName = commandName;
         this.alias = alias;
         this.prefix = prefix;
@@ -76,7 +76,7 @@ public class CommandData {
         next = new ArrayList<>();
     }
 
-    public CommandData(ArgumentTypes argumentType, TabCompleterTypes tc, String permission, CommandExecutors executor, Consumer<String[]> execute) {
+    public CommandData(ArgumentTypes argumentType, TabCompleterTypes tc, String permission, CommandExecutors executor, Consumer<CommandParams> execute) {
         this.argumentType = argumentType;
         this.tc = tc;
         this.permission = permission;
@@ -85,7 +85,7 @@ public class CommandData {
         next = new ArrayList<>();
     }
 
-    public CommandData(ArgumentTypes argumentType, TabCompleterTypes tc, String tcCustom, String permission, CommandExecutors executor, Consumer<String[]> execute) {
+    public CommandData(ArgumentTypes argumentType, TabCompleterTypes tc, String tcCustom, String permission, CommandExecutors executor, Consumer<CommandParams> execute) {
         this.argumentType = argumentType;
         this.tc = tc;
         this.tcCustom = tcCustom;
@@ -119,7 +119,7 @@ public class CommandData {
         next = new ArrayList<>();
     }
 
-    public CommandData(ArgumentTypes argumentType, String subcommand, TabCompleterTypes tc, String permission, CommandExecutors executor, Consumer<String[]> execute) {
+    public CommandData(ArgumentTypes argumentType, String subcommand, TabCompleterTypes tc, String permission, CommandExecutors executor, Consumer<CommandParams> execute) {
         this.argumentType = argumentType;
         this.subcommand = subcommand;
         this.tc = tc;
@@ -129,7 +129,7 @@ public class CommandData {
         next = new ArrayList<>();
     }
 
-    public CommandData(ArgumentTypes argumentType, String subcommand, TabCompleterTypes tc, String tcCustom, String permission, CommandExecutors executor, Consumer<String[]> execute) {
+    public CommandData(ArgumentTypes argumentType, String subcommand, TabCompleterTypes tc, String tcCustom, String permission, CommandExecutors executor, Consumer<CommandParams> execute) {
         this.argumentType = argumentType;
         this.subcommand = subcommand;
         this.tc = tc;
@@ -172,7 +172,7 @@ public class CommandData {
         return permission;
     }
 
-    public Consumer<String[]> getExecute() {
+    public Consumer<CommandParams> getExecute() {
         return execute;
     }
 

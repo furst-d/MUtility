@@ -1,27 +1,34 @@
 package com.mens.mutility.spigot.commands.commands.zalohy;
 
-import com.mens.mutility.spigot.chat.PluginColors;
+import com.mens.mutility.spigot.MUtilitySpigot;
+import com.mens.mutility.spigot.chat.Prefix;
 import com.mens.mutility.spigot.commands.system.CommandData;
 import com.mens.mutility.spigot.commands.system.enums.ArgumentTypes;
 import com.mens.mutility.spigot.commands.system.enums.CommandExecutors;
 import com.mens.mutility.spigot.commands.system.enums.TabCompleterTypes;
+import com.mens.mutility.spigot.utils.PageList;
 
 public class Zalohy {
+    private MUtilitySpigot plugin;
+
+    public Zalohy(MUtilitySpigot plugin) {
+        this.plugin = plugin;
+    }
 
     /**
      * Metoda slouzici k definovani a sestaveni prikazu a jeho parametru v ramci vlastniho prikazovaho systemu
      */
-    public static CommandData create() {
-        PluginColors colors = new PluginColors();
-        CommandData zalohy = new CommandData("zalohy", colors.getSecondaryColor() + "["
-                + colors.getPrimaryColor() + "Zálohy"
-                + colors.getSecondaryColor() + "] "
-                + colors.getSecondaryColor(),"mutility.zalohy.help", CommandExecutors.BOTH, t -> {
+    public CommandData create() {
+        Prefix prefix = new Prefix();
+        PageList helpList = new PageList(10, prefix.getZalohyPrefix(), "/zalohy");
+
+        CommandData zalohy = new CommandData("zalohy", prefix.getZalohyPrefix(),"mutility.zalohy.help", CommandExecutors.BOTH, t -> {
             //TODO
-            System.out.println("Zalohy");
+            t.getSender().spigot().sendMessage(helpList.getList(1).create());
         });
 
         // 1. stupeň
+        CommandData helpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         CommandData pridej = new CommandData(ArgumentTypes.DEFAULT, "pridej", TabCompleterTypes.DEFAULT, "mutility.zalohy.create");
         CommandData zobraz = new CommandData(ArgumentTypes.DEFAULT, "zobraz", TabCompleterTypes.DEFAULT, "mutility.zalohy.manage", CommandExecutors.PLAYER, t -> {
             //TODO
@@ -39,6 +46,9 @@ public class Zalohy {
         CommandData returnZaloha = new CommandData(ArgumentTypes.DEFAULT, "return", TabCompleterTypes.NONE);
 
         // 2. stupeň
+        CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.zalohy.help", CommandExecutors.BOTH, (t) -> {
+            t.getSender().spigot().sendMessage(helpList.getList(Integer.parseInt(t.getArgs()[1])).create());
+        });
         CommandData pridejX = new CommandData(ArgumentTypes.FLOAT, TabCompleterTypes.POSX, "mutility.zalohy.create");
         CommandData zobrazPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         CommandData manageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.manage", CommandExecutors.PLAYER, t -> {
@@ -119,6 +129,7 @@ public class Zalohy {
             System.out.println("PridejName");
         });
 
+        zalohy.link(helpPage);
         zalohy.link(pridej);
         zalohy.link(zobraz);
         zalohy.link(manage);
@@ -129,6 +140,7 @@ public class Zalohy {
         zalohy.link(reject);
         zalohy.link(returnZaloha);
 
+        helpPage.link(helpPageID);
         pridej.link(pridejX);
         zobraz.link(zobrazPage);
         manage.link(manageID);

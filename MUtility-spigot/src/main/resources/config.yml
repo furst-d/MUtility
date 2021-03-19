@@ -1,0 +1,30 @@
+###########################
+##                       ##
+##      M-Utility        ##
+##                       ##
+##     by Menshons       ##
+##     Version 1.0       ##
+##                       ##
+###########################
+
+MYSQL:
+  Table prefix: 'game_mutility_'
+  Host: '109.164.104.180'
+  Port: '3306'
+  Database: 'newkostkuj'
+  User: 'superadmin'
+  Password: 'kostkujjede'
+
+  # Table prefix: 'game_mutility_'
+  # Host: '109.164.104.180'
+  #  Port: '3306'
+  #  Database: 'newkostkuj'
+  #  User: 'superadmin'
+  #  Password: 'kostkujjede'
+
+  # Table prefix: 'game_mutility_'
+  # Host: '${KMC_DB_HOST}'
+  # Port: ${KMC_DB_PORT}
+  # Database: '${KMC_DB_DATABASE}'
+  # User: '${KMC_DB_USER}'
+  # Password: '${KMC_DB_PASSWORD}'

@@ -2,6 +2,7 @@
  * TODO
  * Příkazy - řešit, jestli to odeslal hráč nebo console
  * TabCompleter na hráče nejspíše nebude fungovat pro bungee, bude zobrazovat pouze hráče na jednom serveru
+ * Vyřešit timeout databáze
  */
 package com.mens.mutility.spigot;
 
@@ -16,6 +17,7 @@ import com.mens.mutility.spigot.commands.commands.navrhy.Navrhy;
 import com.mens.mutility.spigot.commands.commands.zalohy.Zalohy;
 import com.mens.mutility.spigot.commands.system.CommandData;
 import com.mens.mutility.spigot.commands.system.CommandListener;
+import com.mens.mutility.spigot.database.Database;
 import com.mens.mutility.spigot.messages.MessageChannelListener;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -26,6 +28,7 @@ import java.util.Objects;
 
 public final class MUtilitySpigot extends JavaPlugin {
     private List<CommandData> commands;
+    public static Database db;
 
     /**
      * Spousteci metoda
@@ -37,6 +40,8 @@ public final class MUtilitySpigot extends JavaPlugin {
         loadEvents();
         loadConfig();
         registerChannels();
+        db = new Database(this);
+        db.openConnection();
     }
 
     /**
@@ -52,15 +57,15 @@ public final class MUtilitySpigot extends JavaPlugin {
      */
     private void loadCommands() {
         commands = new ArrayList<>();
-        commands.add(MUtility.create());
-        commands.add(MStavba.create());
-        commands.add(Event.create());
-        commands.add(MResidence.create());
-        commands.add(MInv.create());
-        commands.add(Anketa.create());
-        commands.add(Zalohy.create());
-        commands.add(Navrh.create());
-        commands.add(Navrhy.create());
+        commands.add(new MUtility(this).create());
+        commands.add(new MStavba(this).create());
+        commands.add(new Event(this).create());
+        commands.add(new MResidence(this).create());
+        commands.add(new MInv(this).create());
+        commands.add(new Anketa(this).create());
+        commands.add(new Zalohy(this).create());
+        commands.add(new Navrh(this).create());
+        commands.add(new Navrhy(this).create());
 
         CommandListener commandListener = new CommandListener(this);
         Objects.requireNonNull(getCommand("mutility")).setExecutor(commandListener);
@@ -86,8 +91,8 @@ public final class MUtilitySpigot extends JavaPlugin {
      * Metoda pro nacteni konfiguracniho souboru
      */
     private void loadConfig() {
-      /*  getConfig().options().copyDefaults(true);
-        saveDefaultConfig(); */
+        getConfig().options().copyDefaults(true);
+        saveDefaultConfig();
     }
 
     /**

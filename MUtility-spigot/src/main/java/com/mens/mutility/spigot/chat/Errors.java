@@ -43,6 +43,11 @@ public class Errors {
                 + " - argument musí být jméno online hráče!";
     }
 
+    public String errWrongArgumentPositiveNumber(String arg) {
+        return "Chybný argument " +getColors().getPrimaryColor() + arg + getColors().getSecondaryColor()
+                + " - argument musí být kladné číslo!";
+    }
+
     public String errNotInGame() {
         return "Tento příkaz musí být zadán ve hře!";
     }

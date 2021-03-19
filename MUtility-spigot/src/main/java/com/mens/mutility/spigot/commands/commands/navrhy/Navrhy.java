@@ -1,27 +1,34 @@
 package com.mens.mutility.spigot.commands.commands.navrhy;
 
-import com.mens.mutility.spigot.chat.PluginColors;
+import com.mens.mutility.spigot.MUtilitySpigot;
+import com.mens.mutility.spigot.chat.Prefix;
 import com.mens.mutility.spigot.commands.system.CommandData;
 import com.mens.mutility.spigot.commands.system.enums.ArgumentTypes;
 import com.mens.mutility.spigot.commands.system.enums.CommandExecutors;
 import com.mens.mutility.spigot.commands.system.enums.TabCompleterTypes;
+import com.mens.mutility.spigot.utils.PageList;
 
 public class Navrhy {
+    private MUtilitySpigot plugin;
+
+    public Navrhy(MUtilitySpigot plugin) {
+        this.plugin = plugin;
+    }
 
     /**
      * Metoda slouzici k definovani a sestaveni prikazu a jeho parametru v ramci vlastniho prikazovaho systemu
      */
-    public static CommandData create() {
-        PluginColors colors = new PluginColors();
-        CommandData navrhy = new CommandData("navrhy", colors.getSecondaryColor() + "["
-                + colors.getPrimaryColor() + "Návrhy"
-                + colors.getSecondaryColor() + "] "
-                + colors.getSecondaryColor(),"mutility.navrhy.help", CommandExecutors.BOTH, t -> {
+    public CommandData create() {
+        Prefix prefix = new Prefix();
+        PageList helpList = new PageList(10, prefix.getNavrhyPrefix(), "/navrhy");
+
+        CommandData navrhy = new CommandData("navrhy", prefix.getNavrhyPrefix(),"mutility.navrhy.help", CommandExecutors.BOTH, t -> {
             //TODO
-            System.out.println("Navrhy");
+            t.getSender().spigot().sendMessage(helpList.getList(1).create());
         });
 
         // 1. stupeň
+        CommandData helpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         CommandData dej = new CommandData(ArgumentTypes.DEFAULT, "dej", TabCompleterTypes.DEFAULT, "mutility.navrhy.get", CommandExecutors.PLAYER, t -> {
             //TODO
             System.out.println("Dej");
@@ -43,6 +50,9 @@ public class Navrhy {
         CommandData vratit = new CommandData(ArgumentTypes.DEFAULT, "vratit", TabCompleterTypes.NONE);
 
         // 2. stupeň
+        CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.navrhy.help", CommandExecutors.BOTH, (t) -> {
+            t.getSender().spigot().sendMessage(helpList.getList(Integer.parseInt(t.getArgs()[1])).create());
+        });
         CommandData dejPage= new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         CommandData dejVsePage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         CommandData dejZamitnutePage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
@@ -63,6 +73,7 @@ public class Navrhy {
             System.out.println("Reject");
         });
 
+        navrhy.link(helpPage);
         navrhy.link(dej);
         navrhy.link(dejVse);
         navrhy.link(dejZamitnute);
@@ -71,6 +82,7 @@ public class Navrhy {
         navrhy.link(zamitnout);
         navrhy.link(vratit);
 
+        helpPage.link(helpPageID);
         dej.link(dejPage);
         dejVse.link(dejVsePage);
         dejZamitnute.link(dejZamitnutePage);

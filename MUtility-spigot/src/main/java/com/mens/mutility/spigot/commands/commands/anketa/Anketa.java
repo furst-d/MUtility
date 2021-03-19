@@ -1,27 +1,34 @@
 package com.mens.mutility.spigot.commands.commands.anketa;
 
-import com.mens.mutility.spigot.chat.PluginColors;
+import com.mens.mutility.spigot.MUtilitySpigot;
+import com.mens.mutility.spigot.chat.Prefix;
 import com.mens.mutility.spigot.commands.system.CommandData;
 import com.mens.mutility.spigot.commands.system.enums.ArgumentTypes;
 import com.mens.mutility.spigot.commands.system.enums.CommandExecutors;
 import com.mens.mutility.spigot.commands.system.enums.TabCompleterTypes;
+import com.mens.mutility.spigot.utils.PageList;
 
 public class Anketa {
+    private MUtilitySpigot plugin;
+
+    public Anketa(MUtilitySpigot plugin) {
+        this.plugin = plugin;
+    }
 
     /**
      * Metoda slouzici k definovani a sestaveni prikazu a jeho parametru v ramci vlastniho prikazovaho systemu
      */
-    public static CommandData create() {
-        PluginColors colors = new PluginColors();
-        CommandData anketa = new CommandData("anketa", colors.getSecondaryColor() + "["
-                + colors.getPrimaryColor() + "Anketa"
-                + colors.getSecondaryColor() + "] "
-                + colors.getSecondaryColor(),"mutility.anketa.help", CommandExecutors.BOTH, t -> {
+    public CommandData create() {
+        Prefix prefix = new Prefix();
+        PageList helpList = new PageList(10, prefix.getAnketaPrefix(), "/anketa");
+
+        CommandData anketa = new CommandData("anketa", prefix.getAnketaPrefix(),"mutility.anketa.help", CommandExecutors.BOTH, t -> {
             //TODO
-            System.out.println("Anketa");
+            t.getSender().spigot().sendMessage(helpList.getList(1).create());
         });
 
         // 1. stupeň
+        CommandData helpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         CommandData vytvor = new CommandData(ArgumentTypes.DEFAULT, "vytvor", TabCompleterTypes.DEFAULT, "mutility.anketa.create");
         CommandData pridej = new CommandData(ArgumentTypes.DEFAULT, "pridej", TabCompleterTypes.DEFAULT, "mutility.anketa.add");
         CommandData start = new CommandData(ArgumentTypes.DEFAULT, "start", TabCompleterTypes.DEFAULT, "mutility.anketa.run");
@@ -32,6 +39,9 @@ public class Anketa {
         });
 
         // 2. stupeň
+        CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.anketa.help", CommandExecutors.BOTH, (t) -> {
+            t.getSender().spigot().sendMessage(helpList.getList(Integer.parseInt(t.getArgs()[1])).create());
+        });
         CommandData nazevAnkety = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Název ankety >]" ,"mutility.anketa.create", CommandExecutors.BOTH, t -> {
             //TODO
             System.out.println("Název ankety");
@@ -60,12 +70,14 @@ public class Anketa {
             System.out.println("H");
         });
 
+        anketa.link(helpPage);
         anketa.link(vytvor);
         anketa.link(pridej);
         anketa.link(start);
         anketa.link(vote);
         anketa.link(stop);
 
+        helpPage.link(helpPageID);
         vytvor.link(nazevAnkety);
         pridej.link(nazevMoznosti);
         start.link(cas);

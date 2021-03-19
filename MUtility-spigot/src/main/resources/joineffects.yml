@@ -1,0 +1,5 @@
+JoinEffects:
+  Menshons:
+    Enable: true
+    Effects:
+      - execute at Menshons run summon minecraft:lightning_bolt ~ ~5 ~

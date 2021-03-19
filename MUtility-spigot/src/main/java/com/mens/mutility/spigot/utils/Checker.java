@@ -63,7 +63,16 @@ public class Checker {
             }
             return false;
         } else {
-            return player.hasPermission(permission);
+            return Objects.requireNonNull(player).hasPermission(permission);
+        }
+    }
+
+    public boolean checkPositiveInt(String number) {
+        try {
+            int numberInt = Integer.parseInt(number);
+            return numberInt > 0;
+        } catch (NumberFormatException e) {
+            return false;
         }
     }
 }
