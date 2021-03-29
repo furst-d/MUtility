@@ -1,6 +1,7 @@
 package com.mens.mutility.spigot.commands.commands.mstavba;
 
 import com.mens.mutility.spigot.MUtilitySpigot;
+import com.mens.mutility.spigot.chat.MyComp;
 import com.mens.mutility.spigot.chat.Prefix;
 import com.mens.mutility.spigot.commands.system.CommandData;
 import com.mens.mutility.spigot.commands.system.enums.ArgumentTypes;
@@ -30,7 +31,7 @@ public class MStavba {
             //TODO
             helpList.clear();
             for (int i = 0; i < 25; i++) {
-                helpList.add(new TextComponent("Ahoj " + i));
+                helpList.add(new MyComp("Ahoj " + i));
             }
             t.getSender().spigot().sendMessage(helpList.getList(1).create());
         });

@@ -1,6 +1,7 @@
 package com.mens.mutility.spigot.commands.commands.event;
 
 import com.mens.mutility.spigot.MUtilitySpigot;
+import com.mens.mutility.spigot.chat.MyComp;
 import com.mens.mutility.spigot.chat.Prefix;
 import com.mens.mutility.spigot.commands.system.CommandData;
 import com.mens.mutility.spigot.commands.system.enums.ArgumentTypes;
@@ -44,9 +45,10 @@ public class Event {
                 //TODO
                 try {
                     System.out.println("Manage");
-                    ResultSet rs = db.sqlSelect(db.getCon().prepareStatement("SELECT id, event_name, tpX, tpY, tpZ, necessaryItems, forbiddenItems, objective, note FROM " + prefix.getTablePrefix(plugin) +"events"));
+                    PreparedStatement stm = db.getCon().prepareStatement("SELECT id, event_name, tpX, tpY, tpZ, necessaryItems, forbiddenItems, objective, note FROM " + prefix.getTablePrefix(plugin) +"events");
+                    ResultSet rs =  stm.executeQuery();
                     while(rs.next()) {
-                        manageList.add(new TextComponent(rs.getString(2)));
+                        manageList.add(new MyComp(rs.getString(2)));
                     }
                     t.getSender().spigot().sendMessage(manageList.getList(1).create());
                 } catch (SQLException throwables) {
@@ -74,11 +76,11 @@ public class Event {
                 try {
                     System.out.println("Manage ID");
                     int id = Integer.parseInt(t.getArgs()[1]);
-                    PreparedStatement stm = db.getCon().prepareStatement("SELECT event_name, tpX, tpY, tpZ, necessaryItems, forbiddenItems, objective, note FROM game_mutility_events WHERE id=?");
+                    PreparedStatement stm = db.getCon().prepareStatement("SELECT event_name, tpX, tpY, tpZ, necessaryItems, forbiddenItems, objective, note FROM "+ prefix.getTablePrefix(plugin) + " + events WHERE id=?");
                     stm.setInt(1, id);
-                    ResultSet rs = db.sqlSelect(stm);
+                    ResultSet rs =  stm.executeQuery();
                     while(rs.next()) {
-                        manageIDList.add(new TextComponent(rs.getString(1)));
+                        manageIDList.add(new MyComp(rs.getString(1)));
                     }
                     t.getSender().spigot().sendMessage(manageIDList.getList(Integer.parseInt(t.getArgs()[1])).create());
                 } catch (SQLException throwables) {

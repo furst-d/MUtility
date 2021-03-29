@@ -1,6 +1,7 @@
 package com.mens.mutility.spigot.utils;
 
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.time.LocalDate;
@@ -52,19 +53,22 @@ public class Checker {
         return player != null;
     }
 
-    public boolean checkPermissions(String playerName, String permission) {
-        Player player = Bukkit.getServer().getPlayer(playerName);
-        if(permission.contains(";")) {
-            String[] permissions = permission.split(";");
-            for (String perm : permissions) {
-                if (Objects.requireNonNull(player).hasPermission(perm)) {
-                    return true;
+    public boolean checkPermissions(CommandSender sender, String permission) {
+        if(sender instanceof Player) {
+            Player player = Bukkit.getServer().getPlayer(sender.getName());
+            if(permission.contains(";")) {
+                String[] permissions = permission.split(";");
+                for (String perm : permissions) {
+                    if (Objects.requireNonNull(player).hasPermission(perm)) {
+                        return true;
+                    }
                 }
+                return false;
+            } else {
+                return Objects.requireNonNull(player).hasPermission(permission);
             }
-            return false;
-        } else {
-            return Objects.requireNonNull(player).hasPermission(permission);
         }
+        return true;
     }
 
     public boolean checkPositiveInt(String number) {

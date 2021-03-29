@@ -52,6 +52,10 @@ public class Errors {
         return "Tento příkaz musí být zadán ve hře!";
     }
 
+    public String errNotInConsole() {
+        return "Tento příkaz musí být zadán z konzole!";
+    }
+
     public String errNoPermission() {
         return "Na použití tohoto příkazu nemáte dostatečná oprávnění!";
     }

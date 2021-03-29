@@ -4,7 +4,6 @@ import com.mens.mutility.spigot.MUtilitySpigot;
 import com.mens.mutility.spigot.chat.Errors;
 import com.mens.mutility.spigot.commands.system.enums.ArgumentTypes;
 import com.mens.mutility.spigot.commands.system.enums.TabCompleterTypes;
-import com.mens.mutility.spigot.database.Database;
 import com.mens.mutility.spigot.utils.Checker;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -18,6 +17,7 @@ import org.bukkit.entity.Player;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class CommandListener implements CommandExecutor, TabCompleter {
     private final MUtilitySpigot plugin;
@@ -71,14 +71,8 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                 //Prikaz nalezen
                 if(args.length == 0) {
                     if(commandData.getExecute() != null) {
-                        if(getChecker().checkPermissions(sender.getName(), commandData.getPermission())) {
-                            commandData.setSender(sender);
-                            commandData.getExecute().accept(new CommandParams(sender, args));
+                        if (checkLast(sender, args, commandData, checkCommandSender(commandData.getPrefix(), sender, commandData), commandData.getPermission(), commandData.getExecute()))
                             return true;
-                        } else {
-                            setError(true);
-                            setErrorMessage(commandData.getPrefix() + getErrors().errNoPermission());
-                        }
                     } else {
                         setError(true);
                         setErrorMessage(commandData.getPrefix() + getErrors().errNotEnoughArguments());
@@ -99,14 +93,8 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                             // Pokud se jedná o poslední podpříkaz
                             if(i == args.length -1) {
                                 if(subcommand.getExecute() != null) {
-                                    if(getChecker().checkPermissions(sender.getName(), subcommand.getPermission())) {
-                                        commandData.setSender(sender);
-                                        subcommand.getExecute().accept(new CommandParams(sender, args));
+                                    if (checkLast(sender, args, commandData, checkCommandSender(commandData.getPrefix(), sender, subcommand), subcommand.getPermission(), subcommand.getExecute()))
                                         return true;
-                                    } else {
-                                        setError(true);
-                                        setErrorMessage(commandData.getPrefix() + getErrors().errNoPermission());
-                                    }
                                 } else {
                                     if(!isError()) {
                                         setError(true);
@@ -127,6 +115,20 @@ public class CommandListener implements CommandExecutor, TabCompleter {
         }
         if(isError()) {
             sender.sendMessage(getErrorMessage());
+        }
+        return false;
+    }
+
+    private boolean checkLast(CommandSender sender, String[] args, CommandData commandData, boolean commandSender, String permission, Consumer<CommandParams> execute) {
+        if(commandSender) {
+            if(getChecker().checkPermissions(sender, permission)) {
+                commandData.setSender(sender);
+                execute.accept(new CommandParams(sender, args));
+                return true;
+            } else {
+                setError(true);
+                setErrorMessage(commandData.getPrefix() + getErrors().errNoPermission());
+            }
         }
         return false;
     }
@@ -200,6 +202,33 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                     setErrorMessage(prefix + getErrors().errWrongArgumentPositiveNumber(args[i]));
                 }
                 break;
+        }
+        return false;
+    }
+
+    private boolean checkCommandSender(String prefix, CommandSender sender, CommandData subcommand) {
+        switch (subcommand.getExecutor()) {
+            case PLAYER:
+                if(sender instanceof Player) {
+                    setError(false);
+                    return true;
+                } else {
+                    setError(true);
+                    setErrorMessage(prefix + getErrors().errNotInGame());
+                }
+                break;
+            case CONSOLE:
+                if(!(sender instanceof Player)) {
+                    setError(false);
+                    return true;
+                } else {
+                    setError(true);
+                    setErrorMessage(prefix + getErrors().errNotInConsole());
+                }
+                break;
+            case BOTH:
+                setError(false);
+                return true;
         }
         return false;
     }

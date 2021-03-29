@@ -172,6 +172,10 @@ public class CommandData {
         return permission;
     }
 
+    public CommandExecutors getExecutor() {
+        return executor;
+    }
+
     public Consumer<CommandParams> getExecute() {
         return execute;
     }

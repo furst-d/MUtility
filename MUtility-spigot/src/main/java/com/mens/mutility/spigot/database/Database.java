@@ -16,7 +16,7 @@ public class Database {
 
     public Database(MUtilitySpigot plugin) {
         this.plugin = plugin;
-        tablePrefix = plugin.getConfig().getString("MYSQL.Table prefix");
+        tablePrefix = prefix.getTablePrefix(plugin);
     }
 
     public Connection getCon() {
@@ -61,14 +61,5 @@ public class Database {
         stm = con.prepareStatement("CREATE TABLE IF NOT EXISTS " + tablePrefix + "zalohy(id INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT, user_id int(11), record_id int(11), building_name varchar(255), note varchar(255), rejected int(11), rejected_reason varchar(255), completed int(11), admin_id int(11), world varchar(255), posX double, posY double, posZ double, create_date date, update_date date)");
         stm.execute();
         Bukkit.getConsoleSender().sendMessage(prefix.getMutilityPrefix() + "Chybejici tabulky vytvoreny!");
-    }
-
-    public ResultSet sqlSelect(PreparedStatement stm) {
-        try {
-            return stm.executeQuery();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-        return null;
     }
 }
