@@ -15,56 +15,71 @@ public class Prefix {
         this.prefixName = prefixName;
     }
 
-    private String getPrefix() {
-        return colors.getSecondaryColor() + "[" +
-                colors.getPrimaryColor() + getPrefixName() +
-                colors.getSecondaryColor() + "]" +
-                colors.getSecondaryColor() + " ";
+    private String getPrefix(boolean hexColor, boolean json) {
+        if(hexColor) {
+            if(json) {
+                return "{\"text\":\"[\",\"color\":\"" + colors.getSecondaryColorHEX() + "\"},{\"text\":\"" + getPrefixName() + "\",\"color\":\"" + colors.getPrimaryColorHEX() + "\"},{\"text\":\"] \",\"color\":\"" + colors.getSecondaryColorHEX() + "\"}";
+            } else {
+                return colors.getSecondaryColor() + "[" +
+                        colors.getPrimaryColor() + getPrefixName() +
+                        colors.getSecondaryColor() + "]" +
+                        colors.getSecondaryColor() + " ";
+            }
+        } else {
+            if(json) {
+                return "{\"text\":\"[\",\"color\":\"" + colors.getSecondaryColor().getName() + "\"},{\"text\":\"" + getPrefixName() + "\",\"color\":\"" + colors.getPrimaryColor().getName() + "\"},{\"text\":\"] \",\"color\":\"" + colors.getSecondaryColor().getName() + "\"}";
+            } else {
+                return colors.getConsoleSecondaryColor() + "[" +
+                        colors.getConsolePrimaryColor() + getPrefixName() +
+                        colors.getConsoleSecondaryColor() + "]" +
+                        colors.getConsoleSecondaryColor() + " ";
+            }
+        }
     }
 
-    public String getMutilityPrefix() {
+    public String getMutilityPrefix(boolean hexColor, boolean json) {
         setPrefixName("M-Utility");
-        return getPrefix();
+        return getPrefix(hexColor, json);
     }
 
-    public String getAnketaPrefix() {
+    public String getAnketaPrefix(boolean hexColor, boolean json) {
         setPrefixName("Anketa");
-        return getPrefix();
+        return getPrefix(hexColor, json);
     }
 
-    public String getEventPrefix() {
+    public String getEventPrefix(boolean hexColor, boolean json) {
         setPrefixName("Event");
-        return getPrefix();
+        return getPrefix(hexColor, json);
     }
 
-    public String getInventoryPrefix() {
+    public String getInventoryPrefix(boolean hexColor, boolean json) {
         setPrefixName("M-Inventory");
-        return getPrefix();
+        return getPrefix(hexColor, json);
     }
 
-    public String getResidencePrefix() {
+    public String getResidencePrefix(boolean hexColor, boolean json) {
         setPrefixName("M-Residence");
-        return getPrefix();
+        return getPrefix(hexColor, json);
     }
 
-    public String getStavbaPrefix() {
+    public String getStavbaPrefix(boolean hexColor, boolean json) {
         setPrefixName("M-Stavba");
-        return getPrefix();
+        return getPrefix(hexColor, json);
     }
 
-    public String getNavrhPrefix() {
+    public String getNavrhPrefix(boolean hexColor, boolean json) {
         setPrefixName("Navrh");
-        return getPrefix();
+        return getPrefix(hexColor, json);
     }
 
-    public String getNavrhyPrefix() {
+    public String getNavrhyPrefix(boolean hexColor, boolean json) {
         setPrefixName("Navrhy");
-        return getPrefix();
+        return getPrefix(hexColor, json);
     }
 
-    public String getZalohyPrefix() {
+    public String getZalohyPrefix(boolean hexColor, boolean json) {
         setPrefixName("Zalohy");
-        return getPrefix();
+        return getPrefix(hexColor, json);
     }
 
     public String getTablePrefix(MUtilitySpigot plugin) {

@@ -17,7 +17,7 @@ public class MResidence {
      */
     public CommandData create() {
         Prefix prefix = new Prefix();
-        return new CommandData("mresidence", "mres", prefix.getResidencePrefix(), "mutility.residence", CommandExecutors.BOTH, t -> {
+        return new CommandData("mresidence", "mres", prefix.getResidencePrefix(true, false), "mutility.residence", CommandExecutors.BOTH, t -> {
             //TODO
             System.out.println("Res");
         });

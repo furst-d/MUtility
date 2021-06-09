@@ -6,7 +6,7 @@ import com.mens.mutility.spigot.commands.system.CommandData;
 import com.mens.mutility.spigot.commands.system.enums.ArgumentTypes;
 import com.mens.mutility.spigot.commands.system.enums.CommandExecutors;
 import com.mens.mutility.spigot.commands.system.enums.TabCompleterTypes;
-import com.mens.mutility.spigot.utils.PageList;
+import com.mens.mutility.spigot.utils.PageList2;
 
 public class MInv {
     private MUtilitySpigot plugin;
@@ -21,9 +21,9 @@ public class MInv {
     public CommandData create() {
         Prefix prefix = new Prefix();
 
-        PageList helpList = new PageList(10, prefix.getInventoryPrefix(), "/minv");
+        PageList2 helpList = new PageList2(10, prefix.getInventoryPrefix(true, false), "/minv");
 
-        CommandData minv = new CommandData("minv", prefix.getInventoryPrefix(),"mutility.inventory.help", CommandExecutors.BOTH, t -> {
+        CommandData minv = new CommandData("minv", prefix.getInventoryPrefix(true, false),"mutility.inventory.help", CommandExecutors.BOTH, t -> {
             //TODO
             t.getSender().spigot().sendMessage(helpList.getList(1).create());
         });

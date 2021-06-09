@@ -6,7 +6,7 @@ import com.mens.mutility.spigot.commands.system.CommandData;
 import com.mens.mutility.spigot.commands.system.enums.ArgumentTypes;
 import com.mens.mutility.spigot.commands.system.enums.CommandExecutors;
 import com.mens.mutility.spigot.commands.system.enums.TabCompleterTypes;
-import com.mens.mutility.spigot.utils.PageList;
+import com.mens.mutility.spigot.utils.PageList2;
 
 public class Navrhy {
     private MUtilitySpigot plugin;
@@ -20,9 +20,9 @@ public class Navrhy {
      */
     public CommandData create() {
         Prefix prefix = new Prefix();
-        PageList helpList = new PageList(10, prefix.getNavrhyPrefix(), "/navrhy");
+        PageList2 helpList = new PageList2(10, prefix.getNavrhyPrefix(true, false), "/navrhy");
 
-        CommandData navrhy = new CommandData("navrhy", prefix.getNavrhyPrefix(),"mutility.navrhy.help", CommandExecutors.BOTH, t -> {
+        CommandData navrhy = new CommandData("navrhy", prefix.getNavrhyPrefix(true, false),"mutility.navrhy.help", CommandExecutors.BOTH, t -> {
             //TODO
             t.getSender().spigot().sendMessage(helpList.getList(1).create());
         });

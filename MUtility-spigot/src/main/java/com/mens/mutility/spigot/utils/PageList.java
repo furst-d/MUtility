@@ -1,10 +1,8 @@
 package com.mens.mutility.spigot.utils;
 
-import com.mens.mutility.spigot.chat.MyComp;
 import com.mens.mutility.spigot.chat.PluginColors;
+import com.mens.mutility.spigot.chat.json.JsonBuilder;
 import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.*;
-import net.md_5.bungee.api.chat.hover.content.Text;
 import org.apache.commons.lang.StringUtils;
 
 import java.awt.*;
@@ -18,8 +16,12 @@ public class PageList {
     private int maxPage;
     private final String title;
     private String command;
-    private final List<List<MyComp>> rows;
-    private MyComp head;
+    private JsonBuilder jb;
+    private final List<String> rows;
+    private JsonBuilder head;
+    private int extraDistance;
+    private double titleLength;
+    private double topLineFinalLength;
 
     public PageList(int limit, String title, String command) {
         this.limit = limit;
@@ -29,6 +31,10 @@ public class PageList {
         maxPage = 1;
         rows = new ArrayList<>();
         head = null;
+        jb = new JsonBuilder();
+        extraDistance = 0;
+        titleLength = 0;
+        topLineFinalLength = 0;
     }
 
     public int getLimit() {
@@ -59,7 +65,7 @@ public class PageList {
         return command;
     }
 
-    public List<List<MyComp>> getRows() {
+    public List<String> getRows() {
         return rows;
     }
 
@@ -67,25 +73,22 @@ public class PageList {
         this.command = command;
     }
 
-    public MyComp getHead() {
+    public JsonBuilder getHead() {
         return head;
     }
 
-    public void setHead(MyComp head) {
+    public void setHead(JsonBuilder head) {
         this.head = head;
     }
 
-    public void add(MyComp... components) {
+    public void add(String row) {
         if(getIndex() == getLimit()) {
             setMaxPage(getMaxPage() + 1);
             setIndex(0);
         } else {
             setIndex(getIndex() + 1);
         }
-        rows.add(new ArrayList<>());
-        for(MyComp component : components) {
-            rows.get(rows.size()-1).add(component);
-        }
+        rows.add(row);
     }
 
     public void clear() {
@@ -94,110 +97,330 @@ public class PageList {
         rows.clear();
     }
 
-    public ComponentBuilder getList(int pageNumber) {
-        ComponentBuilder cb = new ComponentBuilder();
+    public JsonBuilder getList(int pageNumber) {
+        jb.clear();
         PluginColors colors = new PluginColors();
-        cb.append("\n").event((ClickEvent) null).event((HoverEvent) null);
-        String[] lines = getLines(getTitle(), colors.getSecondaryColor());
-        cb.append(lines[0]).event((ClickEvent) null).event((HoverEvent) null);
-        cb.append("\n").event((ClickEvent) null).event((HoverEvent) null);
+        StringBuilder sb = new StringBuilder();
+        JsonBuilder firstPageHover = new JsonBuilder();
+        JsonBuilder firstPage = new JsonBuilder("[");
+        JsonBuilder previousPageHover = new JsonBuilder();
+        JsonBuilder previousPage = new JsonBuilder("[");
+        JsonBuilder nextPageHover = new JsonBuilder();
+        JsonBuilder nextPage = new JsonBuilder("[");
+        JsonBuilder lastPageHover = new JsonBuilder();
+        JsonBuilder lastPage = new JsonBuilder("[");
+        jb.addJsonSegment(getTopLine(getTitle(), colors.getSecondaryColorHEX()));
+
         // Head
         if(!getRows().isEmpty() && getHead() != null) {
-            cb.append(" ").event((ClickEvent) null).event((HoverEvent) null);
-            addEvents(getHead(), cb);
-            cb.append("\n").event((ClickEvent) null).event((HoverEvent) null);
+            sb.append(",{\"text\":\" \"},");
+            sb.append(getHead().getJsonSegments());
+            jb.addJsonSegment(sb.toString());
         }
+
         boolean error = false;
         if(pageNumber > maxPage) {
             pageNumber = maxPage;
         }
         // Body
+        sb = new StringBuilder();
         for (int i = pageNumber * limit - limit; i < pageNumber * limit; i++) {
             try {
-                cb.append(" ").event((ClickEvent) null).event((HoverEvent) null);
-                for (MyComp component : getRows().get(i)) {
-                    addEvents(component, cb);
+                if(getRows().get(i) != null) {
+                    sb.append(",{\"text\":\"\n \"},");
                 }
-                if(i != pageNumber * limit - 1 && getRows().get(i+1) != null) {
-                    cb.append("\n").event((ClickEvent) null).event((HoverEvent) null);
-                }
+                sb.append(getRows().get(i));
             } catch (IndexOutOfBoundsException e) {
                 if(i == pageNumber * limit - limit) {
                     error = true;
                     if(pageNumber == 1 && getRows().isEmpty()) {
-                        cb.append(colors.getPrimaryColor() + "\n   Seznam je prázdný! \n").event((ClickEvent) null).event((HoverEvent) null);
+                        sb.append(",{\"text\":\"\n\"},");
+                        sb.append("{\"text\":\"   Seznam je prázdný! \n\",");
+                        sb.append("\"color\":\"");
+                        sb.append(colors.getPrimaryColorHEX());
+                        sb.append("\"}");
                     }
                 }
                 break;
             }
         }
+        jb.addJsonSegment(sb.toString());
+        sb = new StringBuilder();
         if(!error) {
-            if(getMaxPage() > 1) {
-                cb.append("\n").event((ClickEvent) null).event((HoverEvent) null);
-                cb.append(" ").event((ClickEvent) null).event((HoverEvent) null);
-            }
             if(pageNumber != 1) {
-                MyComp btnFirstPage = new MyComp(colors.getPrimaryColor() + "◀◀", HoverEvent.Action.SHOW_TEXT, colors.getSecondaryColor() + ">> " + colors.getPrimaryColor() + "První strana " + colors.getSecondaryColor() + "<<", ClickEvent.Action.RUN_COMMAND, getCommand() + " page 1");
-                MyComp btnPrevPage = new MyComp(colors.getPrimaryColor() + "◀", HoverEvent.Action.SHOW_TEXT, colors.getSecondaryColor() + ">> " + colors.getPrimaryColor() + "Předchozí strana " + colors.getSecondaryColor() + "<<", ClickEvent.Action.RUN_COMMAND, getCommand() + " page " + (pageNumber - 1));
-                addEvents(btnFirstPage, cb);
-                cb.append(" ").event((ClickEvent) null).event((HoverEvent) null);
-                addEvents(btnPrevPage, cb);
-                cb.append(" ").event((ClickEvent) null).event((HoverEvent) null);
-            }
-            if(getMaxPage() > 1)  {
-                MyComp pages = new MyComp(colors.getSecondaryColor() + "Strana " + colors.getPrimaryColor() + pageNumber + colors.getSecondaryColor() + " z " + colors.getPrimaryColor() + getMaxPage());
-                addEvents(pages, cb);
+                firstPageHover
+                        .text(">> ")
+                        .color(colors.getSecondaryColorHEX())
+                        .text("První strana")
+                        .color(colors.getPrimaryColorHEX())
+                        .text(" <<")
+                        .color(colors.getSecondaryColorHEX());
+                firstPage
+                        .color(colors.getSecondaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, firstPageHover.toString(), true)
+                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, getCommand() + " page 1")
+                        .text("◀◀")
+                        .color(colors.getPrimaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, firstPageHover.toString(), true)
+                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, getCommand() + " page 1")
+                        .text("]")
+                        .color(colors.getSecondaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, firstPageHover.toString(), true)
+                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, getCommand() + " page 1");
+
+                previousPageHover
+                        .text(">> ")
+                        .color(colors.getSecondaryColorHEX())
+                        .text("Předchozí strana")
+                        .color(colors.getPrimaryColorHEX())
+                        .text(" <<")
+                        .color(colors.getSecondaryColorHEX());
+                previousPage
+                        .color(colors.getSecondaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, previousPageHover.toString(), true)
+                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, getCommand() + " page " + (pageNumber - 1))
+                        .text("◀")
+                        .color(colors.getPrimaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, previousPageHover.toString(), true)
+                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, getCommand() + " page " + (pageNumber - 1))
+                        .text("]")
+                        .color(colors.getSecondaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, previousPageHover.toString(), true)
+                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, getCommand() + " page " + (pageNumber - 1));
+            } else {
+                firstPageHover
+                        .text(">> ")
+                        .color(colors.getSecondaryColorHEX())
+                        .text("Již se nacházíš na první straně!")
+                        .color(colors.getSecondaryColorHEX())
+                        .text(" <<")
+                        .color(colors.getSecondaryColorHEX());
+                firstPage
+                        .color(colors.getSecondaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, firstPageHover.toString(), true)
+                        .text("◀◀")
+                        .color(colors.getSecondaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, firstPageHover.toString(), true)
+                        .text("]")
+                        .color(colors.getSecondaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, firstPageHover.toString(), true);
+
+                previousPageHover
+                        .text(">> ")
+                        .color(colors.getSecondaryColorHEX())
+                        .text("Již se nacházíš na první straně!")
+                        .color(colors.getSecondaryColorHEX())
+                        .text(" <<")
+                        .color(colors.getSecondaryColorHEX());
+                previousPage
+                        .color(colors.getSecondaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, previousPageHover.toString(), true)
+                        .text("◀")
+                        .color(colors.getSecondaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, previousPageHover.toString(), true)
+                        .text("]")
+                        .color(colors.getSecondaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, previousPageHover.toString(), true);
             }
             if(pageNumber != getMaxPage()) {
-                MyComp btnNextPage = new MyComp(colors.getPrimaryColor() + "▶", HoverEvent.Action.SHOW_TEXT, colors.getSecondaryColor() + ">> " + colors.getPrimaryColor() + "Následující strana " + colors.getSecondaryColor() + "<<", ClickEvent.Action.RUN_COMMAND, getCommand() + " page " + (pageNumber + 1));
-                MyComp btnLastPage = new MyComp(colors.getPrimaryColor() + "▶▶", HoverEvent.Action.SHOW_TEXT, colors.getSecondaryColor() + ">> " + colors.getPrimaryColor() + "Poslední strana " + colors.getSecondaryColor() + "<<", ClickEvent.Action.RUN_COMMAND, getCommand() + " page " + getMaxPage());
-                cb.append(" ").event((ClickEvent) null).event((HoverEvent) null);
-                addEvents(btnNextPage, cb);
-                cb.append(" ").event((ClickEvent) null).event((HoverEvent) null);
-                addEvents(btnLastPage, cb);
+                nextPageHover
+                        .text(">> ")
+                        .color(colors.getSecondaryColorHEX())
+                        .text("Následující strana")
+                        .color(colors.getPrimaryColorHEX())
+                        .text(" <<")
+                        .color(colors.getSecondaryColorHEX());
+                nextPage
+                        .color(colors.getSecondaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, nextPageHover.toString(), true)
+                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, getCommand() + " page " + (pageNumber + 1))
+                        .text("▶")
+                        .color(colors.getPrimaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, nextPageHover.toString(), true)
+                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, getCommand() + " page " + (pageNumber + 1))
+                        .text("]")
+                        .color(colors.getSecondaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, nextPageHover.toString(), true)
+                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, getCommand() + " page " + (pageNumber + 1));
+
+                lastPageHover
+                        .text(">> ")
+                        .color(colors.getSecondaryColorHEX())
+                        .text("Poslední strana")
+                        .color(colors.getPrimaryColorHEX())
+                        .text(" <<")
+                        .color(colors.getSecondaryColorHEX());
+                lastPage
+                        .color(colors.getSecondaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, lastPageHover.toString(), true)
+                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, getCommand() + " page " + getMaxPage())
+                        .text("▶▶")
+                        .color(colors.getPrimaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, lastPageHover.toString(), true)
+                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, getCommand() + " page " + getMaxPage())
+                        .text("]")
+                        .color(colors.getSecondaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, lastPageHover.toString(), true)
+                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, getCommand() + " page " + getMaxPage());
+            } else {
+                nextPageHover
+                        .text(">> ")
+                        .color(colors.getSecondaryColorHEX())
+                        .text("Již se nacházíš na poslední straně!")
+                        .color(colors.getSecondaryColorHEX())
+                        .text(" <<")
+                        .color(colors.getSecondaryColorHEX());
+                nextPage
+                        .color(colors.getSecondaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, nextPageHover.toString(), true)
+                        .text("▶")
+                        .color(colors.getSecondaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, nextPageHover.toString(), true)
+                        .text("]")
+                        .color(colors.getSecondaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, nextPageHover.toString(), true);
+
+                lastPageHover
+                        .text(">> ")
+                        .color(colors.getSecondaryColorHEX())
+                        .text("Již se nacházíš na poslední straně!")
+                        .color(colors.getSecondaryColorHEX())
+                        .text(" <<")
+                        .color(colors.getSecondaryColorHEX());
+                lastPage
+                        .color(colors.getSecondaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, lastPageHover.toString(), true)
+                        .text("▶▶")
+                        .color(colors.getSecondaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, lastPageHover.toString(), true)
+                        .text("]")
+                        .color(colors.getSecondaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, lastPageHover.toString(), true);
             }
         }
-        cb.append("\n").event((ClickEvent) null).event((HoverEvent) null);
-        cb.append(lines[1]).event((ClickEvent) null).event((HoverEvent) null);
-        cb.append("\n").event((ClickEvent) null).event((HoverEvent) null);
-        return cb;
+        jb.addJsonSegment(sb.toString());
+        if(getMaxPage() > 1) {
+            jb.addJsonSegment(getBottomLine(colors.getSecondaryColorHEX(), true, pageNumber, firstPage, previousPage, nextPage, lastPage));
+        } else {
+            jb.addJsonSegment(getBottomLine(colors.getSecondaryColorHEX(), false, pageNumber, firstPage, previousPage, nextPage, lastPage));
+        }
+        return jb;
     }
 
-    private void addEvents(MyComp component, ComponentBuilder cb) {
-        cb.append(component.getText());
-        if(component.getHoverAction() == null) {
-            cb.event((HoverEvent) null);
-        } else {
-            cb.event(new HoverEvent(component.getHoverAction(), new Text(component.getHover())));
-        }
-        if(component.getClickAction() == null) {
-            cb.event((ClickEvent) null);
-        } else {
-            cb.event(new ClickEvent(component.getClickAction(), component.getCommand()));
-        }
-    }
-
-    private String[] getLines(String title, ChatColor color) {
+    private String getTopLine(String titleJson, String color) {
         MyStringUtils strUt = new MyStringUtils();
-        String[] lines = new String[2];
-        title = title.replace(" ", "");
+        StringBuilder sb = new StringBuilder();
+        titleJson = titleJson.replace(" ", "");
+        String title = "";
+        for (int i = 40; i < titleJson.length(); i++) {
+            if(titleJson.charAt(i) == '"') {
+                break;
+            }
+            title += titleJson.charAt(i);
+        }
         try {
-            int extraDistance = 0;
             double spaceLength = 0.4921875;
-            double titleLength = strUt.getStringWidth(ChatColor.stripColor(title));
+            titleLength = strUt.getStringWidth(ChatColor.stripColor(title));
             double bottomLineLength = strUt.getStringWidth(ChatColor.stripColor(StringUtils.repeat("I", 50)));
             double topHalfLineLength = ((bottomLineLength - titleLength) - (2 * spaceLength)) / 2;
             int topLineNumber = (int) Math.round(topHalfLineLength / spaceLength);
+            topLineFinalLength = 2 * topLineNumber * spaceLength + titleLength;
             double topLineLength = (2 * topLineNumber * spaceLength) + (2 * spaceLength) + titleLength;
             if(Math.abs(topLineLength - bottomLineLength) > Math.abs(topLineLength-(bottomLineLength + spaceLength))) {
                 extraDistance = topLineLength > bottomLineLength? 1 : -1;
             }
-            lines[0] = color + "" + ChatColor.STRIKETHROUGH + StringUtils.repeat(" ", topLineNumber) + ChatColor.RESET
-                    + " " + title + " " + color + "" + ChatColor.STRIKETHROUGH + StringUtils.repeat(" ", topLineNumber) + ChatColor.RESET;
-            lines[1] = color + "" + ChatColor.STRIKETHROUGH + StringUtils.repeat(" ", (50 + extraDistance));
+
+            sb.append("{\"text\":\"\n\"},");
+            sb.append("{\"text\":\"");
+            sb.append(StringUtils.repeat(" ", topLineNumber));
+            sb.append("\",\"strikethrough\":true,\"color\":\"");
+            sb.append(color);
+            sb.append("\"},");
+            sb.append(titleJson);
+            sb.append(",{\"text\":\"");
+            sb.append(StringUtils.repeat(" ", topLineNumber));
+            sb.append("\",\"strikethrough\":true,\"color\":\"");
+            sb.append(color);
+            sb.append("\"},");
+            sb.append("{\"text\":\"\n\"}");
         } catch (IOException | FontFormatException e) {
             e.printStackTrace();
         }
-        return lines;
+        return sb.toString();
+    }
+
+    private String getBottomLine(String color, boolean showPages, int pageNumber, JsonBuilder firstPage, JsonBuilder previousPage, JsonBuilder nextPage, JsonBuilder lastPage) {
+        MyStringUtils strUt = new MyStringUtils();
+        StringBuilder sb = new StringBuilder();
+        PluginColors colors = new PluginColors();
+        try {
+            double spaceLength = 0.4921875;
+            double titleLength = strUt.getStringWidth("(" + pageNumber + " | " + getMaxPage() + ")");
+            double arrowLength = 8;
+            int bottomLineSpaces = (int)Math.round((topLineFinalLength - (arrowLength + titleLength)) / 6 / spaceLength);
+            double bottomFinalLength = bottomLineSpaces * spaceLength * 6 + arrowLength + titleLength;
+            if(showPages) {
+                extraDistance = (int)Math.round((topLineFinalLength - bottomFinalLength) / spaceLength);
+                String pagesJson = new JsonBuilder("(")
+                        .color(color)
+                        .text(String.valueOf(pageNumber))
+                        .color(colors.getPrimaryColorHEX())
+                        .text(" | ")
+                        .color(color)
+                        .text(String.valueOf(getMaxPage()))
+                        .color(colors.getPrimaryColorHEX())
+                         .text(")")
+                        .color(color)
+                        .getJsonSegments();
+                sb.append("{\"text\":\"\n\"},");
+                sb.append("{\"text\":\"");
+                sb.append(StringUtils.repeat(" ", bottomLineSpaces));
+                sb.append("\",\"strikethrough\":true,\"color\":\"");
+                sb.append(color);
+                sb.append("\"},");
+                sb.append(firstPage.getJsonSegments());
+                sb.append(",{\"text\":\"");
+                sb.append(StringUtils.repeat(" ", bottomLineSpaces));
+                sb.append("\",\"strikethrough\":true,\"color\":\"");
+                sb.append(color);
+                sb.append("\"},");
+                sb.append(previousPage.getJsonSegments());
+                sb.append(",{\"text\":\"");
+                sb.append(StringUtils.repeat(" ", bottomLineSpaces));
+                sb.append("\",\"strikethrough\":true,\"color\":\"");
+                sb.append(color);
+                sb.append("\"},");
+                sb.append(pagesJson);
+                sb.append(",{\"text\":\"");
+                sb.append(StringUtils.repeat(" ", bottomLineSpaces));
+                sb.append("\",\"strikethrough\":true,\"color\":\"");
+                sb.append(color);
+                sb.append("\"},");
+                sb.append(nextPage.getJsonSegments());
+                sb.append(",{\"text\":\"");
+                sb.append(StringUtils.repeat(" ", bottomLineSpaces));
+                sb.append("\",\"strikethrough\":true,\"color\":\"");
+                sb.append(color);
+                sb.append("\"},");
+                sb.append(lastPage.getJsonSegments());
+                sb.append(",{\"text\":\"");
+                sb.append(StringUtils.repeat(" ", (bottomLineSpaces + extraDistance)));
+                sb.append("\",\"strikethrough\":true,\"color\":\"");
+                sb.append(color);
+                sb.append("\"},");
+                sb.append("{\"text\":\"\n\"}");
+            } else {
+                sb.append("{\"text\":\"\n\"},");
+                sb.append("{\"text\":\"");
+                sb.append(StringUtils.repeat(" ", (50 + extraDistance)));
+                sb.append("\",\"strikethrough\":true,\"color\":\"");
+                sb.append(color);
+                sb.append("\"},");
+                sb.append("{\"text\":\"\n\"}");
+            }
+        } catch (IOException | FontFormatException e) {
+            e.printStackTrace();
+        }
+        return sb.toString();
     }
 }

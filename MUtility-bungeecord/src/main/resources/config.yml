@@ -1,0 +1,115 @@
+###########################
+##                       ##
+##      M-Utility        ##
+##                       ##
+##     by Menshons       ##
+##     Version 1.0       ##
+##                       ##
+###########################
+
+Servers:
+  OverWorld 1:
+    Name: 'server1'
+    From:
+      X: -100000
+      Z: 0
+    To:
+      X: 0
+      Z: 100000
+    TP border 1:
+      From:
+        X: -100
+        Z: 0
+      To:
+        x: 0
+        Z: 100000
+    TP border 2:
+      From:
+        X: -100000
+        Z: 0
+      To:
+        x: 0
+        Z: 100
+
+  OverWorld 2:
+    Name: 'server2'
+    From:
+      X: -100000
+      Z: -100000
+    To:
+      X: 0
+      Z: 0
+    TP border 1:
+      From:
+        X: -100
+        Z: -100000
+      To:
+        x: 0
+        Z: 0
+      TP border 2:
+        From:
+          X: -100000
+          Z: 0
+        To:
+          x: 0
+          Z: 100
+
+  OverWorld 3:
+    Name: 'server3'
+    From:
+      X: 0
+      Z: 0
+    To:
+      X: 100000
+      Z: 100000
+    TP border 1:
+      From:
+        X: 0
+        Z: 0
+      To:
+        x: 100
+        Z: 100000
+      TP border 2:
+        From:
+          X: 0
+          Z: 0
+        To:
+          x: 100000
+          Z: 100
+
+  OverWorld 4:
+    Name: 'server4'
+    From:
+      X: 0
+      Z: -100000
+    To:
+      X: 100000
+      Z: 0
+    TP border 1:
+      From:
+        X: 0
+        Z: -100000
+      To:
+        x: 100
+        Z: 0
+      TP border 2:
+        From:
+          X: 0
+          Z: -100
+        To:
+          x: 100000
+          Z: 0
+
+  Nether:
+    Name: 'nether'
+    Center:
+      X: 0
+      Z: 0
+    Radius: 25000
+
+  End:
+    Name: 'end'
+    Center:
+      X: 0
+      Z: 0
+    Radius: 25000

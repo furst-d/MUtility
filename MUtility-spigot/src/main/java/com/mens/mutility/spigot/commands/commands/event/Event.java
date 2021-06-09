@@ -3,12 +3,15 @@ package com.mens.mutility.spigot.commands.commands.event;
 import com.mens.mutility.spigot.MUtilitySpigot;
 import com.mens.mutility.spigot.chat.MyComp;
 import com.mens.mutility.spigot.chat.Prefix;
+import com.mens.mutility.spigot.chat.json.JsonBuilder;
 import com.mens.mutility.spigot.commands.system.CommandData;
 import com.mens.mutility.spigot.commands.system.enums.ArgumentTypes;
 import com.mens.mutility.spigot.commands.system.enums.CommandExecutors;
 import com.mens.mutility.spigot.commands.system.enums.TabCompleterTypes;
 import com.mens.mutility.spigot.utils.PageList;
-import net.md_5.bungee.api.chat.TextComponent;
+import com.mens.mutility.spigot.utils.PageList2;
+import net.md_5.bungee.api.ChatColor;
+import org.bukkit.entity.Player;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -17,24 +20,87 @@ import java.sql.SQLException;
 import static com.mens.mutility.spigot.MUtilitySpigot.db;
 
 public class Event {
-    private MUtilitySpigot plugin;
+    private final MUtilitySpigot plugin;
+    private Prefix prefix;
+    private PageList helpListTest;
 
     public Event(MUtilitySpigot plugin) {
         this.plugin = plugin;
+        prefix = new Prefix();
+        helpListTest = new PageList(10, prefix.getEventPrefix(true, true), "/event");
+    }
+
+    private void loadHelpListData() {
+        helpListTest.clear();
+        helpListTest.setHead(new JsonBuilder("Hlava")
+                .color(ChatColor.AQUA)
+                .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT,
+                        new JsonBuilder("H")
+                                .color(ChatColor.GOLD)
+                                .text("L")
+                                .color(ChatColor.AQUA)
+                                .text("A")
+                                .color(ChatColor.GOLD)
+                                .text("V")
+                                .color(ChatColor.AQUA)
+                                .text("A")
+                                .color(ChatColor.GOLD)
+                                .toString(), true)
+        );
+        JsonBuilder jb = new JsonBuilder();
+
+        for (int i = 0; i < 37; i++) {
+            jb.clear();
+            jb.addJsonSegment("{\"text\":\"[\",\"color\":\"gray\"},{\"text\":\"Test\",\"color\":\"dark_aqua\"},{\"text\":\"]\",\"color\":\"gray\"}")
+                    .text("[" + i + "]")
+                    .color(ChatColor.AQUA)
+                    .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, "/ahoj")
+                    .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, "Hover", false)
+                    .text(" Text bez eventu ")
+                    .color(ChatColor.RED)
+                    .effect(JsonBuilder.Effects.BOLD)
+                    .effect(JsonBuilder.Effects.ITALIC)
+                    .effect(JsonBuilder.Effects.STRIKETHROUGH)
+                    .effect(JsonBuilder.Effects.UNDERLINED)
+                    .effect(JsonBuilder.Effects.OBFUSCATED)
+                    .text("Hover a event")
+                    .color(ChatColor.GOLD)
+                    .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, "/ahoj2")
+                    .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, new JsonBuilder()
+                            .text(">> ")
+                            .color(ChatColor.GOLD)
+                            .text("Klikni ")
+                            .color("#B4CA69")
+                            .text("z")
+                            .color(ChatColor.LIGHT_PURPLE)
+                            .text("d")
+                            .color(ChatColor.YELLOW)
+                            .text("e")
+                            .color(ChatColor.GREEN)
+                            .text(" <<")
+                            .color(ChatColor.RED)
+                            .toString(), true);
+            helpListTest.add(jb.getJsonSegments());
+        }
+
     }
 
     /**
      * Metoda slouzici k definovani a sestaveni prikazu a jeho parametru v ramci vlastniho prikazovaho systemu
      */
     public CommandData create() {
-            Prefix prefix = new Prefix();
-            PageList helpList = new PageList(10, prefix.getEventPrefix(), "/event");
-            PageList manageList = new PageList(10, prefix.getEventPrefix(), "/event spravuj");
-            PageList manageIDList = new PageList(10, prefix.getEventPrefix(), "/event spravuj");
 
-            CommandData event = new CommandData("event", prefix.getEventPrefix(), "mutility.eventy.help", CommandExecutors.BOTH, t -> {
+            PageList2 helpList = new PageList2(10, prefix.getEventPrefix(true, false), "/event");
+            PageList2 manageList = new PageList2(10, prefix.getEventPrefix(true, false), "/event spravuj");
+            PageList2 manageIDList = new PageList2(10, prefix.getEventPrefix(true, false), "/event spravuj");
+
+            CommandData event = new CommandData("event", prefix.getEventPrefix(true, false), "mutility.eventy.help", CommandExecutors.BOTH, t -> {
                 //TODO
                 t.getSender().spigot().sendMessage(helpList.getList(1).create());
+
+                loadHelpListData();
+                helpListTest.getList(1).toPlayer((Player) t.getSender());
+
             });
 
             // 1. stupeň
@@ -62,7 +128,9 @@ public class Event {
 
             // 2. stupeň
             CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.eventy.help", CommandExecutors.BOTH, (t) -> {
-                t.getSender().spigot().sendMessage(helpList.getList(Integer.parseInt(t.getArgs()[1])).create());
+                //t.getSender().spigot().sendMessage(helpList.getList(Integer.parseInt(t.getArgs()[1])).create());
+                loadHelpListData();
+                helpListTest.getList(Integer.parseInt(t.getArgs()[1])).toPlayer((Player) t.getSender());
             });
             CommandData otazky = new CommandData(ArgumentTypes.DEFAULT, "otazky", TabCompleterTypes.DEFAULT, "mutility.eventy.otazky.create");
             CommandData hledacka = new CommandData(ArgumentTypes.DEFAULT, "hledacka", TabCompleterTypes.DEFAULT, "mutility.eventy.hledacka.create");

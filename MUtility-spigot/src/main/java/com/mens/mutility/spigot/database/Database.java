@@ -3,6 +3,9 @@ package com.mens.mutility.spigot.database;
 import com.mens.mutility.spigot.MUtilitySpigot;
 import com.mens.mutility.spigot.chat.PluginColors;
 import com.mens.mutility.spigot.chat.Prefix;
+import com.mens.mutility.spigot.chat.json.JsonBuilder;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.chat.ComponentSerializer;
 import org.bukkit.Bukkit;
 
 import java.sql.*;
@@ -33,11 +36,23 @@ public class Database {
         String URL = "jdbc:mysql://" + HOST + ":" + PORT + "/" + DATABASE + "?autoReconnect=true&useSSL=false&useUnicode=yes&characterEncoding=UTF-8";
         try {
             con = DriverManager.getConnection(URL, USER, PASSWORD);
-            Bukkit.getConsoleSender().sendMessage(prefix.getMutilityPrefix() + "Databaze " + colors.getPrimaryColor() + "MYSQL" + colors.getSecondaryColor() + " pripojena!");
+
+            JsonBuilder jb = new JsonBuilder();
+            jb.text("Databáze ")
+                    .color(ChatColor.AQUA)
+                    .text("MYSQL")
+                    .color(colors.getPrimaryColorHEX())
+                    .text(" pripojena!")
+                    .color(colors.getSecondaryColorHEX());
+
+            Bukkit.getConsoleSender().spigot().sendMessage(ComponentSerializer.parse(jb.toString()));
+
+
+            Bukkit.getConsoleSender().sendMessage(prefix.getMutilityPrefix(true, false) + "Databaze " + colors.getPrimaryColor() + "MYSQL" + colors.getSecondaryColor() + " pripojena!");
             createTablesIfNotExists();
         } catch (SQLException e) {
             e.printStackTrace();
-            Bukkit.getConsoleSender().sendMessage(prefix.getMutilityPrefix() + "Pripojeni k " + colors.getPrimaryColor() + "MYSQL" + colors.getSecondaryColor() + " se nezdarilo!");
+            Bukkit.getConsoleSender().sendMessage(prefix.getMutilityPrefix(true, false) + "Pripojeni k " + colors.getPrimaryColor() + "MYSQL" + colors.getSecondaryColor() + " se nezdarilo!");
             plugin.getPluginLoader().disablePlugin(plugin);
         }
     }
@@ -60,6 +75,6 @@ public class Database {
         stm.execute();
         stm = con.prepareStatement("CREATE TABLE IF NOT EXISTS " + tablePrefix + "zalohy(id INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT, user_id int(11), record_id int(11), building_name varchar(255), note varchar(255), rejected int(11), rejected_reason varchar(255), completed int(11), admin_id int(11), world varchar(255), posX double, posY double, posZ double, create_date date, update_date date)");
         stm.execute();
-        Bukkit.getConsoleSender().sendMessage(prefix.getMutilityPrefix() + "Chybejici tabulky vytvoreny!");
+        Bukkit.getConsoleSender().sendMessage(prefix.getMutilityPrefix(true, false) + "Chybejici tabulky vytvoreny!");
     }
 }

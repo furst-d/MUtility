@@ -20,7 +20,7 @@ public class Lobby extends Command {
         if ((sender instanceof ProxiedPlayer)) {
             ProxiedPlayer player = (ProxiedPlayer) sender;
             player.sendMessage(new TextComponent(" BungeeCord >> Info command sended"));
-            msgChannel.sendToServer("mens:mutility-data", player.getServer().getInfo().getName());
+            //msgChannel.sendToServer("mens:mutility-data", player.getServer().getInfo().getName());
 
 
            /* player.sendMessage(new ComponentBuilder("Connecting you to the lobby!").color(ChatColor.RED).create());

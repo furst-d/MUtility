@@ -16,6 +16,5 @@ public class PortalEvent implements Listener {
     public void onPortalEvent(PostLoginEvent event) {
         ProxiedPlayer player = event.getPlayer();
         player.sendMessage(new TextComponent(ChatColor.DARK_AQUA + "Ahoj " + player.getName() + ", vítej na serveru"));
-
     }
 }

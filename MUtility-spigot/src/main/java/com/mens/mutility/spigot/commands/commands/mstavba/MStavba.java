@@ -7,8 +7,7 @@ import com.mens.mutility.spigot.commands.system.CommandData;
 import com.mens.mutility.spigot.commands.system.enums.ArgumentTypes;
 import com.mens.mutility.spigot.commands.system.enums.CommandExecutors;
 import com.mens.mutility.spigot.commands.system.enums.TabCompleterTypes;
-import com.mens.mutility.spigot.utils.PageList;
-import net.md_5.bungee.api.chat.TextComponent;
+import com.mens.mutility.spigot.utils.PageList2;
 
 /**
  * Trida reprezentujici prikaz /mstavba
@@ -25,9 +24,9 @@ public class MStavba {
      */
     public CommandData create() {
         Prefix prefix = new Prefix();
-        PageList helpList = new PageList(10, prefix.getStavbaPrefix(), "/mstavba");
+        PageList2 helpList = new PageList2(10, prefix.getStavbaPrefix(true, false), "/mstavba");
 
-        CommandData stavba = new CommandData("mstavba", prefix.getStavbaPrefix(), "mutility.stavba.help", CommandExecutors.PLAYER, t -> {
+        CommandData stavba = new CommandData("mstavba", prefix.getStavbaPrefix(true, false), "mutility.stavba.help", CommandExecutors.PLAYER, t -> {
             //TODO
             helpList.clear();
             for (int i = 0; i < 25; i++) {

@@ -12,7 +12,7 @@ import com.mens.mutility.spigot.commands.system.enums.TabCompleterTypes;
 import com.mens.mutility.spigot.database.DatabaseMethods;
 import com.mens.mutility.spigot.utils.Checker;
 import com.mens.mutility.spigot.utils.MyStringUtils;
-import com.mens.mutility.spigot.utils.PageList;
+import com.mens.mutility.spigot.utils.PageList2;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -45,13 +45,13 @@ public class Zalohy {
         Errors errors = new Errors();
         MyStringUtils utils = new MyStringUtils();
         DatabaseMethods dm = new DatabaseMethods();
-        PageList helpList = new PageList(10, prefix.getZalohyPrefix(), "/zalohy");
-        PageList showList = new PageList(10, prefix.getZalohyPrefix(), "/zalohy zobraz");
-        PageList manageList = new PageList(10, prefix.getZalohyPrefix(), "/zalohy manage");
-        PageList adminList = new PageList(10, prefix.getZalohyPrefix(), "/zalohy admin");
-        PageList adminUserList = new PageList(10, prefix.getZalohyPrefix(), null);
+        PageList2 helpList = new PageList2(10, prefix.getZalohyPrefix(true, false), "/zalohy");
+        PageList2 showList = new PageList2(10, prefix.getZalohyPrefix(true, false), "/zalohy zobraz");
+        PageList2 manageList = new PageList2(10, prefix.getZalohyPrefix(true, false), "/zalohy manage");
+        PageList2 adminList = new PageList2(10, prefix.getZalohyPrefix(true, false), "/zalohy admin");
+        PageList2 adminUserList = new PageList2(10, prefix.getZalohyPrefix(true, false), null);
 
-        CommandData zalohy = new CommandData("zalohy", prefix.getZalohyPrefix(),"mutility.zalohy.help", CommandExecutors.BOTH, t -> {
+        CommandData zalohy = new CommandData("zalohy", prefix.getZalohyPrefix(true, false),"mutility.zalohy.help", CommandExecutors.BOTH, t -> {
             helpList.clear();
             helpList.add(new MyComp(colors.getSecondaryColor() + "Příkazy:"));
             helpList.add(new MyComp(ChatColor.YELLOW + "  Pro hráče:"));
@@ -71,7 +71,7 @@ public class Zalohy {
                 helpList.add(new MyComp(colors.getSecondaryColor() + "   - " + colors.getPrimaryColor() + "/zalohy admin", HoverEvent.Action.SHOW_TEXT, colors.getSecondaryColor() + "Seznam hráčů, kteří si zažádali o přesun", ClickEvent.Action.SUGGEST_COMMAND, "/zalohy admin"));
                 helpList.add(new MyComp(colors.getSecondaryColor() + "   - " + colors.getPrimaryColor() + "/zalohy admin [< Jméno hráče >]", HoverEvent.Action.SHOW_TEXT, colors.getSecondaryColor() + "Seznam žádostí konkrétního hráče", ClickEvent.Action.SUGGEST_COMMAND, "/zalohy admin "));
             }
-            t.getSender().spigot().sendMessage(helpList.getList(1).create());
+            //t.getSender().spigot().sendMessage(helpList.getList(1).create());
         });
 
         // 1. stupeň
@@ -166,7 +166,6 @@ public class Zalohy {
                     }
                     showList.add(manageMyComp, deleteMyComp, textMyComp);
                 }
-                //t.getSender().spigot().sendMessage(showList.getList(1).create());
                 t.getSender().spigot().sendMessage(showList.getList(1).create());
 
             } catch (SQLException e) {
@@ -292,10 +291,10 @@ public class Zalohy {
                         }
                         player.spigot().sendMessage(manageList.getList(1).create());
                     } else {
-                        player.sendMessage(prefix.getZalohyPrefix() + errors.errDenied());
+                        player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errDenied());
                     }
                 } else {
-                    player.sendMessage(prefix.getZalohyPrefix() + errors.errWrongArgument(String.valueOf(id)));
+                    player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(String.valueOf(id)));
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -346,12 +345,12 @@ public class Zalohy {
                             stm.close();
                             id++;
                         }
-                        player.sendMessage(prefix.getZalohyPrefix() + "Záloha "+ colors.getPrimaryColor() + name + " "+ colors.getSecondaryColor() + "byla smazána!");
+                        player.sendMessage(prefix.getZalohyPrefix(true, false) + "Záloha "+ colors.getPrimaryColor() + name + " "+ colors.getSecondaryColor() + "byla smazána!");
                     } else {
-                        player.sendMessage(prefix.getZalohyPrefix() + errors.errDenied());
+                        player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errDenied());
                     }
                 } else {
-                    player.sendMessage(prefix.getZalohyPrefix() + errors.errWrongArgument(String.valueOf(id)));
+                    player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(String.valueOf(id)));
                 }
 
             } catch (SQLException e) {
@@ -475,9 +474,9 @@ public class Zalohy {
                     destination.setY(y);
                     destination.setZ(z);
                     player.teleport(destination);
-                    player.sendMessage(prefix.getZalohyPrefix() + "Byl jsi teleportován k záloze " + colors.getPrimaryColor() + name + colors.getSecondaryColor() + "!");
+                    player.sendMessage(prefix.getZalohyPrefix(true, false) + "Byl jsi teleportován k záloze " + colors.getPrimaryColor() + name + colors.getSecondaryColor() + "!");
                 } else {
-                    player.sendMessage(prefix.getZalohyPrefix() + errors.errWrongArgument(String.valueOf(id)));
+                    player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(String.valueOf(id)));
                 }
 
             } catch (SQLException e) {
@@ -501,12 +500,12 @@ public class Zalohy {
                     if(rs.next()) {
                         name = rs.getString(1);
                     }
-                    player.sendMessage(prefix.getZalohyPrefix() + "Záloha "+ colors.getPrimaryColor() + name + colors.getSecondaryColor() + " byla nastavena jako "+ ChatColor.GREEN + "dokončená" + colors.getSecondaryColor() + "!");
+                    player.sendMessage(prefix.getZalohyPrefix(true, false) + "Záloha "+ colors.getPrimaryColor() + name + colors.getSecondaryColor() + " byla nastavena jako "+ ChatColor.GREEN + "dokončená" + colors.getSecondaryColor() + "!");
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
             } else {
-                player.sendMessage(prefix.getZalohyPrefix() + errors.errWrongArgument(String.valueOf(id)));
+                player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(String.valueOf(id)));
             }
         });
         CommandData rejectID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE);
@@ -525,12 +524,12 @@ public class Zalohy {
                     if(rs.next()) {
                         name = rs.getString(1);
                     }
-                    player.sendMessage(prefix.getZalohyPrefix() + "Záloha "+ colors.getPrimaryColor() + name + colors.getSecondaryColor() + " byla vrácena mezi "+ ChatColor.GOLD + "nepřesunuté" + colors.getSecondaryColor() + "!");
+                    player.sendMessage(prefix.getZalohyPrefix(true, false) + "Záloha "+ colors.getPrimaryColor() + name + colors.getSecondaryColor() + " byla vrácena mezi "+ ChatColor.GOLD + "nepřesunuté" + colors.getSecondaryColor() + "!");
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
             } else {
-                player.sendMessage(prefix.getZalohyPrefix() + errors.errWrongArgument(String.valueOf(id)));
+                player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(String.valueOf(id)));
             }
         });
 
@@ -563,12 +562,12 @@ public class Zalohy {
                     if(rs.next()) {
                         name = rs.getString(1);
                     }
-                    player.sendMessage(prefix.getZalohyPrefix() + "Záloha "+ colors.getPrimaryColor() + name + colors.getSecondaryColor() + " byla nastavena jako "+ ChatColor.DARK_RED + "zamítnutá" + colors.getSecondaryColor() + "!");
+                    player.sendMessage(prefix.getZalohyPrefix(true, false) + "Záloha "+ colors.getPrimaryColor() + name + colors.getSecondaryColor() + " byla nastavena jako "+ ChatColor.DARK_RED + "zamítnutá" + colors.getSecondaryColor() + "!");
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
             } else {
-                player.sendMessage(prefix.getZalohyPrefix() + errors.errWrongArgument(String.valueOf(id)));
+                player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(String.valueOf(id)));
             }
         });
 
@@ -596,15 +595,15 @@ public class Zalohy {
                         stm.setInt(2, id);
                         stm.setString(3, player.getName());
                         stm.execute();
-                        player.sendMessage(prefix.getZalohyPrefix() + "Souřadnice "+ colors.getPrimaryColor() + "X "+ colors.getSecondaryColor() + "byla aktualizována na " + colors.getPrimaryColor() +  x + colors.getSecondaryColor() + "!");
+                        player.sendMessage(prefix.getZalohyPrefix(true, false) + "Souřadnice "+ colors.getPrimaryColor() + "X "+ colors.getSecondaryColor() + "byla aktualizována na " + colors.getPrimaryColor() +  x + colors.getSecondaryColor() + "!");
                     } else {
-                        player.sendMessage(prefix.getZalohyPrefix() + errors.errDenied());
+                        player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errDenied());
                     }
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
             } else {
-                player.sendMessage(prefix.getZalohyPrefix() + errors.errWrongArgument(String.valueOf(id)));
+                player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(String.valueOf(id)));
             }
         });
         CommandData setYY = new CommandData(ArgumentTypes.FLOAT, TabCompleterTypes.POSY, "mutility.zalohy.manage", CommandExecutors.PLAYER, t -> {
@@ -629,15 +628,15 @@ public class Zalohy {
                         stm.setInt(2, id);
                         stm.setString(3, player.getName());
                         stm.execute();
-                        player.sendMessage(prefix.getZalohyPrefix() + "Souřadnice "+ colors.getPrimaryColor() + "Y "+ colors.getSecondaryColor() + "byla aktualizována na " + colors.getPrimaryColor() +  y + colors.getSecondaryColor() + "!");
+                        player.sendMessage(prefix.getZalohyPrefix(true, false) + "Souřadnice "+ colors.getPrimaryColor() + "Y "+ colors.getSecondaryColor() + "byla aktualizována na " + colors.getPrimaryColor() +  y + colors.getSecondaryColor() + "!");
                     } else {
-                        player.sendMessage(prefix.getZalohyPrefix() + errors.errDenied());
+                        player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errDenied());
                     }
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
             } else {
-                player.sendMessage(prefix.getZalohyPrefix() + errors.errWrongArgument(String.valueOf(id)));
+                player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(String.valueOf(id)));
             }
         });
         CommandData setZZ = new CommandData(ArgumentTypes.FLOAT, TabCompleterTypes.POSZ, "mutility.zalohy.manage", CommandExecutors.PLAYER, t -> {
@@ -662,15 +661,15 @@ public class Zalohy {
                         stm.setInt(2, id);
                         stm.setString(3, player.getName());
                         stm.execute();
-                        player.sendMessage(prefix.getZalohyPrefix() + "Souřadnice "+ colors.getPrimaryColor() + "Z "+ colors.getSecondaryColor() + "byla aktualizována na " + colors.getPrimaryColor() +  z + colors.getSecondaryColor() + "!");
+                        player.sendMessage(prefix.getZalohyPrefix(true, false) + "Souřadnice "+ colors.getPrimaryColor() + "Z "+ colors.getSecondaryColor() + "byla aktualizována na " + colors.getPrimaryColor() +  z + colors.getSecondaryColor() + "!");
                     } else {
-                        player.sendMessage(prefix.getZalohyPrefix() + errors.errDenied());
+                        player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errDenied());
                     }
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
             } else {
-                player.sendMessage(prefix.getZalohyPrefix() + errors.errWrongArgument(String.valueOf(id)));
+                player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(String.valueOf(id)));
             }
         });
         CommandData setNoteNote = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Poznámka >]", "mutility.zalohy.manage", CommandExecutors.PLAYER, t -> {
@@ -695,15 +694,15 @@ public class Zalohy {
                         stm.setInt(2, id);
                         stm.setString(3, player.getName());
                         stm.execute();
-                        player.sendMessage(prefix.getZalohyPrefix() + "Poznámka byla aktualizována na " + colors.getPrimaryColor() +  note + colors.getSecondaryColor() + "!");
+                        player.sendMessage(prefix.getZalohyPrefix(true, false) + "Poznámka byla aktualizována na " + colors.getPrimaryColor() +  note + colors.getSecondaryColor() + "!");
                     } else {
-                        player.sendMessage(prefix.getZalohyPrefix() + errors.errDenied());
+                        player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errDenied());
                     }
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
             } else {
-                player.sendMessage(prefix.getZalohyPrefix() + errors.errWrongArgument(String.valueOf(id)));
+                player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(String.valueOf(id)));
             }
         });
         CommandData setNameName = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Název stavby/staveb >]", "mutility.zalohy.manage", CommandExecutors.PLAYER, t -> {
@@ -728,15 +727,15 @@ public class Zalohy {
                         stm.setInt(2, id);
                         stm.setString(3, player.getName());
                         stm.execute();
-                        player.sendMessage(prefix.getZalohyPrefix() + "Název byl aktualizován na " + colors.getPrimaryColor() +  name + colors.getSecondaryColor() + "!");
+                        player.sendMessage(prefix.getZalohyPrefix(true, false) + "Název byl aktualizován na " + colors.getPrimaryColor() +  name + colors.getSecondaryColor() + "!");
                     } else {
-                        player.sendMessage(prefix.getZalohyPrefix() + errors.errDenied());
+                        player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errDenied());
                     }
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
             } else {
-                player.sendMessage(prefix.getZalohyPrefix() + errors.errWrongArgument(String.valueOf(id)));
+                player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(String.valueOf(id)));
             }
         });
         CommandData adminNamePageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.admin", CommandExecutors.PLAYER, t -> t.getSender().spigot().sendMessage(adminUserList.getList(Integer.parseInt(t.getArgs()[3])).create()));
@@ -770,7 +769,7 @@ public class Zalohy {
                 stm.setString(10, player.getWorld().getName());
                 stm.setDate(11, Date.valueOf(LocalDate.now()));
                 stm.execute();
-                player.sendMessage(prefix.getZalohyPrefix() + "Záloha "+ colors.getPrimaryColor() + name + colors.getSecondaryColor() +" úspěšně vytvořena!");
+                player.sendMessage(prefix.getZalohyPrefix(true, false) + "Záloha "+ colors.getPrimaryColor() + name + colors.getSecondaryColor() +" úspěšně vytvořena!");
                 player.spigot().sendMessage(new TextComponent(colors.getSecondaryColor() + "Kliknutím "), new MyComp(colors.getPrimaryColor() + "➥Zde", HoverEvent.Action.SHOW_TEXT, colors.getSecondaryColor() + ">> "+ colors.getPrimaryColor() + "Klikni "+ colors.getSecondaryColor() +"<<", ClickEvent.Action.SUGGEST_COMMAND, "/zalohy manage "+ (max_record_id + 1) + " setNote ").getComp(), new TextComponent(colors.getSecondaryColor() + " můžete přidat poznámku pro moderátory."));
             } catch (SQLException e) {
                 e.printStackTrace();

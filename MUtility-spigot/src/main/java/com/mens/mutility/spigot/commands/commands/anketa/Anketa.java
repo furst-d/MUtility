@@ -6,7 +6,7 @@ import com.mens.mutility.spigot.commands.system.CommandData;
 import com.mens.mutility.spigot.commands.system.enums.ArgumentTypes;
 import com.mens.mutility.spigot.commands.system.enums.CommandExecutors;
 import com.mens.mutility.spigot.commands.system.enums.TabCompleterTypes;
-import com.mens.mutility.spigot.utils.PageList;
+import com.mens.mutility.spigot.utils.PageList2;
 
 public class Anketa {
     private MUtilitySpigot plugin;
@@ -20,9 +20,9 @@ public class Anketa {
      */
     public CommandData create() {
         Prefix prefix = new Prefix();
-        PageList helpList = new PageList(10, prefix.getAnketaPrefix(), "/anketa");
+        PageList2 helpList = new PageList2(10, prefix.getAnketaPrefix(true, false), "/anketa");
 
-        CommandData anketa = new CommandData("anketa", prefix.getAnketaPrefix(),"mutility.anketa.help", CommandExecutors.BOTH, t -> {
+        CommandData anketa = new CommandData("anketa", prefix.getAnketaPrefix(true, false),"mutility.anketa.help", CommandExecutors.BOTH, t -> {
             //TODO
             t.getSender().spigot().sendMessage(helpList.getList(1).create());
         });

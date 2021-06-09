@@ -6,6 +6,7 @@
  */
 package com.mens.mutility.spigot;
 
+import com.mens.mutility.spigot.portal.PortalManager;
 import com.mens.mutility.spigot.commands.commands.anketa.Anketa;
 import com.mens.mutility.spigot.commands.commands.minv.MInv;
 import com.mens.mutility.spigot.commands.commands.mresidence.MResidence;
@@ -18,8 +19,12 @@ import com.mens.mutility.spigot.commands.commands.zalohy.Zalohy;
 import com.mens.mutility.spigot.commands.system.CommandData;
 import com.mens.mutility.spigot.commands.system.CommandListener;
 import com.mens.mutility.spigot.database.Database;
+import com.mens.mutility.spigot.eventhandlers.OnEntityPortalEvent;
+import com.mens.mutility.spigot.eventhandlers.OnPlayerJoinEvent;
+import com.mens.mutility.spigot.eventhandlers.OnPlayerPortalEvent;
 import com.mens.mutility.spigot.messages.MessageChannelListener;
 import org.bukkit.Bukkit;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
@@ -29,6 +34,8 @@ import java.util.Objects;
 public final class MUtilitySpigot extends JavaPlugin {
     private List<CommandData> commands;
     public static Database db;
+    public static List<PortalManager> portalQueue;
+    private PluginManager pm;
 
     /**
      * Spousteci metoda
@@ -36,12 +43,14 @@ public final class MUtilitySpigot extends JavaPlugin {
     @Override
     public void onEnable() {
         getLogger().info("Plugin spusten!");
+        pm = Bukkit.getPluginManager();
         loadCommands();
         loadEvents();
         loadConfig();
         registerChannels();
         db = new Database(this);
         db.openConnection();
+        portalQueue = new ArrayList<>();
     }
 
     /**
@@ -84,7 +93,9 @@ public final class MUtilitySpigot extends JavaPlugin {
      * Metoda pro registraci eventu
      */
     private void loadEvents() {
-
+        pm.registerEvents(new OnEntityPortalEvent(this), this);
+        pm.registerEvents(new OnPlayerPortalEvent(this), this);
+        pm.registerEvents(new OnPlayerJoinEvent(this), this);
     }
 
     /**
