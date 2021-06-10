@@ -121,6 +121,22 @@ public class JsonBuilder {
         return text;
     }
 
+    public String getRawData(String json) {
+        StringBuilder sb = new StringBuilder();
+        String[] parts = json.split("\"text\":\"");
+        for (String part : parts) {
+            if(!part.equals("{")) {
+                for (int i = 0; i < part.length(); i++) {
+                    if(part.charAt(i) == '"') {
+                        break;
+                    }
+                    sb.append(part.charAt(i));
+                }
+            }
+        }
+        return sb.toString();
+    }
+
     public JsonBuilder clear() {
         extras.clear();
         return this;

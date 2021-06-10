@@ -10,18 +10,20 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class CommandData {
-    String commandName;
-    String alias;
-    String prefix;
-    ArgumentTypes argumentType;
-    String subcommand;
-    TabCompleterTypes tc;
-    String tcCustom;
-    String permission;
-    CommandExecutors executor;
-    Consumer<CommandParams> execute;
-    List<CommandData> next;
-    CommandSender sender;
+    private String commandName;
+    private String alias;
+    private String prefix;
+    private ArgumentTypes argumentType;
+    private String subcommand;
+    private TabCompleterTypes tc;
+    private String tcCustom;
+    private String permission;
+    private CommandExecutors executor;
+    private Consumer<CommandParams> execute;
+    private List<CommandData> next;
+    private CommandSender sender;
+    private String description;
+    private String syntax;
 
     public CommandData(String commandName, String prefix) {
         this.commandName = commandName;
@@ -180,6 +182,18 @@ public class CommandData {
         return execute;
     }
 
+    public List<CommandData> getNext() {
+        return next;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getSyntax() {
+        return syntax;
+    }
+
     public void link(CommandData data) {
         next.add(data);
     }
@@ -190,5 +204,13 @@ public class CommandData {
 
     public void setSender(CommandSender sender) {
         this.sender = sender;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setSyntax(String syntax) {
+        this.syntax = syntax;
     }
 }

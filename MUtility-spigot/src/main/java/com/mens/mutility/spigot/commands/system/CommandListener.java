@@ -78,7 +78,7 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                         setErrorMessage(commandData.getPrefix() + getErrors().errNotEnoughArguments());
                     }
                 }
-                List<CommandData> subcommands = commandData.next;
+                List<CommandData> subcommands = commandData.getNext();
                 //Projed vsechny parametry v prikazu
                 for (int i = 0; i < args.length; i++) {
                     if(subcommands.size() == 0) {
@@ -102,7 +102,7 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                                     }
                                 }
                             }
-                            subcommands = subcommand.next;
+                            subcommands = subcommand.getNext();
                             break;
                         }
                     }
@@ -240,14 +240,14 @@ public class CommandListener implements CommandExecutor, TabCompleter {
         List<CommandData> commands = plugin.getCommands();
         for (CommandData commandData: commands) {
             if(command.getName().equalsIgnoreCase(commandData.getCommandName())) {
-                List<CommandData> subcommands = commandData.next;
+                List<CommandData> subcommands = commandData.getNext();
                 for (int i = 0; i < args.length; i++) {
                     for (CommandData subcommand: subcommands) {
                         if(checkSubcommand(args, commandData.getPrefix(), subcommand, i)) {
                             if(subcommand.getArgumentType() == ArgumentTypes.STRINGINF) {
                                 i = args.length -1;
                             } else {
-                                subcommands = subcommand.next;
+                                subcommands = subcommand.getNext();
                             }
                         }
                         // Pokud se jedná o poslední podpříkaz

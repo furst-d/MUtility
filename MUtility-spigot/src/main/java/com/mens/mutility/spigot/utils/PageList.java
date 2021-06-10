@@ -14,18 +14,19 @@ public class PageList {
     private final int limit;
     private int index;
     private int maxPage;
-    private final String title;
+    private String titleRaw;
+    private final String titleJson;
     private String command;
-    private JsonBuilder jb;
+    private final JsonBuilder jb;
     private final List<String> rows;
     private JsonBuilder head;
     private int extraDistance;
     private double titleLength;
     private double topLineFinalLength;
 
-    public PageList(int limit, String title, String command) {
+    public PageList(int limit, String titleJson, String command) {
         this.limit = limit;
-        this.title = title;
+        this.titleJson = titleJson;
         this.command = command;
         index = 0;
         maxPage = 1;
@@ -35,6 +36,7 @@ public class PageList {
         extraDistance = 0;
         titleLength = 0;
         topLineFinalLength = 0;
+        titleRaw = "";
     }
 
     public int getLimit() {
@@ -57,10 +59,6 @@ public class PageList {
         this.maxPage = maxPage;
     }
 
-    public String getTitle() {
-        return title;
-    }
-
     public String getCommand() {
         return command;
     }
@@ -69,12 +67,12 @@ public class PageList {
         return rows;
     }
 
-    public void setCommand(String command) {
-        this.command = command;
-    }
-
     public JsonBuilder getHead() {
         return head;
+    }
+
+    public void setCommand(String command) {
+        this.command = command;
     }
 
     public void setHead(JsonBuilder head) {
@@ -109,11 +107,11 @@ public class PageList {
         JsonBuilder nextPage = new JsonBuilder("[");
         JsonBuilder lastPageHover = new JsonBuilder();
         JsonBuilder lastPage = new JsonBuilder("[");
-        jb.addJsonSegment(getTopLine(getTitle(), colors.getSecondaryColorHEX()));
+        jb.addJsonSegment(getTopLine(colors.getSecondaryColorHEX()));
 
         // Head
         if(!getRows().isEmpty() && getHead() != null) {
-            sb.append(",{\"text\":\" \"},");
+            sb.append(",{\"text\":\"\n \"},");
             sb.append(getHead().getJsonSegments());
             jb.addJsonSegment(sb.toString());
         }
@@ -134,7 +132,7 @@ public class PageList {
                 if(i == pageNumber * limit - limit) {
                     error = true;
                     if(pageNumber == 1 && getRows().isEmpty()) {
-                        sb.append(",{\"text\":\"\n\"},");
+                        sb.append(",{\"text\":\"\n\n\"},");
                         sb.append("{\"text\":\"   Seznam je prázdný! \n\",");
                         sb.append("\"color\":\"");
                         sb.append(colors.getPrimaryColorHEX());
@@ -192,14 +190,14 @@ public class PageList {
                         .text(">> ")
                         .color(colors.getSecondaryColorHEX())
                         .text("Již se nacházíš na první straně!")
-                        .color(colors.getSecondaryColorHEX())
+                        .color(colors.getDisableColorHEX())
                         .text(" <<")
                         .color(colors.getSecondaryColorHEX());
                 firstPage
                         .color(colors.getSecondaryColorHEX())
                         .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, firstPageHover.toString(), true)
                         .text("◀◀")
-                        .color(colors.getSecondaryColorHEX())
+                        .color(colors.getDisableColorHEX())
                         .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, firstPageHover.toString(), true)
                         .text("]")
                         .color(colors.getSecondaryColorHEX())
@@ -209,14 +207,14 @@ public class PageList {
                         .text(">> ")
                         .color(colors.getSecondaryColorHEX())
                         .text("Již se nacházíš na první straně!")
-                        .color(colors.getSecondaryColorHEX())
+                        .color(colors.getDisableColorHEX())
                         .text(" <<")
                         .color(colors.getSecondaryColorHEX());
                 previousPage
                         .color(colors.getSecondaryColorHEX())
                         .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, previousPageHover.toString(), true)
                         .text("◀")
-                        .color(colors.getSecondaryColorHEX())
+                        .color(colors.getDisableColorHEX())
                         .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, previousPageHover.toString(), true)
                         .text("]")
                         .color(colors.getSecondaryColorHEX())
@@ -267,14 +265,14 @@ public class PageList {
                         .text(">> ")
                         .color(colors.getSecondaryColorHEX())
                         .text("Již se nacházíš na poslední straně!")
-                        .color(colors.getSecondaryColorHEX())
+                        .color(colors.getDisableColorHEX())
                         .text(" <<")
                         .color(colors.getSecondaryColorHEX());
                 nextPage
                         .color(colors.getSecondaryColorHEX())
                         .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, nextPageHover.toString(), true)
                         .text("▶")
-                        .color(colors.getSecondaryColorHEX())
+                        .color(colors.getDisableColorHEX())
                         .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, nextPageHover.toString(), true)
                         .text("]")
                         .color(colors.getSecondaryColorHEX())
@@ -284,14 +282,14 @@ public class PageList {
                         .text(">> ")
                         .color(colors.getSecondaryColorHEX())
                         .text("Již se nacházíš na poslední straně!")
-                        .color(colors.getSecondaryColorHEX())
+                        .color(colors.getDisableColorHEX())
                         .text(" <<")
                         .color(colors.getSecondaryColorHEX());
                 lastPage
                         .color(colors.getSecondaryColorHEX())
                         .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, lastPageHover.toString(), true)
                         .text("▶▶")
-                        .color(colors.getSecondaryColorHEX())
+                        .color(colors.getDisableColorHEX())
                         .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, lastPageHover.toString(), true)
                         .text("]")
                         .color(colors.getSecondaryColorHEX())
@@ -307,20 +305,13 @@ public class PageList {
         return jb;
     }
 
-    private String getTopLine(String titleJson, String color) {
+    private String getTopLine(String color) {
         MyStringUtils strUt = new MyStringUtils();
         StringBuilder sb = new StringBuilder();
-        titleJson = titleJson.replace(" ", "");
-        String title = "";
-        for (int i = 40; i < titleJson.length(); i++) {
-            if(titleJson.charAt(i) == '"') {
-                break;
-            }
-            title += titleJson.charAt(i);
-        }
+        titleRaw = jb.getRawData(titleJson);
         try {
             double spaceLength = 0.4921875;
-            titleLength = strUt.getStringWidth(ChatColor.stripColor(title));
+            titleLength = strUt.getStringWidth(ChatColor.stripColor(titleRaw));
             double bottomLineLength = strUt.getStringWidth(ChatColor.stripColor(StringUtils.repeat("I", 50)));
             double topHalfLineLength = ((bottomLineLength - titleLength) - (2 * spaceLength)) / 2;
             int topLineNumber = (int) Math.round(topHalfLineLength / spaceLength);
@@ -341,8 +332,7 @@ public class PageList {
             sb.append(StringUtils.repeat(" ", topLineNumber));
             sb.append("\",\"strikethrough\":true,\"color\":\"");
             sb.append(color);
-            sb.append("\"},");
-            sb.append("{\"text\":\"\n\"}");
+            sb.append("\"}");
         } catch (IOException | FontFormatException e) {
             e.printStackTrace();
         }
@@ -356,10 +346,10 @@ public class PageList {
         try {
             double spaceLength = 0.4921875;
             double titleLength = strUt.getStringWidth("(" + pageNumber + " | " + getMaxPage() + ")");
-            double arrowLength = 8;
+            double arrowLength = 9;
             int bottomLineSpaces = (int)Math.round((topLineFinalLength - (arrowLength + titleLength)) / 6 / spaceLength);
-            double bottomFinalLength = bottomLineSpaces * spaceLength * 6 + arrowLength + titleLength;
             if(showPages) {
+                double bottomFinalLength = bottomLineSpaces * spaceLength * 6 + arrowLength + titleLength;
                 extraDistance = (int)Math.round((topLineFinalLength - bottomFinalLength) / spaceLength);
                 String pagesJson = new JsonBuilder("(")
                         .color(color)
@@ -410,6 +400,8 @@ public class PageList {
                 sb.append("\"},");
                 sb.append("{\"text\":\"\n\"}");
             } else {
+                double bottomFinalLength = strUt.getStringWidth(ChatColor.stripColor(StringUtils.repeat("I", 50)));
+                extraDistance = (int)Math.round((topLineFinalLength - bottomFinalLength) / spaceLength);
                 sb.append("{\"text\":\"\n\"},");
                 sb.append("{\"text\":\"");
                 sb.append(StringUtils.repeat(" ", (50 + extraDistance)));

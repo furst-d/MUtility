@@ -12,7 +12,9 @@ import com.mens.mutility.spigot.commands.system.enums.TabCompleterTypes;
 import com.mens.mutility.spigot.database.DatabaseMethods;
 import com.mens.mutility.spigot.utils.Checker;
 import com.mens.mutility.spigot.utils.MyStringUtils;
+import com.mens.mutility.spigot.utils.PageList;
 import com.mens.mutility.spigot.utils.PageList2;
+import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -30,9 +32,11 @@ import static com.mens.mutility.spigot.MUtilitySpigot.db;
 
 public class Zalohy {
     private final MUtilitySpigot plugin;
+    //private PageList helpList;
 
     public Zalohy(MUtilitySpigot plugin) {
         this.plugin = plugin;
+        //helpList = new PageList(10, prefix.getZalohyPrefix(true, true), "/zalohy");
     }
 
     /**
@@ -45,14 +49,13 @@ public class Zalohy {
         Errors errors = new Errors();
         MyStringUtils utils = new MyStringUtils();
         DatabaseMethods dm = new DatabaseMethods();
-        PageList2 helpList = new PageList2(10, prefix.getZalohyPrefix(true, false), "/zalohy");
         PageList2 showList = new PageList2(10, prefix.getZalohyPrefix(true, false), "/zalohy zobraz");
         PageList2 manageList = new PageList2(10, prefix.getZalohyPrefix(true, false), "/zalohy manage");
         PageList2 adminList = new PageList2(10, prefix.getZalohyPrefix(true, false), "/zalohy admin");
         PageList2 adminUserList = new PageList2(10, prefix.getZalohyPrefix(true, false), null);
 
         CommandData zalohy = new CommandData("zalohy", prefix.getZalohyPrefix(true, false),"mutility.zalohy.help", CommandExecutors.BOTH, t -> {
-            helpList.clear();
+           /* helpList.clear();
             helpList.add(new MyComp(colors.getSecondaryColor() + "Příkazy:"));
             helpList.add(new MyComp(ChatColor.YELLOW + "  Pro hráče:"));
             float x = 0;
@@ -70,7 +73,7 @@ public class Zalohy {
                 helpList.add(new MyComp(ChatColor.DARK_GREEN + "\n  Pro moderátory:"));
                 helpList.add(new MyComp(colors.getSecondaryColor() + "   - " + colors.getPrimaryColor() + "/zalohy admin", HoverEvent.Action.SHOW_TEXT, colors.getSecondaryColor() + "Seznam hráčů, kteří si zažádali o přesun", ClickEvent.Action.SUGGEST_COMMAND, "/zalohy admin"));
                 helpList.add(new MyComp(colors.getSecondaryColor() + "   - " + colors.getPrimaryColor() + "/zalohy admin [< Jméno hráče >]", HoverEvent.Action.SHOW_TEXT, colors.getSecondaryColor() + "Seznam žádostí konkrétního hráče", ClickEvent.Action.SUGGEST_COMMAND, "/zalohy admin "));
-            }
+            }*/
             //t.getSender().spigot().sendMessage(helpList.getList(1).create());
         });
 
@@ -246,7 +249,7 @@ public class Zalohy {
         CommandData returnZaloha = new CommandData(ArgumentTypes.DEFAULT, "return", TabCompleterTypes.NONE);
 
         // 2. stupeň
-        CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.zalohy.help", CommandExecutors.BOTH, (t) -> t.getSender().spigot().sendMessage(helpList.getList(Integer.parseInt(t.getArgs()[1])).create()));
+        CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.zalohy.help", CommandExecutors.BOTH, (t) -> t.getSender().spigot().sendMessage(/*helpList.getList(Integer.parseInt(t.getArgs()[1])).create()*/));
         CommandData pridejX = new CommandData(ArgumentTypes.FLOAT, TabCompleterTypes.POSX, "mutility.zalohy.create");
         CommandData zobrazPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         CommandData manageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.manage", CommandExecutors.PLAYER, t -> {
@@ -839,7 +842,10 @@ public class Zalohy {
             if(rs.next()) {
                 count = rs.getInt(1);
             }
-        }catch (SQLException e) {
+        } catch (CommunicationsException e)  {
+            db.openConnection();
+            isZaloha(player, id, global, tablePrefix);
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return (count != 0);

@@ -18,7 +18,7 @@ public class Prefix {
     private String getPrefix(boolean hexColor, boolean json) {
         if(hexColor) {
             if(json) {
-                return "{\"text\":\"[\",\"color\":\"" + colors.getSecondaryColorHEX() + "\"},{\"text\":\"" + getPrefixName() + "\",\"color\":\"" + colors.getPrimaryColorHEX() + "\"},{\"text\":\"] \",\"color\":\"" + colors.getSecondaryColorHEX() + "\"}";
+                return "{\"text\":\"[\",\"color\":\"" + colors.getSecondaryColorHEX() + "\"},{\"text\":\"" + getPrefixName() + "\",\"color\":\"" + colors.getPrimaryColorHEX() + "\"},{\"text\":\"]\",\"color\":\"" + colors.getSecondaryColorHEX() + "\"}";
             } else {
                 return colors.getSecondaryColor() + "[" +
                         colors.getPrimaryColor() + getPrefixName() +
@@ -27,7 +27,7 @@ public class Prefix {
             }
         } else {
             if(json) {
-                return "{\"text\":\"[\",\"color\":\"" + colors.getSecondaryColor().getName() + "\"},{\"text\":\"" + getPrefixName() + "\",\"color\":\"" + colors.getPrimaryColor().getName() + "\"},{\"text\":\"] \",\"color\":\"" + colors.getSecondaryColor().getName() + "\"}";
+                return "{\"text\":\"[\",\"color\":\"" + colors.getSecondaryColor().getName() + "\"},{\"text\":\"" + getPrefixName() + "\",\"color\":\"" + colors.getPrimaryColor().getName() + "\"},{\"text\":\"]\",\"color\":\"" + colors.getSecondaryColor().getName() + "\"}";
             } else {
                 return colors.getConsoleSecondaryColor() + "[" +
                         colors.getConsolePrimaryColor() + getPrefixName() +
