@@ -3,28 +3,31 @@ package com.mens.mutility.spigot.commands.commands.anketa;
 import com.mens.mutility.spigot.MUtilitySpigot;
 import com.mens.mutility.spigot.chat.Prefix;
 import com.mens.mutility.spigot.commands.system.CommandData;
+import com.mens.mutility.spigot.commands.system.CommandHelp;
 import com.mens.mutility.spigot.commands.system.enums.ArgumentTypes;
 import com.mens.mutility.spigot.commands.system.enums.CommandExecutors;
 import com.mens.mutility.spigot.commands.system.enums.TabCompleterTypes;
-import com.mens.mutility.spigot.utils.PageList2;
+import com.mens.mutility.spigot.utils.PageList;
+import org.bukkit.entity.Player;
 
-public class Anketa {
-    private MUtilitySpigot plugin;
+public class Anketa extends CommandHelp {
+    private final MUtilitySpigot plugin;
+    private final Prefix prefix;
+    private PageList helpList;
 
     public Anketa(MUtilitySpigot plugin) {
         this.plugin = plugin;
+        prefix = new Prefix();
+        helpList = new PageList(10, prefix.getAnketaPrefix(true, true).replace("]", " - nápověda]"), "/anketa");
     }
 
     /**
      * Metoda slouzici k definovani a sestaveni prikazu a jeho parametru v ramci vlastniho prikazovaho systemu
      */
     public CommandData create() {
-        Prefix prefix = new Prefix();
-        PageList2 helpList = new PageList2(10, prefix.getAnketaPrefix(true, false), "/anketa");
-
         CommandData anketa = new CommandData("anketa", prefix.getAnketaPrefix(true, false),"mutility.anketa.help", CommandExecutors.BOTH, t -> {
-            //TODO
-            t.getSender().spigot().sendMessage(helpList.getList(1).create());
+            helpList = getCommandHelp(plugin, t.getSender(), helpList);
+            helpList.getList(1).toPlayer((Player) t.getSender());
         });
 
         // 1. stupeň
@@ -40,7 +43,8 @@ public class Anketa {
 
         // 2. stupeň
         CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.anketa.help", CommandExecutors.BOTH, (t) -> {
-            t.getSender().spigot().sendMessage(helpList.getList(Integer.parseInt(t.getArgs()[1])).create());
+            helpList = getCommandHelp(plugin, t.getSender(), helpList);
+            helpList.getList(Integer.parseInt(t.getArgs()[1])).toPlayer((Player) t.getSender());
         });
         CommandData nazevAnkety = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Název ankety >]" ,"mutility.anketa.create", CommandExecutors.BOTH, t -> {
             //TODO
@@ -70,6 +74,20 @@ public class Anketa {
             System.out.println("H");
         });
 
+        anketa.setDescription("Systém pro správu anket");
+
+        vytvor.setDescription("Vytvoření nové ankety");
+        vytvor.setSyntax("/anketa " + vytvor.getSubcommand() + " [<Název ankety>]");
+
+        pridej.setDescription("Přidání možnosti volby v aktuálně vytvořené anketě");
+        pridej.setSyntax("/anketa " + pridej.getSubcommand() + " [<Název volby>]");
+
+        start.setDescription("Zapnutí ankety");
+        start.setSyntax("/anketa " + start.getSubcommand() + " [<Čas(číslo)>] [<Jednotka>]");
+
+        stop.setDescription("Vypnutí ankety");
+        stop.setSyntax("/anketa " + stop.getSubcommand());
+
         anketa.link(helpPage);
         anketa.link(vytvor);
         anketa.link(pridej);
@@ -83,9 +101,9 @@ public class Anketa {
         start.link(cas);
         vote.link(voteID);
 
-        start.link(sec);
-        start.link(min);
-        start.link(hod);
+        cas.link(sec);
+        cas.link(min);
+        cas.link(hod);
 
         return anketa;
     }

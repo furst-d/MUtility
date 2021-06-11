@@ -1,22 +1,26 @@
 package com.mens.mutility.spigot.commands.commands.mstavba;
 
 import com.mens.mutility.spigot.MUtilitySpigot;
-import com.mens.mutility.spigot.chat.MyComp;
 import com.mens.mutility.spigot.chat.Prefix;
 import com.mens.mutility.spigot.commands.system.CommandData;
+import com.mens.mutility.spigot.commands.system.CommandHelp;
 import com.mens.mutility.spigot.commands.system.enums.ArgumentTypes;
 import com.mens.mutility.spigot.commands.system.enums.CommandExecutors;
 import com.mens.mutility.spigot.commands.system.enums.TabCompleterTypes;
-import com.mens.mutility.spigot.utils.PageList2;
+import com.mens.mutility.spigot.utils.PageList;
+import org.bukkit.entity.Player;
 
 /**
  * Trida reprezentujici prikaz /mstavba
  */
-public class MStavba {
-    private MUtilitySpigot plugin;
+public class MStavba extends CommandHelp {
+    private final MUtilitySpigot plugin;
+    private PageList helpList;
 
     public MStavba(MUtilitySpigot plugin) {
         this.plugin = plugin;
+        Prefix prefix = new Prefix();
+        helpList = new PageList(10, prefix.getStavbaPrefix(true, true).replace("]", " - nápověda]"), "/mstavba");
     }
 
     /**
@@ -24,15 +28,10 @@ public class MStavba {
      */
     public CommandData create() {
         Prefix prefix = new Prefix();
-        PageList2 helpList = new PageList2(10, prefix.getStavbaPrefix(true, false), "/mstavba");
 
         CommandData stavba = new CommandData("mstavba", prefix.getStavbaPrefix(true, false), "mutility.stavba.help", CommandExecutors.PLAYER, t -> {
-            //TODO
-            helpList.clear();
-            for (int i = 0; i < 25; i++) {
-                helpList.add(new MyComp("Ahoj " + i));
-            }
-            t.getSender().spigot().sendMessage(helpList.getList(1).create());
+            helpList = getCommandHelp(plugin, t.getSender(), helpList);
+            helpList.getList(1).toPlayer((Player) t.getSender());
         });
 
         // 1. stupeň
@@ -49,7 +48,8 @@ public class MStavba {
 
         // 2. stupeň
         CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.stavba.help", CommandExecutors.BOTH, (t) -> {
-            t.getSender().spigot().sendMessage(helpList.getList(Integer.parseInt(t.getArgs()[1])).create());
+            helpList = getCommandHelp(plugin, t.getSender(), helpList);
+            helpList.getList(Integer.parseInt(t.getArgs()[1])).toPlayer((Player) t.getSender());
         });
         CommandData zobrazPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         CommandData startDate = new CommandData(ArgumentTypes.DATE, TabCompleterTypes.DATE_NOW, "mutility.stavba.create");
@@ -76,6 +76,17 @@ public class MStavba {
             //TODO
             System.out.println("Popis");
         });
+
+        stavba.setDescription("Systém pro Stavbu měsíce");
+
+        vytvor.setDescription("Vytvoření nové ankety pro hlasování");
+        vytvor.setSyntax("/mstavba " + vytvor.getSubcommand() + " [<Od>] [<Do>] [<Popis období>]");
+
+        zobraz.setDescription("Zobrazí seznam přihlášených staveb a umožní jejich zařazení do soutěže");
+        zobraz.setSyntax("/mstavba " + zobraz.getSubcommand());
+
+        hlasuj.setDescription("Pokud je soutěž aktivní a hráč ještě nehlasoval, vygeneruje hlasovací odkaz pro hlasování");
+        hlasuj.setSyntax("/mstavba " + hlasuj.getSubcommand());
 
         stavba.link(helpPage);
         stavba.link(zobraz);

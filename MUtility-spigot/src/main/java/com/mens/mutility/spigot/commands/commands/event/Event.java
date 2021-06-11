@@ -12,7 +12,6 @@ import com.mens.mutility.spigot.commands.system.enums.TabCompleterTypes;
 import com.mens.mutility.spigot.utils.PageList;
 import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.sql.PreparedStatement;
@@ -36,11 +35,6 @@ public class Event extends CommandHelp {
         helpList = new PageList(10, prefix.getEventPrefix(true, true).replace("]", " - nápověda]"), "/event");
         manageList = new PageList(10, prefix.getEventPrefix(true, true).replace("]", " - seznam]"), "/event spravuj");
         manageIDList = new PageList(20, prefix.getEventPrefix(true, true).replace("]", " - úprava]"), "/event spravuj");
-    }
-
-    private void loadHelpListData(CommandSender sender) {
-        //TODO
-        helpList = getCommandHelp(plugin, sender, helpList);
     }
 
     private void loadManageListData() {
@@ -435,8 +429,7 @@ public class Event extends CommandHelp {
      */
     public CommandData create() {
             CommandData event = new CommandData("event", prefix.getEventPrefix(true, false), "mutility.eventy.help", CommandExecutors.BOTH, t -> {
-                //TODO
-                loadHelpListData(t.getSender());
+                helpList = getCommandHelp(plugin, t.getSender(), helpList);
                 helpList.getList(1).toPlayer((Player) t.getSender());
             });
 
@@ -455,7 +448,7 @@ public class Event extends CommandHelp {
 
             // 2. stupeň
             CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.eventy.help", CommandExecutors.BOTH, (t) -> {
-                loadHelpListData(t.getSender());
+                helpList = getCommandHelp(plugin, t.getSender(), helpList);
                 helpList.getList(Integer.parseInt(t.getArgs()[1])).toPlayer((Player) t.getSender());
             });
             CommandData otazky = new CommandData(ArgumentTypes.DEFAULT, "otazky", TabCompleterTypes.DEFAULT, "mutility.eventy.otazky.create");
@@ -601,13 +594,13 @@ public class Event extends CommandHelp {
                 System.out.println("SetTP");
             });
 
-            event.setDescription("Nástroj pro správu eventů");
+            event.setDescription("Systém pro správu eventů");
 
             spust.setDescription("Obsluha naprogramovaných eventů");
-            spust.setSyntax("/event " + spust.getSubcommand() + " [< Název eventu >] [< Další parametry >]");
+            spust.setSyntax("/event " + spust.getSubcommand() + " [<Název eventu>] [<Další parametry>]");
 
             vytvor.setDescription("Vytváření nového eventu");
-            vytvor.setSyntax("/event " + vytvor.getSubcommand() + " [< Název eventu >]");
+            vytvor.setSyntax("/event " + vytvor.getSubcommand() + " [<Název eventu>]");
 
             spravuj.setDescription("Seznam a správa jednotlivých eventů");
             spravuj.setSyntax("/event " + spravuj.getSubcommand());

@@ -20,7 +20,7 @@ public class CommandData {
     private String permission;
     private CommandExecutors executor;
     private Consumer<CommandParams> execute;
-    private List<CommandData> next;
+    private final List<CommandData> next;
     private CommandSender sender;
     private String description;
     private String syntax;

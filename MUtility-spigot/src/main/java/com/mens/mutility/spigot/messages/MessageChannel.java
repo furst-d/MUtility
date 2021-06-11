@@ -1,12 +1,9 @@
 package com.mens.mutility.spigot.messages;
 
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
 import com.mens.mutility.spigot.MUtilitySpigot;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;

@@ -6,6 +6,7 @@ import com.mens.mutility.spigot.chat.Errors;
 import com.mens.mutility.spigot.chat.PluginColors;
 import com.mens.mutility.spigot.chat.Prefix;
 import com.mens.mutility.spigot.commands.system.CommandData;
+import com.mens.mutility.spigot.commands.system.CommandHelp;
 import com.mens.mutility.spigot.commands.system.enums.ArgumentTypes;
 import com.mens.mutility.spigot.commands.system.enums.CommandExecutors;
 import com.mens.mutility.spigot.commands.system.enums.TabCompleterTypes;
@@ -30,13 +31,14 @@ import java.time.LocalDate;
 
 import static com.mens.mutility.spigot.MUtilitySpigot.db;
 
-public class Zalohy {
+public class Zalohy extends CommandHelp {
     private final MUtilitySpigot plugin;
-    //private PageList helpList;
+    private PageList helpList;
 
     public Zalohy(MUtilitySpigot plugin) {
         this.plugin = plugin;
-        //helpList = new PageList(10, prefix.getZalohyPrefix(true, true), "/zalohy");
+        Prefix prefix = new Prefix();
+        helpList = new PageList(10, prefix.getZalohyPrefix(true, true).replace("]", " - nápověda]"), "/zalohy");
     }
 
     /**
@@ -45,7 +47,6 @@ public class Zalohy {
     public CommandData create() {
         Prefix prefix = new Prefix();
         PluginColors colors = new PluginColors();
-        Checker checker = new Checker();
         Errors errors = new Errors();
         MyStringUtils utils = new MyStringUtils();
         DatabaseMethods dm = new DatabaseMethods();
@@ -55,26 +56,8 @@ public class Zalohy {
         PageList2 adminUserList = new PageList2(10, prefix.getZalohyPrefix(true, false), null);
 
         CommandData zalohy = new CommandData("zalohy", prefix.getZalohyPrefix(true, false),"mutility.zalohy.help", CommandExecutors.BOTH, t -> {
-           /* helpList.clear();
-            helpList.add(new MyComp(colors.getSecondaryColor() + "Příkazy:"));
-            helpList.add(new MyComp(ChatColor.YELLOW + "  Pro hráče:"));
-            float x = 0;
-            float y = 0;
-            float z = 0;
-            if(t.getSender() instanceof Player) {
-                Player player = (Player) t.getSender();
-                x = (float) (((int) player.getLocation().getX()) + 0.5);
-                y = (int)player.getLocation().getY();
-                z = (float) (((int) player.getLocation().getZ()) + 0.5);
-            }
-            helpList.add(new MyComp(colors.getSecondaryColor() + "   - " + colors.getPrimaryColor() + "/zalohy pridej [<Souřadnice>] [<Název stavby/staveb>]", HoverEvent.Action.SHOW_TEXT, colors.getSecondaryColor() + "Vytvoří žádost o přesun staveb na zadaných souřadnicích", ClickEvent.Action.SUGGEST_COMMAND, "/zalohy pridej "+ x +" " + y + " "+ z +" "));
-            helpList.add(new MyComp(colors.getSecondaryColor() + "   - " + colors.getPrimaryColor() + "/zalohy zobraz", HoverEvent.Action.SHOW_TEXT, colors.getSecondaryColor() + "Seznam tvých žádostí", ClickEvent.Action.SUGGEST_COMMAND, "/zalohy zobraz"));
-            if(checker.checkPermissions(t.getSender(), "mutility.zalohy.admin")) {
-                helpList.add(new MyComp(ChatColor.DARK_GREEN + "\n  Pro moderátory:"));
-                helpList.add(new MyComp(colors.getSecondaryColor() + "   - " + colors.getPrimaryColor() + "/zalohy admin", HoverEvent.Action.SHOW_TEXT, colors.getSecondaryColor() + "Seznam hráčů, kteří si zažádali o přesun", ClickEvent.Action.SUGGEST_COMMAND, "/zalohy admin"));
-                helpList.add(new MyComp(colors.getSecondaryColor() + "   - " + colors.getPrimaryColor() + "/zalohy admin [< Jméno hráče >]", HoverEvent.Action.SHOW_TEXT, colors.getSecondaryColor() + "Seznam žádostí konkrétního hráče", ClickEvent.Action.SUGGEST_COMMAND, "/zalohy admin "));
-            }*/
-            //t.getSender().spigot().sendMessage(helpList.getList(1).create());
+            helpList = getCommandHelp(plugin, t.getSender(), helpList);
+            helpList.getList(1).toPlayer((Player) t.getSender());
         });
 
         // 1. stupeň
@@ -249,7 +232,10 @@ public class Zalohy {
         CommandData returnZaloha = new CommandData(ArgumentTypes.DEFAULT, "return", TabCompleterTypes.NONE);
 
         // 2. stupeň
-        CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.zalohy.help", CommandExecutors.BOTH, (t) -> t.getSender().spigot().sendMessage(/*helpList.getList(Integer.parseInt(t.getArgs()[1])).create()*/));
+        CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.zalohy.help", CommandExecutors.BOTH, (t) -> {
+            helpList = getCommandHelp(plugin, t.getSender(), helpList);
+            helpList.getList(Integer.parseInt(t.getArgs()[1])).toPlayer((Player) t.getSender());
+        });
         CommandData pridejX = new CommandData(ArgumentTypes.FLOAT, TabCompleterTypes.POSX, "mutility.zalohy.create");
         CommandData zobrazPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         CommandData manageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.manage", CommandExecutors.PLAYER, t -> {
@@ -778,6 +764,17 @@ public class Zalohy {
                 e.printStackTrace();
             }
         });
+
+        zalohy.setDescription("Systém pro správu záloh");
+
+        admin.setDescription("Zobrazí seznam všech hráčů, kteří si zažádali o zálohu a jejich statistiky.\nSeznam staveb jednotlivého hráče lze specifikovat dalším parametrem");
+        admin.setSyntax("/zalohy " + admin.getSubcommand() + "\n/zalohy " + admin.getSubcommand() + " [<Jméno hráče>]");
+
+        pridej.setDescription("Vytvoření nové žádosti na přesun staveb");
+        pridej.setSyntax("/zalohy " + pridej.getSubcommand() + " [<X>] [<Y>] [<Z>] [<Název stavby/staveb>] na zadaných souřadnicích");
+
+        zobraz.setDescription("Zobrazí uživateli jeho žádosti na přesun staveb");
+        zobraz.setSyntax("/zalohy " + zobraz.getSubcommand());
 
         zalohy.link(helpPage);
         zalohy.link(pridej);

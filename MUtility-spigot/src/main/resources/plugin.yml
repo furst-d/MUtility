@@ -80,7 +80,10 @@ permissions:
   mutility.eventy.disableflybypass:
     default: op
     description: Nevypne fly pri teleportaci
-  mutility.residence:
+  mutility.residence.help:
+    default: op
+    description: Napoveda k prikazu MRes
+  mutility.residence.send:
     default: op
     description: Poslani residence zpravy
   mutility.inventory.help:
@@ -134,6 +137,12 @@ permissions:
   mutility.navrhy.help:
     default: op
     description: Napoveda k navrhum
+  mutility.navrhy.show:
+    default: op
+    description: Seznam hracovych navrhu
+  mutility.navrhy.delete:
+    default: op
+    description: Smazani navrhu
   mutility.navrhy.get:
     default: op
     description: Vraceni nevyrizenych navrhu

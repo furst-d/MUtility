@@ -35,18 +35,18 @@ public class JsonBuilder {
     protected List<String> extras;
 
     public JsonBuilder( String... text ) {
-        extras = new ArrayList();
+        extras = new ArrayList<>();
         for( String extra : text ) {
             this.parse(extra);
         }
     }
 
-    public JsonBuilder parse( String text ) {
-        String regex = "[&§]{1}([a-fA-Fl-oL-O0-9]){1}";
+    public void parse(String text ) {
+        String regex = "[&§]([a-fA-Fl-oL-O0-9])";
         text = text.replaceAll( regex, "§$1" );
         if( !Pattern.compile( regex ).matcher( text ).find() ) {
             text( text );
-            return this;
+            return;
         }
 
         String[] words = text.split( regex );
@@ -56,7 +56,6 @@ public class JsonBuilder {
                 text( word ).hoverEvent( "§" + text.charAt( index - 1 ) );
             index += word.length() + 2;
         }
-        return this;
     }
 
     public JsonBuilder text( String text ) {
@@ -85,11 +84,10 @@ public class JsonBuilder {
         return this;
     }
 
-    public JsonBuilder hoverEvent(String color) {
+    public void hoverEvent(String color) {
         while( color.length() != 1 )
             color = color.substring(1).trim();
         color( ChatColor.of(color));
-        return this;
     }
 
     public JsonBuilder hoverEvent(HoverAction action, String value, boolean json) {
@@ -102,23 +100,22 @@ public class JsonBuilder {
         return this;
     }
 
-    public JsonBuilder addJsonSegment(String json) {
+    public void addJsonSegment(String json) {
         if(!json.isEmpty()) {
             if(json.charAt(0) == ',') {
                 json = json.substring(1);
             }
         }
         extras.add(json);
-        return this;
     }
 
     public String getJsonSegments() {
-        String text = "";
+        StringBuilder text = new StringBuilder();
         for (String extra : extras ) {
-            text += extra + ",";
+            text.append(extra).append(",");
         }
-        text = text.substring(0, text.length() - 1);
-        return text;
+        text = new StringBuilder(text.substring(0, text.length() - 1));
+        return text.toString();
     }
 
     public String getRawData(String json) {
@@ -137,9 +134,8 @@ public class JsonBuilder {
         return sb.toString();
     }
 
-    public JsonBuilder clear() {
+    public void clear() {
         extras.clear();
-        return this;
     }
 
     public void toPlayer( Player... players ) {
@@ -168,16 +164,16 @@ public class JsonBuilder {
         if( extras.size() <= 1 ) {
             return extras.size() == 0 ? "{text:\"\"}" : extras.get(0);
         }
-        String text = "[\"\"," + extras.get(0).substring( 0, extras.get(0).length() - 1 ) + "},";
+        StringBuilder text = new StringBuilder("[\"\"," + extras.get(0).substring(0, extras.get(0).length() - 1) + "},");
         for (int i = 0; i < extras.size(); i++) {
             if(i != 0) {
                 if(!extras.get(i).isEmpty()) {
-                    text += extras.get(i) + ",";
+                    text.append(extras.get(i)).append(",");
                 }
             }
         }
-        text = text.substring(0, text.length() - 1) + "]";
-        return text;
+        text = new StringBuilder(text.substring(0, text.length() - 1) + "]");
+        return text.toString();
     }
 
     private void addSegment(String segment) {

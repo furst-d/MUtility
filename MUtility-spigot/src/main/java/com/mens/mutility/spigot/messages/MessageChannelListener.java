@@ -8,6 +8,7 @@ import org.bukkit.WorldCreator;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 
+import javax.annotation.Nonnull;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -18,7 +19,6 @@ import java.io.IOException;
  */
 public class MessageChannelListener implements PluginMessageListener {
 
-    private final MUtilitySpigot plugin;
     private PortalRequestChecker checker;
 
     /**
@@ -26,12 +26,11 @@ public class MessageChannelListener implements PluginMessageListener {
      * @param plugin Odkaz na main tridu
      */
     public MessageChannelListener(MUtilitySpigot plugin) {
-        this.plugin = plugin;
         checker = new PortalRequestChecker();
     }
 
     @Override
-    public void onPluginMessageReceived(String channel, Player player, byte[] message) {
+    public void onPluginMessageReceived(@Nonnull String channel, @Nonnull Player player, @Nonnull byte[] message) {
         try {
             DataInputStream stream = new DataInputStream(new ByteArrayInputStream(message));
             String subChannel = stream.readUTF();

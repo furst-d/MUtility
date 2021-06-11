@@ -1,7 +1,6 @@
 package com.mens.mutility.spigot.chat;
 
 import com.mens.mutility.spigot.MUtilitySpigot;
-import org.bukkit.Bukkit;
 
 public class Prefix {
     private String prefixName;

@@ -1,4 +1,4 @@
-/**
+/*
  * TODO
  * Příkazy - řešit, jestli to odeslal hráč nebo console
  * TabCompleter na hráče nejspíše nebude fungovat pro bungee, bude zobrazovat pouze hráče na jednom serveru

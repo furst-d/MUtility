@@ -348,8 +348,9 @@ public class PageList {
             double titleLength = strUt.getStringWidth("(" + pageNumber + " | " + getMaxPage() + ")");
             double arrowLength = 9;
             int bottomLineSpaces = (int)Math.round((topLineFinalLength - (arrowLength + titleLength)) / 6 / spaceLength);
+            double bottomFinalLength;
             if(showPages) {
-                double bottomFinalLength = bottomLineSpaces * spaceLength * 6 + arrowLength + titleLength;
+                bottomFinalLength = bottomLineSpaces * spaceLength * 6 + arrowLength + titleLength;
                 extraDistance = (int)Math.round((topLineFinalLength - bottomFinalLength) / spaceLength);
                 String pagesJson = new JsonBuilder("(")
                         .color(color)
@@ -395,21 +396,17 @@ public class PageList {
                 sb.append(lastPage.getJsonSegments());
                 sb.append(",{\"text\":\"");
                 sb.append(StringUtils.repeat(" ", (bottomLineSpaces + extraDistance)));
-                sb.append("\",\"strikethrough\":true,\"color\":\"");
-                sb.append(color);
-                sb.append("\"},");
-                sb.append("{\"text\":\"\n\"}");
             } else {
-                double bottomFinalLength = strUt.getStringWidth(ChatColor.stripColor(StringUtils.repeat("I", 50)));
+                bottomFinalLength = strUt.getStringWidth(ChatColor.stripColor(StringUtils.repeat("I", 50)));
                 extraDistance = (int)Math.round((topLineFinalLength - bottomFinalLength) / spaceLength);
                 sb.append("{\"text\":\"\n\"},");
                 sb.append("{\"text\":\"");
                 sb.append(StringUtils.repeat(" ", (50 + extraDistance)));
-                sb.append("\",\"strikethrough\":true,\"color\":\"");
-                sb.append(color);
-                sb.append("\"},");
-                sb.append("{\"text\":\"\n\"}");
             }
+            sb.append("\",\"strikethrough\":true,\"color\":\"");
+            sb.append(color);
+            sb.append("\"},");
+            sb.append("{\"text\":\"\n\"}");
         } catch (IOException | FontFormatException e) {
             e.printStackTrace();
         }
