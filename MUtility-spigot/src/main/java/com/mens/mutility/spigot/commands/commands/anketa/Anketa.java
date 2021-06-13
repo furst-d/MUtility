@@ -7,17 +7,24 @@ import com.mens.mutility.spigot.commands.system.CommandHelp;
 import com.mens.mutility.spigot.commands.system.enums.ArgumentTypes;
 import com.mens.mutility.spigot.commands.system.enums.CommandExecutors;
 import com.mens.mutility.spigot.commands.system.enums.TabCompleterTypes;
+import com.mens.mutility.spigot.messages.MessageChannel;
+import com.mens.mutility.spigot.utils.MyStringUtils;
 import com.mens.mutility.spigot.utils.PageList;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 public class Anketa extends CommandHelp {
     private final MUtilitySpigot plugin;
     private final Prefix prefix;
+    private final MessageChannel channel;
+    private final MyStringUtils strUt;
     private PageList helpList;
 
     public Anketa(MUtilitySpigot plugin) {
         this.plugin = plugin;
         prefix = new Prefix();
+        channel = new MessageChannel(plugin);
+        strUt = new MyStringUtils();
         helpList = new PageList(10, prefix.getAnketaPrefix(true, true).replace("]", " - nápověda]"), "/anketa");
     }
 
@@ -37,8 +44,7 @@ public class Anketa extends CommandHelp {
         CommandData start = new CommandData(ArgumentTypes.DEFAULT, "start", TabCompleterTypes.DEFAULT, "mutility.anketa.run");
         CommandData vote = new CommandData(ArgumentTypes.DEFAULT, "vote", TabCompleterTypes.NONE);
         CommandData stop = new CommandData(ArgumentTypes.DEFAULT, "stop", TabCompleterTypes.DEFAULT, "mutility.anketa.run", CommandExecutors.BOTH, t -> {
-            //TODO
-            System.out.println("Stop");
+            channel.sendSurveyStopSignalToBungeecord((Player) t.getSender());
         });
 
         // 2. stupeň
@@ -47,31 +53,28 @@ public class Anketa extends CommandHelp {
             helpList.getList(Integer.parseInt(t.getArgs()[1])).toPlayer((Player) t.getSender());
         });
         CommandData nazevAnkety = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Název ankety >]" ,"mutility.anketa.create", CommandExecutors.BOTH, t -> {
-            //TODO
-            System.out.println("Název ankety");
+            String name = strUt.getStringFromArgs(t.getArgs(), 1);
+            channel.sendSurveyCreateSignalToBungeecord((Player) t.getSender(), name);
+
         });
         CommandData nazevMoznosti = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Název možnosti >]" ,"mutility.anketa.add", CommandExecutors.BOTH, t -> {
-            //TODO
-            System.out.println("Název možnosti");
+            String option = strUt.getStringFromArgs(t.getArgs(), 1);
+            channel.sendSurveyAddSignalToBungeecord((Player) t.getSender(), option);
         });
         CommandData cas = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.CUSTOM, "[< Čas (číslo) >]", "mutility.anketa.run");
         CommandData voteID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE,"mutility.anketa.vote", CommandExecutors.PLAYER, t -> {
-            //TODO
-            System.out.println("Vote ID");
+            channel.sendSurveyVoteSignalToBungeecord((Player) t.getSender(), Integer.parseInt(t.getArgs()[1]));
         });
 
         // 3. stupeň
         CommandData sec = new CommandData(ArgumentTypes.DEFAULT, "sec", TabCompleterTypes.DEFAULT,"mutility.anketa.run", CommandExecutors.PLAYER, t -> {
-            //TODO
-            System.out.println("Sec");
+            channel.sendSurveyStartSignalToBungeecord((Player) t.getSender(), Integer.parseInt(t.getArgs()[1]), "sec");
         });
         CommandData min = new CommandData(ArgumentTypes.DEFAULT, "min", TabCompleterTypes.DEFAULT,"mutility.anketa.run", CommandExecutors.PLAYER, t -> {
-            //TODO
-            System.out.println("Min");
+            channel.sendSurveyStartSignalToBungeecord((Player) t.getSender(), Integer.parseInt(t.getArgs()[1]), "min");
         });
         CommandData hod = new CommandData(ArgumentTypes.DEFAULT, "h", TabCompleterTypes.DEFAULT,"mutility.anketa.run", CommandExecutors.PLAYER, t -> {
-            //TODO
-            System.out.println("H");
+            channel.sendSurveyStartSignalToBungeecord((Player) t.getSender(), Integer.parseInt(t.getArgs()[1]), "h");
         });
 
         anketa.setDescription("Systém pro správu anket");

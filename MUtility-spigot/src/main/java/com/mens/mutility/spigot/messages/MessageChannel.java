@@ -12,8 +12,9 @@ import java.io.IOException;
  * Trida zajistujici komunikaci mezi pluginy na serverech v ramci BungeeCord
  */
 public class MessageChannel implements Listener {
-
     private final MUtilitySpigot plugin;
+    private ByteArrayOutputStream stream;
+    private DataOutputStream output;
 
     /**
      * Konstruktor tridy
@@ -24,20 +25,20 @@ public class MessageChannel implements Listener {
     }
 
     public void sendServer(Player player, String server) {
-        ByteArrayOutputStream byteArrayOutpusStream = new ByteArrayOutputStream();
-        DataOutputStream dataOutpusStream = new DataOutputStream(byteArrayOutpusStream);
+        stream = new ByteArrayOutputStream();
+        output = new DataOutputStream(stream);
         try {
-            dataOutpusStream.writeUTF("Connect");
-            dataOutpusStream.writeUTF(server);
+            output.writeUTF("Connect");
+            output.writeUTF(server);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        player.sendPluginMessage(plugin, "BungeeCord", byteArrayOutpusStream.toByteArray());
+        player.sendPluginMessage(plugin, "BungeeCord", stream.toByteArray());
     }
 
     public void sendPortalInfoToBungeeCord(Player player, String channel, double x, double y, double z) {
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        DataOutputStream output = new DataOutputStream(stream);
+        stream = new ByteArrayOutputStream();
+        output = new DataOutputStream(stream);
         try {
             output.writeUTF(channel);
             output.writeDouble(x);
@@ -50,10 +51,87 @@ public class MessageChannel implements Listener {
     }
 
     public void sendToBungeeCord(Player player, String channel) {
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        DataOutputStream output = new DataOutputStream(stream);
+        stream = new ByteArrayOutputStream();
+        output = new DataOutputStream(stream);
         try {
             output.writeUTF(channel);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        player.sendPluginMessage(plugin, "BungeeCord", stream.toByteArray());
+    }
+
+    public void sendToBungeeCord(Player player, String channel, String value) {
+        stream = new ByteArrayOutputStream();
+        output = new DataOutputStream(stream);
+        try {
+            output.writeUTF(channel);
+            output.writeUTF(value);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        player.sendPluginMessage(plugin, "BungeeCord", stream.toByteArray());
+    }
+
+    public void sendSurveyCreateSignalToBungeecord(Player player, String surveyName) {
+        stream = new ByteArrayOutputStream();
+        output = new DataOutputStream(stream);
+        try {
+            output.writeUTF("mens:survey-create");
+            output.writeUTF(surveyName);
+            output.writeUTF(player.getName());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        player.sendPluginMessage(plugin, "BungeeCord", stream.toByteArray());
+    }
+
+    public void sendSurveyAddSignalToBungeecord(Player player, String option) {
+        stream = new ByteArrayOutputStream();
+        output = new DataOutputStream(stream);
+        try {
+            output.writeUTF("mens:survey-add");
+            output.writeUTF(player.getName());
+            output.writeUTF(option);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        player.sendPluginMessage(plugin, "BungeeCord", stream.toByteArray());
+    }
+
+    public void sendSurveyStartSignalToBungeecord(Player player, int time, String unit) {
+        stream = new ByteArrayOutputStream();
+        output = new DataOutputStream(stream);
+        try {
+            output.writeUTF("mens:survey-start");
+            output.writeUTF(player.getName());
+            output.writeInt(time);
+            output.writeUTF(unit);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        player.sendPluginMessage(plugin, "BungeeCord", stream.toByteArray());
+    }
+
+    public void sendSurveyStopSignalToBungeecord(Player player) {
+        stream = new ByteArrayOutputStream();
+        output = new DataOutputStream(stream);
+        try {
+            output.writeUTF("mens:survey-stop");
+            output.writeUTF(player.getName());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        player.sendPluginMessage(plugin, "BungeeCord", stream.toByteArray());
+    }
+
+    public void sendSurveyVoteSignalToBungeecord(Player player, int id) {
+        stream = new ByteArrayOutputStream();
+        output = new DataOutputStream(stream);
+        try {
+            output.writeUTF("mens:survey-vote");
+            output.writeUTF(player.getName());
+            output.writeInt(id);
         } catch (IOException e) {
             e.printStackTrace();
         }

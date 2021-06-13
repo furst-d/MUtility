@@ -1,17 +1,13 @@
 package com.mens.mutility.bungeecord.messages;
 
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
 import com.mens.mutility.bungeecord.MUtilityBungeeCord;
-import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.config.ServerInfo;
-import com.mens.mutility.bungeecord.*;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.Collection;
+
 
 public class MessageChannel {
 
@@ -43,8 +39,18 @@ public class MessageChannel {
             e.printStackTrace();
         }
         server.sendData( "mens:mutility", stream.toByteArray());
-        /*    plugin.getProxy().getServers().values().forEach((server) -> {
-            server.sendData("mens:mutility", stream.toByteArray());
-        }); */
+    }
+
+    public void sendPermissionRequestBroadcast(String subChannel, String permission, String returnChannel) {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        DataOutputStream output = new DataOutputStream(stream);
+        try {
+            output.writeUTF(subChannel);
+            output.writeUTF(permission);
+            output.writeUTF(returnChannel);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        plugin.getProxy().getServers().values().forEach((server) -> server.sendData("mens:mutility", stream.toByteArray()));
     }
 }
