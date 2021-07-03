@@ -10,7 +10,6 @@ import com.mens.mutility.spigot.commands.system.enums.TabCompleterTypes;
 import com.mens.mutility.spigot.messages.MessageChannel;
 import com.mens.mutility.spigot.utils.MyStringUtils;
 import com.mens.mutility.spigot.utils.PageList;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 public class Anketa extends CommandHelp {
@@ -43,9 +42,7 @@ public class Anketa extends CommandHelp {
         CommandData pridej = new CommandData(ArgumentTypes.DEFAULT, "pridej", TabCompleterTypes.DEFAULT, "mutility.anketa.add");
         CommandData start = new CommandData(ArgumentTypes.DEFAULT, "start", TabCompleterTypes.DEFAULT, "mutility.anketa.run");
         CommandData vote = new CommandData(ArgumentTypes.DEFAULT, "vote", TabCompleterTypes.NONE);
-        CommandData stop = new CommandData(ArgumentTypes.DEFAULT, "stop", TabCompleterTypes.DEFAULT, "mutility.anketa.run", CommandExecutors.BOTH, t -> {
-            channel.sendSurveyStopSignalToBungeecord((Player) t.getSender());
-        });
+        CommandData stop = new CommandData(ArgumentTypes.DEFAULT, "stop", TabCompleterTypes.DEFAULT, "mutility.anketa.run", CommandExecutors.BOTH, t -> channel.sendSurveyStopSignalToBungeecord((Player) t.getSender()));
 
         // 2. stupeň
         CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.anketa.help", CommandExecutors.BOTH, (t) -> {
@@ -62,20 +59,12 @@ public class Anketa extends CommandHelp {
             channel.sendSurveyAddSignalToBungeecord((Player) t.getSender(), option);
         });
         CommandData cas = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.CUSTOM, "[< Čas (číslo) >]", "mutility.anketa.run");
-        CommandData voteID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE,"mutility.anketa.vote", CommandExecutors.PLAYER, t -> {
-            channel.sendSurveyVoteSignalToBungeecord((Player) t.getSender(), Integer.parseInt(t.getArgs()[1]));
-        });
+        CommandData voteID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE,"mutility.anketa.vote", CommandExecutors.PLAYER, t -> channel.sendSurveyVoteSignalToBungeecord((Player) t.getSender(), Integer.parseInt(t.getArgs()[1])));
 
         // 3. stupeň
-        CommandData sec = new CommandData(ArgumentTypes.DEFAULT, "sec", TabCompleterTypes.DEFAULT,"mutility.anketa.run", CommandExecutors.PLAYER, t -> {
-            channel.sendSurveyStartSignalToBungeecord((Player) t.getSender(), Integer.parseInt(t.getArgs()[1]), "sec");
-        });
-        CommandData min = new CommandData(ArgumentTypes.DEFAULT, "min", TabCompleterTypes.DEFAULT,"mutility.anketa.run", CommandExecutors.PLAYER, t -> {
-            channel.sendSurveyStartSignalToBungeecord((Player) t.getSender(), Integer.parseInt(t.getArgs()[1]), "min");
-        });
-        CommandData hod = new CommandData(ArgumentTypes.DEFAULT, "h", TabCompleterTypes.DEFAULT,"mutility.anketa.run", CommandExecutors.PLAYER, t -> {
-            channel.sendSurveyStartSignalToBungeecord((Player) t.getSender(), Integer.parseInt(t.getArgs()[1]), "h");
-        });
+        CommandData sec = new CommandData(ArgumentTypes.DEFAULT, "sec", TabCompleterTypes.DEFAULT,"mutility.anketa.run", CommandExecutors.PLAYER, t -> channel.sendSurveyStartSignalToBungeecord((Player) t.getSender(), Integer.parseInt(t.getArgs()[1]), "sec"));
+        CommandData min = new CommandData(ArgumentTypes.DEFAULT, "min", TabCompleterTypes.DEFAULT,"mutility.anketa.run", CommandExecutors.PLAYER, t -> channel.sendSurveyStartSignalToBungeecord((Player) t.getSender(), Integer.parseInt(t.getArgs()[1]), "min"));
+        CommandData hod = new CommandData(ArgumentTypes.DEFAULT, "h", TabCompleterTypes.DEFAULT,"mutility.anketa.run", CommandExecutors.PLAYER, t -> channel.sendSurveyStartSignalToBungeecord((Player) t.getSender(), Integer.parseInt(t.getArgs()[1]), "h"));
 
         anketa.setDescription("Systém pro správu anket");
 

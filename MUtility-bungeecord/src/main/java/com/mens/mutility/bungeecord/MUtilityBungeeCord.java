@@ -2,7 +2,8 @@ package com.mens.mutility.bungeecord;
 
 import com.google.common.io.ByteStreams;
 import com.mens.mutility.bungeecord.commands.Lobby;
-import com.mens.mutility.bungeecord.events.PortalEvent;
+import com.mens.mutility.bungeecord.events.JoinEvent;
+import com.mens.mutility.bungeecord.utils.teleport.TeleportRequest;
 import com.mens.mutility.bungeecord.messages.MessageChannelListener;
 import com.mens.mutility.bungeecord.portal.PortalRequest;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -77,7 +78,7 @@ public final class MUtilityBungeeCord extends Plugin {
      * Metoda pro registraci eventu
      */
     private void loadEvents() {
-        getProxy().getPluginManager().registerListener(this, new PortalEvent());
+        getProxy().getPluginManager().registerListener(this, new JoinEvent());
         getProxy().getPluginManager().registerListener(this, new MessageChannelListener(this));
     }
 

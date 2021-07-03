@@ -5,9 +5,11 @@ import com.mens.mutility.spigot.chat.Errors;
 import com.mens.mutility.spigot.commands.system.enums.ArgumentTypes;
 import com.mens.mutility.spigot.commands.system.enums.TabCompleterTypes;
 import com.mens.mutility.spigot.utils.Checker;
+import com.mens.mutility.spigot.utils.ServerInfo;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -76,7 +78,7 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                             return true;
                     } else {
                         setError(true);
-                        setErrorMessage(commandData.getPrefix() + getErrors().errNotEnoughArguments());
+                        setErrorMessage(commandData.getPrefix() + getErrors().errNotEnoughArguments(true, false));
                     }
                 }
                 List<CommandData> subcommands = commandData.getNext();
@@ -84,7 +86,7 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                 for (int i = 0; i < args.length; i++) {
                     if(subcommands.size() == 0) {
                         setError(true);
-                        setErrorMessage(commandData.getPrefix() + getErrors().errTooMuchArguments());
+                        setErrorMessage(commandData.getPrefix() + getErrors().errTooMuchArguments(true, false));
                     }
                     for (CommandData subcommand: subcommands) {
                         if(checkSubcommand(args, commandData.getPrefix(), subcommand, i)) {
@@ -99,7 +101,7 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                                 } else {
                                     if(!isError()) {
                                         setError(true);
-                                        setErrorMessage(commandData.getPrefix() + getErrors().errNotEnoughArguments());
+                                        setErrorMessage(commandData.getPrefix() + getErrors().errNotEnoughArguments(true, false));
                                     }
                                 }
                             }
@@ -128,7 +130,7 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                 return true;
             } else {
                 setError(true);
-                setErrorMessage(commandData.getPrefix() + getErrors().errNoPermission());
+                setErrorMessage(commandData.getPrefix() + getErrors().errNoPermission(true, false));
             }
         }
         return false;
@@ -142,7 +144,7 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                     return true;
                 } else {
                     setError(true);
-                    setErrorMessage(prefix + getErrors().errWrongArgument(args[i]));
+                    setErrorMessage(prefix + getErrors().errWrongArgument(args[i], true, false));
                 }
                 break;
             case INTEGER:
@@ -151,7 +153,7 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                     return true;
                 } else {
                     setError(true);
-                    setErrorMessage(prefix + getErrors().errWrongArgumentNumber(args[i]));
+                    setErrorMessage(prefix + getErrors().errWrongArgumentNumber(args[i], true, false));
                 }
                 break;
             case DOUBLE:
@@ -160,7 +162,7 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                     return true;
                 } else {
                     setError(true);
-                    setErrorMessage(prefix + getErrors().errWrongArgumentNumber(args[i]));
+                    setErrorMessage(prefix + getErrors().errWrongArgumentNumber(args[i], true, false));
                 }
                 break;
             case FLOAT:
@@ -169,7 +171,7 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                     return true;
                 } else {
                     setError(true);
-                    setErrorMessage(prefix + getErrors().errWrongArgumentNumber(args[i]));
+                    setErrorMessage(prefix + getErrors().errWrongArgumentNumber(args[i], true, false));
                 }
                 break;
             case STRING:
@@ -182,7 +184,7 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                     return true;
                 } else {
                     setError(true);
-                    setErrorMessage(prefix + getErrors().errWrongArgumentDate(args[i]));
+                    setErrorMessage(prefix + getErrors().errWrongArgumentDate(args[i], true, false));
                 }
                 break;
             case ONLINE_PLAYER:
@@ -191,7 +193,7 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                     return true;
                 } else {
                     setError(true);
-                    setErrorMessage(prefix + getErrors().errWrongArgumentOnlinePlayer(args[i]));
+                    setErrorMessage(prefix + getErrors().errWrongArgumentOnlinePlayer(args[i], true, false));
                 }
                 break;
             case POSITIVE_INTEGER:
@@ -200,7 +202,7 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                     return true;
                 } else {
                     setError(true);
-                    setErrorMessage(prefix + getErrors().errWrongArgumentPositiveNumber(args[i]));
+                    setErrorMessage(prefix + getErrors().errWrongArgumentPositiveNumber(args[i], true, false));
                 }
                 break;
         }
@@ -215,7 +217,7 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                     return true;
                 } else {
                     setError(true);
-                    setErrorMessage(prefix + getErrors().errNotInGame());
+                    setErrorMessage(prefix + getErrors().errNotInGame(true, false));
                 }
                 break;
             case CONSOLE:
@@ -224,7 +226,7 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                     return true;
                 } else {
                     setError(true);
-                    setErrorMessage(prefix + getErrors().errNotInConsole());
+                    setErrorMessage(prefix + getErrors().errNotInConsole(true, false));
                 }
                 break;
             case BOTH:
@@ -319,6 +321,20 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                                             z += 0.5;
                                             if(String.valueOf(z).contains(args[i])) {
                                                 arguments.add(String.valueOf(z));
+                                            }
+                                            break;
+                                        case SERVERS:
+                                            for(ServerInfo server: plugin.getServers()) {
+                                                if(server.getName().contains(args[i])) {
+                                                    arguments.add(server.getName());
+                                                }
+                                            }
+                                            break;
+                                        case WORLDS:
+                                            for(World world: Bukkit.getServer().getWorlds()) {
+                                                if(world.getName().contains(args[i])) {
+                                                    arguments.add(world.getName());
+                                                }
                                             }
                                             break;
                                     }

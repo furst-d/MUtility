@@ -48,7 +48,17 @@ public class Database {
             Bukkit.getConsoleSender().spigot().sendMessage(ComponentSerializer.parse(jb.toString()));
 
 
-            Bukkit.getConsoleSender().sendMessage(prefix.getMutilityPrefix(true, false) + "Databaze " + colors.getPrimaryColor() + "MYSQL" + colors.getSecondaryColor() + " pripojena!");
+            Bukkit.getConsoleSender().sendMessage(prefix.getMutilityPrefix(true, false) + " Databaze " + colors.getPrimaryColor() + "MYSQL" + colors.getSecondaryColor() + " pripojena!");
+            new JsonBuilder()
+                    .addJsonSegment(prefix.getMutilityPrefix(true, true))
+                    .text("Databáze ")
+                    .color(colors.getSecondaryColorHEX())
+                    .text("MySQL")
+                    .color(colors.getPrimaryColorHEX())
+                    .text(" připojena!")
+                    .color(colors.getSecondaryColorHEX())
+                    .toConsole();
+
             createTablesIfNotExists();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -59,7 +69,7 @@ public class Database {
 
     private void createTablesIfNotExists() throws SQLException {
         PreparedStatement stm;
-        stm = con.prepareStatement("CREATE TABLE IF NOT EXISTS " + tablePrefix + "events(id INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT, event_name varchar(255), tpX double, tpY double, tpZ double, necessaryItems varchar(255), forbiddenItems varchar(255), objective varchar(255), note varchar(255))");
+        stm = con.prepareStatement("CREATE TABLE IF NOT EXISTS " + tablePrefix + "events(id INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT, event_name varchar(255), tpX double, tpY double, tpZ double, world varchar(255), server varchar(255), necessaryItems varchar(255), forbiddenItems varchar(255), objective varchar(255), note varchar(255))");
         stm.execute();
         stm = con.prepareStatement("CREATE TABLE IF NOT EXISTS " + tablePrefix + "inventory(id INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT, username varchar(255), id_user_record int(4), inventory_name varchar(255), inventory longtext)");
         stm.execute();

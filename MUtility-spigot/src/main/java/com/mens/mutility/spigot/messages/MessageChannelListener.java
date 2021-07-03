@@ -5,11 +5,13 @@ import com.mens.mutility.spigot.MUtilitySpigot;
 import com.mens.mutility.spigot.portal.PortalManager;
 import com.mens.mutility.spigot.portal.PortalRequestChecker;
 import com.mens.mutility.spigot.utils.Checker;
+import com.mens.mutility.spigot.utils.ServerInfo;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.WorldCreator;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.messaging.PluginMessageListener;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import javax.annotation.Nonnull;
 import java.io.ByteArrayInputStream;
@@ -39,51 +41,83 @@ public class MessageChannelListener implements PluginMessageListener {
         try {
             DataInputStream stream = new DataInputStream(new ByteArrayInputStream(message));
             String subChannel = stream.readUTF();
-            if(subChannel.equals("mens:send-to-nether")) {
-                Location loc = player.getLocation();
-                loc.setX(stream.readDouble());
-                loc.setY(stream.readDouble());
-                loc.setZ(stream.readDouble());
-                loc.setWorld(WorldCreator.name("world_nether").createWorld());
-                PortalManager pm = new PortalManager(player, loc);
-                pm.findPortal();
-                pm.createPortal();
-                if(pm.isPrepared()) {
-                    MUtilitySpigot.portalQueue.add(pm);
-                    checker = new PortalRequestChecker();
-                }
-            }
-            if(subChannel.equals("mens:send-to-overworld")) {
-                Location loc = player.getLocation();
-                loc.setX(stream.readDouble());
-                loc.setY(stream.readDouble());
-                loc.setZ(stream.readDouble());
-                loc.setWorld(WorldCreator.name("world").createWorld());
-                PortalManager pm = new PortalManager(player, loc);
-                pm.findPortal();
-                pm.createPortal();
-                if(pm.isPrepared()) {
-                    MUtilitySpigot.portalQueue.add(pm);
-                    checker.checkRequests();
-                }
-            }
-            if(subChannel.equals("mens:permissionRequest")) {
-                String permission = stream.readUTF();
-                String returnChannel = stream.readUTF();
-                Checker checker = new Checker();
-                StringBuilder permPlayers = new StringBuilder();
-                for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-                    if(checker.checkPermissions(onlinePlayer, permission)) {
-                        permPlayers.append(onlinePlayer.getName()).append(";");
+            switch(subChannel) {
+                case "mens:send-to-nether":
+                    Location loc = player.getLocation();
+                    loc.setX(stream.readDouble());
+                    loc.setY(stream.readDouble());
+                    loc.setZ(stream.readDouble());
+                    loc.setWorld(WorldCreator.name("world_nether").createWorld());
+                    PortalManager pm = new PortalManager(player, loc);
+                    pm.findPortal();
+                    pm.createPortal();
+                    if(pm.isPrepared()) {
+                        MUtilitySpigot.portalQueue.add(pm);
+                        checker = new PortalRequestChecker();
                     }
-                }
-                if(!permPlayers.toString().equalsIgnoreCase("")) {
-                    permPlayers.substring(0, permPlayers.length() - 1);
-                }
-                MessageChannel messageChannel = new MessageChannel(plugin);
-                player = Iterables.getFirst(Bukkit.getOnlinePlayers(), null);
-                messageChannel.sendToBungeeCord(player, returnChannel, permPlayers.toString());
+                    break;
+                case "mens:send-to-overworld":
+                    loc = player.getLocation();
+                    loc.setX(stream.readDouble());
+                    loc.setY(stream.readDouble());
+                    loc.setZ(stream.readDouble());
+                    loc.setWorld(WorldCreator.name("world").createWorld());
+                    pm = new PortalManager(player, loc);
+                    pm.findPortal();
+                    pm.createPortal();
+                    if(pm.isPrepared()) {
+                        MUtilitySpigot.portalQueue.add(pm);
+                        checker.checkRequests();
+                    }
+                    break;
+                case "mens:permissionRequest":
+                    String permission = stream.readUTF();
+                    String returnChannel = stream.readUTF();
+                    Checker checker = new Checker();
+                    StringBuilder permPlayers = new StringBuilder();
+                    for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                        if(checker.checkPermissions(onlinePlayer, permission)) {
+                            permPlayers.append(onlinePlayer.getName()).append(";");
+                        }
+                    }
+                    if(!permPlayers.toString().equalsIgnoreCase("")) {
+                        permPlayers.substring(0, permPlayers.length() - 1);
+                    }
+                    MessageChannel messageChannel = new MessageChannel(plugin);
+                    player = Iterables.getFirst(Bukkit.getOnlinePlayers(), null);
+                    messageChannel.sendToBungeeCord(player, returnChannel, permPlayers.toString());
+                    break;
+                case "mens:servers-info-response":
+                    String[] servers = stream.readUTF().split(";");
+                    String serverName = stream.readUTF();
+                    plugin.getServers().clear();
+                    for(String server : servers) {
+                        if(server.equals(serverName)) {
+                            plugin.getServers().add(new ServerInfo(server, true));
+                        } else {
+                            plugin.getServers().add(new ServerInfo(server, false));
+                        }
+                    }
+                    break;
+                case "mens:teleport-request":
+                    new BukkitRunnable() {
+
+                        @Override
+                        public void run() {
+
+                        }
+                    }.runTaskTimer(plugin, 0, 1);
+                    Player telPlayer = Bukkit.getPlayer(stream.readUTF());
+                    assert telPlayer != null;
+                    Location location = telPlayer.getLocation();
+                    location.setX(stream.readDouble());
+                    location.setY(stream.readDouble());
+                    location.setZ(stream.readDouble());
+                    location.setWorld( WorldCreator.name(stream.readUTF()).createWorld());
+                    telPlayer.teleport(location);
+                    break;
             }
+
         } catch (IOException e) {
             e.printStackTrace();
         }

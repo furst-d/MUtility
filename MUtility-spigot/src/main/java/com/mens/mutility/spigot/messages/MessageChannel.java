@@ -1,6 +1,9 @@
 package com.mens.mutility.spigot.messages;
 
+import com.google.common.collect.Iterables;
 import com.mens.mutility.spigot.MUtilitySpigot;
+import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 
@@ -132,6 +135,38 @@ public class MessageChannel implements Listener {
             output.writeUTF("mens:survey-vote");
             output.writeUTF(player.getName());
             output.writeInt(id);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        player.sendPluginMessage(plugin, "BungeeCord", stream.toByteArray());
+    }
+
+    public void broadcastJson(String json) {
+        stream = new ByteArrayOutputStream();
+        output = new DataOutputStream(stream);
+        try {
+            output.writeUTF("mens:broadcast-json");
+            output.writeUTF(json);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Player player = Iterables.getFirst(Bukkit.getOnlinePlayers(), null);
+        if(player != null) {
+            player.sendPluginMessage(plugin, "BungeeCord", stream.toByteArray());
+        }
+    }
+
+    public void sendTeleportRequest(Player player, float x, float y, float z, String world, String server) {
+        stream = new ByteArrayOutputStream();
+        output = new DataOutputStream(stream);
+        try {
+            output.writeUTF("mens:teleport-request");
+            output.writeUTF(player.getName());
+            output.writeFloat(x);
+            output.writeFloat(y);
+            output.writeFloat(z);
+            output.writeUTF(world);
+            output.writeUTF(server);
         } catch (IOException e) {
             e.printStackTrace();
         }

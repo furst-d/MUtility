@@ -80,13 +80,12 @@ public class PageList {
     }
 
     public void add(String row) {
+        rows.add(row);
+        setIndex(getIndex() + 1);
         if(getIndex() == getLimit()) {
             setMaxPage(getMaxPage() + 1);
             setIndex(0);
-        } else {
-            setIndex(getIndex() + 1);
         }
-        rows.add(row);
     }
 
     public void clear() {

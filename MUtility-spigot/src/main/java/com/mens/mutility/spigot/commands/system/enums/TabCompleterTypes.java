@@ -11,6 +11,8 @@ public enum TabCompleterTypes {
     POSX("[<Souřadnice X>]"),
     POSY("[<Souřadnice Y>]"),
     POSZ("[<Souřadnice Z>]"),
+    SERVERS("[<Server>]"),
+    WORLDS("[<Svět>]"),
     NONE(null);
 
     private final String description;

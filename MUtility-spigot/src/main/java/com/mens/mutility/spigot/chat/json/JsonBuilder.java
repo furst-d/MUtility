@@ -100,13 +100,14 @@ public class JsonBuilder {
         return this;
     }
 
-    public void addJsonSegment(String json) {
+    public JsonBuilder addJsonSegment(String json) {
         if(!json.isEmpty()) {
             if(json.charAt(0) == ',') {
                 json = json.substring(1);
             }
         }
         extras.add(json);
+        return this;
     }
 
     public String getJsonSegments() {

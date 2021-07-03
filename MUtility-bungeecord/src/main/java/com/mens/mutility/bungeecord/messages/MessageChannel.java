@@ -13,13 +13,27 @@ public class MessageChannel {
 
     MUtilityBungeeCord plugin = MUtilityBungeeCord.getInstance();
 
-    public  void sendToServer(String channel, String message, ServerInfo server) {
+    public  void sendToServer(ServerInfo server, String channel, String message) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         DataOutputStream output = new DataOutputStream(stream);
 
         try {
             output.writeUTF(channel);
             output.writeUTF(message);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        server.sendData("mens:mutility", stream.toByteArray());
+    }
+
+    public  void sendToServer(ServerInfo server, String channel, String message, String message2) {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        DataOutputStream output = new DataOutputStream(stream);
+
+        try {
+            output.writeUTF(channel);
+            output.writeUTF(message);
+            output.writeUTF(message2);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -52,5 +66,21 @@ public class MessageChannel {
             e.printStackTrace();
         }
         plugin.getProxy().getServers().values().forEach((server) -> server.sendData("mens:mutility", stream.toByteArray()));
+    }
+
+    public void sendTeleportRequest(ServerInfo server, String player, double x, double y, double z, String world) {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        DataOutputStream output = new DataOutputStream(stream);
+        try {
+            output.writeUTF("mens:teleport-request");
+            output.writeUTF(player);
+            output.writeDouble(x);
+            output.writeDouble(y);
+            output.writeDouble(z);
+            output.writeUTF(world);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        server.sendData( "mens:mutility", stream.toByteArray());
     }
 }

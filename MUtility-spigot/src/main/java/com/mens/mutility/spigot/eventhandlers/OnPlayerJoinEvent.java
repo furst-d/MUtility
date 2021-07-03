@@ -7,6 +7,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
+import java.sql.SQLException;
+import java.util.TimerTask;
+
 public class OnPlayerJoinEvent implements Listener {
     private final MUtilitySpigot plugin;
     MessageChannel messageChannel;
@@ -20,5 +23,18 @@ public class OnPlayerJoinEvent implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         messageChannel.sendToBungeeCord(player, "mens:join-confirmation");
+        if(plugin.getServers().isEmpty()) {
+            new java.util.Timer().schedule(new TimerTask(){
+                int seconds = 0;
+                @Override
+                public void run() {
+                        if (seconds == 5) {
+                            messageChannel.sendToBungeeCord(player, "mens:servers-info-request", player.getName());
+                            this.cancel();
+                        }
+                        seconds++;
+                }
+            },0,1000);
+        }
     }
 }

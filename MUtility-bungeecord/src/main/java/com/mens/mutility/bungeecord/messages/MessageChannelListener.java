@@ -5,12 +5,15 @@ import com.mens.mutility.bungeecord.chat.PluginColors;
 import com.mens.mutility.bungeecord.chat.Prefix;
 import com.mens.mutility.bungeecord.chat.json.JsonBuilder;
 import com.mens.mutility.bungeecord.commands.anketa.Anketa;
+import com.mens.mutility.bungeecord.utils.teleport.TeleportRequest;
 import com.mens.mutility.bungeecord.portal.PortalRequest;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PluginMessageEvent;
 import net.md_5.bungee.api.plugin.Listener;
+import net.md_5.bungee.api.scheduler.ScheduledTask;
+import net.md_5.bungee.chat.ComponentSerializer;
 import net.md_5.bungee.event.EventHandler;
 
 import java.io.ByteArrayInputStream;
@@ -23,14 +26,18 @@ public class MessageChannelListener implements Listener {
     private final Prefix prefix;
     private final PluginColors colors;
     private Anketa survey;
-    JsonBuilder notCreated;
+    private ProxiedPlayer player;
+    JsonBuilder surveyNotCreated;
+    StringBuilder servers;
+    ServerInfo target;
+    private ScheduledTask st;
 
     public MessageChannelListener(MUtilityBungeeCord plugin) {
         this.plugin = plugin;
         messageChannel = new MessageChannel();
         prefix = new Prefix();
         colors = new PluginColors();
-        notCreated = new JsonBuilder()
+        surveyNotCreated = new JsonBuilder()
                 .addJsonSegment(prefix.getAnketaPrefix(true, true))
                 .text(" Nejprve je nutné vytvořit anketu, použijte ")
                 .color(colors.getSecondaryColorHEX())
@@ -42,7 +49,7 @@ public class MessageChannelListener implements Listener {
     public void onPluginMessage(PluginMessageEvent event) {
         if(!event.getTag().equalsIgnoreCase("BungeeCord")) return;
         DataInputStream stream = new DataInputStream(new ByteArrayInputStream(event.getData()));
-        ProxiedPlayer player = (ProxiedPlayer) event.getReceiver();
+        player = (ProxiedPlayer) event.getReceiver();
         try {
             String channel = stream.readUTF();
             switch (channel) {
@@ -77,7 +84,7 @@ public class MessageChannelListener implements Listener {
                             targetStr = plugin.getConfiguration().getString("Servers.OverWorld 4.Name");
                         }
                     }
-                    ServerInfo target = ProxyServer.getInstance().getServerInfo(targetStr);
+                    target = ProxyServer.getInstance().getServerInfo(targetStr);
                     MUtilityBungeeCord.portalQueue.add(new PortalRequest(player, target, "mens:send-to-overworld", x, y, z));
                     player.connect(target);
                     break;
@@ -114,7 +121,7 @@ public class MessageChannelListener implements Listener {
                     if(survey != null) {
                         survey.add(player, stream.readUTF());
                     } else {
-                        notCreated.toPlayer(player);
+                        surveyNotCreated.toPlayer(player);
                     }
                     break;
 
@@ -123,7 +130,7 @@ public class MessageChannelListener implements Listener {
                     if(survey != null) {
                         survey.start(player, stream.readInt(), stream.readUTF());
                     } else {
-                        notCreated.toPlayer(player);
+                        surveyNotCreated.toPlayer(player);
                     }
                     break;
 
@@ -132,7 +139,7 @@ public class MessageChannelListener implements Listener {
                     if(survey != null) {
                         survey.stop(player);
                     } else {
-                        notCreated.toPlayer(player);
+                        surveyNotCreated.toPlayer(player);
                     }
                     break;
 
@@ -141,14 +148,47 @@ public class MessageChannelListener implements Listener {
                     if(survey != null) {
                         survey.vote(player, stream.readInt());
                     } else {
-                        notCreated.toPlayer(player);
+                        surveyNotCreated.toPlayer(player);
                     }
                     break;
 
                 case "mens:surveyPermissionResponse":
                     survey.addPermissedPlayers(stream.readUTF());
                     break;
-
+                case "mens:broadcast-json":
+                    String json = stream.readUTF();
+                    for (ProxiedPlayer onlinePlayer : ProxyServer.getInstance().getPlayers()) {
+                        onlinePlayer.sendMessage(ComponentSerializer.parse(json));
+                    }
+                    break;
+                case "mens:servers-info-request":
+                    servers = new StringBuilder();
+                    player = ProxyServer.getInstance().getPlayer(stream.readUTF());
+                    target = (ServerInfo) plugin.getProxy().getServers().values().toArray()[0];
+                    for(ServerInfo server : plugin.getProxy().getServers().values()) {
+                        servers.append(server.getName());
+                        servers.append(";");
+                        if(player.getServer().getInfo().getName().equals(server.getName())) {
+                            target = ProxyServer.getInstance().getServerInfo(server.getName());
+                        }
+                    }
+                    servers.substring(0, servers.length() - 1);
+                    messageChannel.sendToServer(target, "mens:servers-info-response", servers.toString(), target.getName());
+                    break;
+                case "mens:teleport-request":
+                    TeleportRequest teleportRequest = new TeleportRequest(
+                            ProxyServer.getInstance().getPlayer(stream.readUTF()),
+                            stream.readFloat(),
+                            stream.readFloat(),
+                            stream.readFloat(),
+                            stream.readUTF(),
+                            ProxyServer.getInstance().getServerInfo(stream.readUTF()));
+                    player.connect(teleportRequest.getServer(), (result, error) -> {
+                        if(result) {
+                            teleportRequest.startTimer(10000);
+                        }
+                    });
+                    break;
             }
         } catch (IOException e) {
             e.printStackTrace();

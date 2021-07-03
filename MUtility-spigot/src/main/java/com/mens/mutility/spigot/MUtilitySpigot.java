@@ -6,6 +6,7 @@
  */
 package com.mens.mutility.spigot;
 
+import com.mens.mutility.spigot.messages.MessageChannel;
 import com.mens.mutility.spigot.portal.PortalManager;
 import com.mens.mutility.spigot.commands.commands.anketa.Anketa;
 import com.mens.mutility.spigot.commands.commands.minv.MInv;
@@ -23,6 +24,7 @@ import com.mens.mutility.spigot.eventhandlers.OnEntityPortalEvent;
 import com.mens.mutility.spigot.eventhandlers.OnPlayerJoinEvent;
 import com.mens.mutility.spigot.eventhandlers.OnPlayerPortalEvent;
 import com.mens.mutility.spigot.messages.MessageChannelListener;
+import com.mens.mutility.spigot.utils.ServerInfo;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -33,9 +35,11 @@ import java.util.Objects;
 
 public final class MUtilitySpigot extends JavaPlugin {
     private List<CommandData> commands;
+    private List<ServerInfo> servers;
     public static Database db;
     public static List<PortalManager> portalQueue;
     private PluginManager pm;
+    private MessageChannel messageChannel;
 
     /**
      * Spousteci metoda
@@ -51,6 +55,8 @@ public final class MUtilitySpigot extends JavaPlugin {
         db = new Database(this);
         db.openConnection();
         portalQueue = new ArrayList<>();
+        messageChannel = new MessageChannel(this);
+        servers = new ArrayList<>();
     }
 
     /**
@@ -116,9 +122,26 @@ public final class MUtilitySpigot extends JavaPlugin {
 
     /**
      * Getter na List prikazu
-     * @return List prikazu
+     * @return list prikazu
      */
     public List<CommandData> getCommands() {
         return commands;
+    }
+
+    /**
+     * Getter na List serveru
+     * @return list serveru
+     */
+    public List<ServerInfo> getServers() {
+        return servers;
+    }
+
+    public String getCurrentServer() {
+        for(ServerInfo server : servers) {
+            if(server.isThis()) {
+                return server.getName();
+            }
+        }
+        return null;
     }
 }
