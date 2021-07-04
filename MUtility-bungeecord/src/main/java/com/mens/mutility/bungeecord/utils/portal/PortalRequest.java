@@ -1,4 +1,4 @@
-package com.mens.mutility.bungeecord.utils.teleport;
+package com.mens.mutility.bungeecord.utils.portal;
 
 import com.mens.mutility.bungeecord.MUtilityBungeeCord;
 import com.mens.mutility.bungeecord.messages.MessageChannel;
@@ -8,7 +8,7 @@ import net.md_5.bungee.api.scheduler.ScheduledTask;
 
 import java.util.concurrent.TimeUnit;
 
-public class TeleportRequest {
+public class PortalRequest {
     private final ProxiedPlayer player;
     private final double x;
     private final double y;
@@ -20,7 +20,7 @@ public class TeleportRequest {
     private int seconds;
     private final MessageChannel messageChannel;
 
-    public TeleportRequest(ProxiedPlayer player, double x, double y, double z, String world, ServerInfo server) {
+    public PortalRequest(ProxiedPlayer player, double x, double y, double z, String world, ServerInfo server) {
         this.player = player;
         this.x = x;
         this.y = y;
@@ -64,6 +64,13 @@ public class TeleportRequest {
             for (ProxiedPlayer onlinePlayer : getServer().getPlayers()) {
                 if(onlinePlayer.getName().equals(getPlayer().getName())) {
                     messageChannel.sendTeleportRequest(server, player.getName(), x, y, z, world);
+                    String subChannel = "mens:send-to-";
+                    if(world.equals("world")) {
+                        subChannel += "overworld";
+                    } else if(world.equals("world_nether")) {
+                        subChannel += "nether";
+                    }
+                    messageChannel.sendPortalInfoToServer(player, subChannel, server, x, y, z);
                     st.cancel();
                 }
             }

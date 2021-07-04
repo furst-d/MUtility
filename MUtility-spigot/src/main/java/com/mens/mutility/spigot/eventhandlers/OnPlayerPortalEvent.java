@@ -19,12 +19,11 @@ public class OnPlayerPortalEvent implements Listener {
 
     @EventHandler
     public void onPlayerPortalEvent(PlayerPortalEvent event) {
-        if(Objects.requireNonNull(event.getFrom().getWorld()).getName().equalsIgnoreCase("world")) {
-            messageChannel.sendPortalInfoToBungeeCord(event.getPlayer(), "mens:send-to-nether", event.getFrom().getX() / 8, event.getFrom().getY(), event.getFrom().getZ() / 8);
-        } else if(event.getFrom().getWorld().getName().equalsIgnoreCase("world_nether")) {
-            System.out.println(Objects.requireNonNull(event.getTo()).getX() + ", " + event.getTo().getY() + ", " +  event.getTo().getZ());
-            messageChannel.sendPortalInfoToBungeeCord(event.getPlayer(), "mens:send-to-overworld", event.getFrom().getX() * 8, event.getFrom().getY(), event.getFrom().getZ() * 8);
-        }
         event.setCancelled(true);
+        if(Objects.requireNonNull(event.getFrom().getWorld()).getName().equalsIgnoreCase("world")) {
+            messageChannel.sendPortalInfoToBungeeCord(event.getPlayer(), "mens:portalRequest", "nether", event.getFrom().getX() / 8, event.getFrom().getY(), event.getFrom().getZ() / 8);
+        } else if(event.getFrom().getWorld().getName().equalsIgnoreCase("world_nether")) {
+            messageChannel.sendPortalInfoToBungeeCord(event.getPlayer(), "mens:portalRequest", "overworld", event.getFrom().getX() * 8, event.getFrom().getY(), event.getFrom().getZ() * 8);
+        }
     }
 }

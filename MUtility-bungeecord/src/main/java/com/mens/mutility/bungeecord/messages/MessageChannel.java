@@ -46,6 +46,7 @@ public class MessageChannel {
         DataOutputStream output = new DataOutputStream(stream);
         try {
             output.writeUTF(subchannel);
+            output.writeUTF(player.getName());
             output.writeDouble(x);
             output.writeDouble(y);
             output.writeDouble(z);

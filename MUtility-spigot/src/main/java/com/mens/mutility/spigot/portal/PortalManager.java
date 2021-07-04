@@ -59,6 +59,7 @@ public class PortalManager {
             if(!portalRect.isPresent()) {
                 portalRect = portalAgent.createPortal(new BlockPosition(searchLocation.getX(), searchLocation.getY(), searchLocation.getZ()), EnumDirection.EnumAxis.Z, ((CraftPlayer) player).getHandle(), createRadius);
             }
+            System.out.println("Zvysuji radius na: " + createRadius);
             createRadius += 16;
         }
         setPortalRect(portalRect);

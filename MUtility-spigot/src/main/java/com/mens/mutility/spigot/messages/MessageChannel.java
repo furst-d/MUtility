@@ -39,11 +39,12 @@ public class MessageChannel implements Listener {
         player.sendPluginMessage(plugin, "BungeeCord", stream.toByteArray());
     }
 
-    public void sendPortalInfoToBungeeCord(Player player, String channel, double x, double y, double z) {
+    public void sendPortalInfoToBungeeCord(Player player, String channel, String world, double x, double y, double z) {
         stream = new ByteArrayOutputStream();
         output = new DataOutputStream(stream);
         try {
             output.writeUTF(channel);
+            output.writeUTF(world);
             output.writeDouble(x);
             output.writeDouble(y);
             output.writeDouble(z);

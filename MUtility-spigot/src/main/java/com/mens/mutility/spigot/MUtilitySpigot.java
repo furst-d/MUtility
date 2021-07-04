@@ -7,7 +7,6 @@
 package com.mens.mutility.spigot;
 
 import com.mens.mutility.spigot.messages.MessageChannel;
-import com.mens.mutility.spigot.portal.PortalManager;
 import com.mens.mutility.spigot.commands.commands.anketa.Anketa;
 import com.mens.mutility.spigot.commands.commands.minv.MInv;
 import com.mens.mutility.spigot.commands.commands.mresidence.MResidence;
@@ -37,7 +36,6 @@ public final class MUtilitySpigot extends JavaPlugin {
     private List<CommandData> commands;
     private List<ServerInfo> servers;
     public static Database db;
-    public static List<PortalManager> portalQueue;
     private PluginManager pm;
     private MessageChannel messageChannel;
 
@@ -54,7 +52,6 @@ public final class MUtilitySpigot extends JavaPlugin {
         registerChannels();
         db = new Database(this);
         db.openConnection();
-        portalQueue = new ArrayList<>();
         messageChannel = new MessageChannel(this);
         servers = new ArrayList<>();
     }

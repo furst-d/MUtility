@@ -3,15 +3,14 @@ package com.mens.mutility.spigot.messages;
 import com.google.common.collect.Iterables;
 import com.mens.mutility.spigot.MUtilitySpigot;
 import com.mens.mutility.spigot.portal.PortalManager;
-import com.mens.mutility.spigot.portal.PortalRequestChecker;
 import com.mens.mutility.spigot.utils.Checker;
 import com.mens.mutility.spigot.utils.ServerInfo;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.messaging.PluginMessageListener;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import javax.annotation.Nonnull;
 import java.io.ByteArrayInputStream;
@@ -25,7 +24,6 @@ import java.io.IOException;
 public class MessageChannelListener implements PluginMessageListener {
 
     private final MUtilitySpigot plugin;
-    private PortalRequestChecker checker;
 
     /**
      * Konstruktor tridy
@@ -33,7 +31,6 @@ public class MessageChannelListener implements PluginMessageListener {
      */
     public MessageChannelListener(MUtilitySpigot plugin) {
         this.plugin = plugin;
-        checker = new PortalRequestChecker();
     }
 
     @Override
@@ -43,6 +40,8 @@ public class MessageChannelListener implements PluginMessageListener {
             String subChannel = stream.readUTF();
             switch(subChannel) {
                 case "mens:send-to-nether":
+                    Player telPlayerNe = Bukkit.getPlayer(stream.readUTF());
+                    assert telPlayerNe != null;
                     Location loc = player.getLocation();
                     loc.setX(stream.readDouble());
                     loc.setY(stream.readDouble());
@@ -52,11 +51,12 @@ public class MessageChannelListener implements PluginMessageListener {
                     pm.findPortal();
                     pm.createPortal();
                     if(pm.isPrepared()) {
-                        MUtilitySpigot.portalQueue.add(pm);
-                        checker = new PortalRequestChecker();
+                        telPlayerNe.teleport(pm.getPortalLocation());
                     }
                     break;
                 case "mens:send-to-overworld":
+                    Player telPlayerOw = Bukkit.getPlayer(stream.readUTF());
+                    assert telPlayerOw != null;
                     loc = player.getLocation();
                     loc.setX(stream.readDouble());
                     loc.setY(stream.readDouble());
@@ -66,8 +66,7 @@ public class MessageChannelListener implements PluginMessageListener {
                     pm.findPortal();
                     pm.createPortal();
                     if(pm.isPrepared()) {
-                        MUtilitySpigot.portalQueue.add(pm);
-                        checker.checkRequests();
+                        telPlayerOw.teleport(pm.getPortalLocation());
                     }
                     break;
                 case "mens:permissionRequest":
@@ -100,20 +99,13 @@ public class MessageChannelListener implements PluginMessageListener {
                     }
                     break;
                 case "mens:teleport-request":
-                    new BukkitRunnable() {
-
-                        @Override
-                        public void run() {
-
-                        }
-                    }.runTaskTimer(plugin, 0, 1);
                     Player telPlayer = Bukkit.getPlayer(stream.readUTF());
                     assert telPlayer != null;
-                    Location location = telPlayer.getLocation();
-                    location.setX(stream.readDouble());
-                    location.setY(stream.readDouble());
-                    location.setZ(stream.readDouble());
-                    location.setWorld( WorldCreator.name(stream.readUTF()).createWorld());
+                    double x = stream.readDouble();
+                    double y = stream.readDouble();
+                    double z = stream.readDouble();
+                    World world = WorldCreator.name(stream.readUTF()).createWorld();
+                    Location location = new Location(world, x, y, z);
                     telPlayer.teleport(location);
                     break;
             }

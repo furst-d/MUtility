@@ -3,24 +3,18 @@ package com.mens.mutility.bungeecord;
 import com.google.common.io.ByteStreams;
 import com.mens.mutility.bungeecord.commands.Lobby;
 import com.mens.mutility.bungeecord.events.JoinEvent;
-import com.mens.mutility.bungeecord.utils.teleport.TeleportRequest;
 import com.mens.mutility.bungeecord.messages.MessageChannelListener;
-import com.mens.mutility.bungeecord.portal.PortalRequest;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public final class MUtilityBungeeCord extends Plugin {
 
     private static MUtilityBungeeCord instance;
-    private MessageChannelListener channelListener;
     private Configuration configuration;
-    public static List<PortalRequest> portalQueue;
 
     /**
      * Spousteci metoda
@@ -29,9 +23,6 @@ public final class MUtilityBungeeCord extends Plugin {
     public void onEnable() {
         setInstance(this);
         getLogger().info("Plugin spusten!");
-
-        channelListener = new MessageChannelListener(this);
-        portalQueue = new ArrayList<>();
 
         loadConfig("config.yml");
         loadCommands();

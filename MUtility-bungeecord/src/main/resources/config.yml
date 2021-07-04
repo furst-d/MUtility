@@ -107,8 +107,8 @@ Servers:
       Z: 0
     Radius: 25000
 
-  End:
-    Name: 'end'
+  Event:
+    Name: 'event'
     Center:
       X: 0
       Z: 0

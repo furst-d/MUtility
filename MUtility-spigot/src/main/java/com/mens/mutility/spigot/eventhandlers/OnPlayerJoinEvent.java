@@ -7,7 +7,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
-import java.sql.SQLException;
 import java.util.TimerTask;
 
 public class OnPlayerJoinEvent implements Listener {
@@ -22,7 +21,6 @@ public class OnPlayerJoinEvent implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        messageChannel.sendToBungeeCord(player, "mens:join-confirmation");
         if(plugin.getServers().isEmpty()) {
             new java.util.Timer().schedule(new TimerTask(){
                 int seconds = 0;
