@@ -24,6 +24,7 @@ import com.mens.mutility.spigot.eventhandlers.OnPlayerJoinEvent;
 import com.mens.mutility.spigot.eventhandlers.OnPlayerPortalEvent;
 import com.mens.mutility.spigot.messages.MessageChannelListener;
 import com.mens.mutility.spigot.utils.ServerInfo;
+import com.mens.mutility.spigot.utils.YamlFile;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -35,9 +36,13 @@ import java.util.Objects;
 public final class MUtilitySpigot extends JavaPlugin {
     private List<CommandData> commands;
     private List<ServerInfo> servers;
-    public static Database db;
+    private Database db;
     private PluginManager pm;
     private MessageChannel messageChannel;
+
+    private YamlFile events;
+    private YamlFile joinEffects;
+    private YamlFile messages;
 
     /**
      * Spousteci metoda
@@ -46,12 +51,13 @@ public final class MUtilitySpigot extends JavaPlugin {
     public void onEnable() {
         getLogger().info("Plugin spusten!");
         pm = Bukkit.getPluginManager();
+        db = new Database(this);
+        db.openConnection();
         loadCommands();
         loadEvents();
         loadConfig();
+        loadFiles();
         registerChannels();
-        db = new Database(this);
-        db.openConnection();
         messageChannel = new MessageChannel(this);
         servers = new ArrayList<>();
     }
@@ -62,6 +68,22 @@ public final class MUtilitySpigot extends JavaPlugin {
     @Override
     public void onDisable() {
         getLogger().info("Plugin vypnut!");
+    }
+
+    public Database getDb() {
+        return db;
+    }
+
+    public YamlFile getEvents() {
+        return events;
+    }
+
+    public YamlFile getJoinEffects() {
+        return joinEffects;
+    }
+
+    public YamlFile getMessages() {
+        return messages;
     }
 
     /**
@@ -107,6 +129,12 @@ public final class MUtilitySpigot extends JavaPlugin {
     private void loadConfig() {
         getConfig().options().copyDefaults(true);
         saveDefaultConfig();
+    }
+
+    private void loadFiles() {
+        events = new YamlFile(this, "/events.yml");
+        joinEffects = new YamlFile(this, "/joineffects.yml");
+        messages = new YamlFile(this, "/messages.yml");
     }
 
     /**

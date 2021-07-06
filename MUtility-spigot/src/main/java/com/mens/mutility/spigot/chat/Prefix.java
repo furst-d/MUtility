@@ -21,8 +21,7 @@ public class Prefix {
             } else {
                 return colors.getSecondaryColor() + "[" +
                         colors.getPrimaryColor() + getPrefixName() +
-                        colors.getSecondaryColor() + "]" +
-                        colors.getSecondaryColor() + " ";
+                        colors.getSecondaryColor() + "]: ";
             }
         } else {
             if(json) {
@@ -30,8 +29,7 @@ public class Prefix {
             } else {
                 return colors.getConsoleSecondaryColor() + "[" +
                         colors.getConsolePrimaryColor() + getPrefixName() +
-                        colors.getConsoleSecondaryColor() + "]" +
-                        colors.getConsoleSecondaryColor() + " ";
+                        colors.getConsoleSecondaryColor() + "]: ";
             }
         }
     }

@@ -10,7 +10,7 @@ import com.mens.mutility.spigot.commands.system.CommandHelp;
 import com.mens.mutility.spigot.commands.system.enums.ArgumentTypes;
 import com.mens.mutility.spigot.commands.system.enums.CommandExecutors;
 import com.mens.mutility.spigot.commands.system.enums.TabCompleterTypes;
-import com.mens.mutility.spigot.database.DatabaseMethods;
+import com.mens.mutility.spigot.database.Database;
 import com.mens.mutility.spigot.utils.MyStringUtils;
 import com.mens.mutility.spigot.utils.PageList;
 import com.mens.mutility.spigot.utils.PageList2;
@@ -28,14 +28,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 
-import static com.mens.mutility.spigot.MUtilitySpigot.db;
 
 public class Zalohy extends CommandHelp {
     private final MUtilitySpigot plugin;
     private PageList helpList;
+    private final Database db;
 
     public Zalohy(MUtilitySpigot plugin) {
         this.plugin = plugin;
+        db = plugin.getDb();
         Prefix prefix = new Prefix();
         helpList = new PageList(10, prefix.getZalohyPrefix(true, true).replace("]", " - nápověda]"), "/zalohy");
     }
@@ -48,7 +49,6 @@ public class Zalohy extends CommandHelp {
         PluginColors colors = new PluginColors();
         Errors errors = new Errors();
         MyStringUtils utils = new MyStringUtils();
-        DatabaseMethods dm = new DatabaseMethods();
         PageList2 showList = new PageList2(10, prefix.getZalohyPrefix(true, false), "/zalohy zobraz");
         PageList2 manageList = new PageList2(10, prefix.getZalohyPrefix(true, false), "/zalohy manage");
         PageList2 adminList = new PageList2(10, prefix.getZalohyPrefix(true, false), "/zalohy admin");
@@ -104,7 +104,7 @@ public class Zalohy extends CommandHelp {
                     deleteMyComp.setText(colors.getSecondaryColor() + " [" + ChatColor.DARK_GRAY + "✖" + colors.getSecondaryColor() + "]");
                     deleteMyComp.setHover(colors.getSecondaryColor() + ">> " + ChatColor.GRAY + "Tuto zálohu již "+ ChatColor.DARK_RED + "nelze " + ChatColor.GRAY + "smazat "+ colors.getSecondaryColor() + "<<");
                     if(rejected == 1) {
-                        String admin = dm.getUserFromID(admin_id);
+                        String admin = getUserFromID(admin_id);
                         textMyComp.setText(" " + colors.getSecondaryColor() +"- ["+ colors.getPrimaryColor() + record_id + colors.getSecondaryColor() + "] "+ ChatColor.DARK_RED + building_name);
                         textMyComp.setHover(
                                 colors.getSecondaryColor() + "X: "+ colors.getPrimaryColor() + x + "\n" +
@@ -118,7 +118,7 @@ public class Zalohy extends CommandHelp {
                                         colors.getSecondaryColor() + "Zamítnul/a: "+ ChatColor.DARK_RED + admin + "\n" +
                                         colors.getSecondaryColor() + "Důvod zamítnutí: "+ ChatColor.DARK_RED + rejected_reason);
                     } else if(completed == 1) {
-                        String admin = dm.getUserFromID(admin_id);
+                        String admin = getUserFromID(admin_id);
                         textMyComp.setText(" " + colors.getSecondaryColor() +"- ["+ colors.getPrimaryColor() + record_id + colors.getSecondaryColor() + "] "+ ChatColor.GREEN + building_name);
                         textMyComp.setHover(
                                 colors.getSecondaryColor() + "X: "+ colors.getPrimaryColor() + x + "\n" +
@@ -387,7 +387,7 @@ public class Zalohy extends CommandHelp {
 
                     MyComp backupMyComp = new MyComp(HoverEvent.Action.SHOW_TEXT);
                     if(rejected == 1) {
-                        String adminUsername = dm.getUserFromID(admin_id);
+                        String adminUsername = getUserFromID(admin_id);
                         backupMyComp.setText(colors.getSecondaryColor() + "- ["+ colors.getPrimaryColor() + record_id + colors.getSecondaryColor() + "] "+ ChatColor.DARK_RED + building_name);
                         backupMyComp.setHover(
                                 colors.getSecondaryColor() + "X: "+ colors.getPrimaryColor() + x + "\n" +
@@ -401,7 +401,7 @@ public class Zalohy extends CommandHelp {
                                         colors.getSecondaryColor() + "Zamítnul/a: "+ ChatColor.DARK_RED + adminUsername + "\n" +
                                         colors.getSecondaryColor() + "Důvod zamítnutí: "+ ChatColor.DARK_RED + rejected_reason);
                     } else if(completed == 1) {
-                        String adminUsername = dm.getUserFromID(admin_id);
+                        String adminUsername = getUserFromID(admin_id);
                         backupMyComp.setText(colors.getSecondaryColor() + "- ["+ colors.getPrimaryColor() + record_id + colors.getSecondaryColor() + "] "+ ChatColor.GREEN + building_name);
                         backupMyComp.setHover(
                                 colors.getSecondaryColor() + "X: "+ colors.getPrimaryColor() + x + "\n" +
@@ -845,5 +845,23 @@ public class Zalohy extends CommandHelp {
             e.printStackTrace();
         }
         return (count != 0);
+    }
+
+    private String getUserFromID(int id) {
+        String username = "";
+        try {
+            PreparedStatement stm = db.getCon().prepareStatement("SELECT username FROM web_users WHERE id = ?");
+            stm.setInt(1, id);
+            ResultSet rs =  stm.executeQuery();
+            if(rs.next()) {
+                username = rs.getString(1);
+            }
+        } catch(CommunicationsException e) {
+            db.openConnection();
+            getUserFromID(id);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return username;
     }
 }

@@ -10,7 +10,9 @@ import com.mens.mutility.spigot.commands.system.CommandHelp;
 import com.mens.mutility.spigot.commands.system.enums.ArgumentTypes;
 import com.mens.mutility.spigot.commands.system.enums.CommandExecutors;
 import com.mens.mutility.spigot.commands.system.enums.TabCompleterTypes;
+import com.mens.mutility.spigot.database.Database;
 import com.mens.mutility.spigot.messages.MessageChannel;
+import com.mens.mutility.spigot.utils.DeleteConfirmation;
 import com.mens.mutility.spigot.utils.MyStringUtils;
 import com.mens.mutility.spigot.utils.PageList;
 import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
@@ -20,9 +22,9 @@ import org.bukkit.entity.Player;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
-
-import static com.mens.mutility.spigot.MUtilitySpigot.db;
 
 public class Event extends CommandHelp {
     private final MUtilitySpigot plugin;
@@ -34,9 +36,12 @@ public class Event extends CommandHelp {
     private final PageList manageList;
     private final PageList manageIDList;
     private final MessageChannel messageChannel;
+    private final Database db;
+    private final List<DeleteConfirmation> deleteConfirmationList;
 
     public Event(MUtilitySpigot plugin) {
         this.plugin = plugin;
+        db = plugin.getDb();
         prefix = new Prefix();
         errors = new Errors();
         strUt = new MyStringUtils();
@@ -45,6 +50,7 @@ public class Event extends CommandHelp {
         manageList = new PageList(10, prefix.getEventPrefix(true, true).replace("]", " - seznam]"), "/event spravuj");
         manageIDList = new PageList(20, prefix.getEventPrefix(true, true).replace("]", " - úprava]"), "/event spravuj");
         messageChannel = new MessageChannel(plugin);
+        deleteConfirmationList = new ArrayList<>();
     }
 
     /**
@@ -116,9 +122,35 @@ public class Event extends CommandHelp {
             }
         });
         CommandData deleteID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.eventy.delete", CommandExecutors.PLAYER, t -> {
-            //TODO
-            System.out.println("Delete ID");
+            int id = Integer.parseInt(t.getArgs()[1]);
+            if(isEvent(id)) {
+                EventData data = getEventData(id);
+                if(data != null) {
+                    DeleteConfirmation deleteConfirmation = new DeleteConfirmation(id, (Player) t.getSender(), "/event delete confirm");
+                    deleteConfirmation.setMessage(new JsonBuilder()
+                            .addJsonSegment(prefix.getEventPrefix(true, true))
+                            .text(": Opravdu si přejete odstranit event ")
+                            .color(colors.getSecondaryColorHEX())
+                            .text(data.getName())
+                            .color(colors.getPrimaryColorHEX())
+                            .text("?")
+                            .color(colors.getSecondaryColorHEX()));
+                    if(deleteConfirmationList.stream().noneMatch(x -> (x.getId() == id
+                            && x.getPlayer().getName().equals(t.getSender().getName())
+                            && !x.isFinished()))) {
+                        deleteConfirmation.startTimer();
+                        deleteConfirmationList.add(deleteConfirmation);
+                    } else {
+                        t.getSender().sendMessage(prefix.getEventPrefix(true, false)
+                                + colors.getSecondaryColor() + "Žádost o potvrzení již byla vytvořena!");
+                    }
+
+                }
+            } else {
+                t.getSender().sendMessage(prefix.getEventPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1],true, false));
+            }
         });
+        CommandData deleteConfirm = new CommandData(ArgumentTypes.DEFAULT, "confirm", TabCompleterTypes.NONE);
 
         // 3. stupeň
         CommandData ano = new CommandData(ArgumentTypes.DEFAULT, "ano", TabCompleterTypes.DEFAULT, "mutility.eventy.otazky.create");
@@ -160,6 +192,37 @@ public class Event extends CommandHelp {
         CommandData pageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.eventy.manage", CommandExecutors.BOTH, t -> {
             loadManageListData();
             manageList.getList(Integer.parseInt(t.getArgs()[2])).toPlayer((Player) t.getSender());
+        });
+        CommandData deleteConfirmID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.eventy.delete", CommandExecutors.PLAYER, t -> {
+            int id = Integer.parseInt(t.getArgs()[2]);
+            if(isEvent(id)) {
+                EventData data = getEventData(id);
+                if(data != null) {
+                    boolean valid = false;
+                    for (int i = deleteConfirmationList.size() - 1; i >= 0; i--) {
+                        if(deleteConfirmationList.get(i).getId() == id
+                                && deleteConfirmationList.get(i).getPlayer().getName().equals(t.getSender().getName())) {
+                            if(!deleteConfirmationList.get(i).isFinished()) {
+                                valid = true;
+                                deleteConfirmationList.get(i).setFinished(true);
+                                deleteEvent(id);
+                                t.getSender().sendMessage(prefix.getEventPrefix(true, false)
+                                        + colors.getSecondaryColor() + "Event "
+                                        + colors.getPrimaryColor() + data.getName()
+                                        + colors.getSecondaryColor() + " byl smazán!");
+                                break;
+                            }
+                        }
+                    }
+                    if(!valid) {
+                        t.getSender().sendMessage(prefix.getEventPrefix(true, false)
+                                + colors.getSecondaryColor() + "Potvrzení o smazání eventu není platné!");
+                    }
+                    deleteConfirmationList.removeIf(DeleteConfirmation::isFinished);
+                }
+            } else {
+                t.getSender().sendMessage(prefix.getEventPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1],true, false));
+            }
         });
 
         // 4. stupeň
@@ -260,6 +323,7 @@ public class Event extends CommandHelp {
         fakeMessage.link(fakeMessageID);
         tp.link(tpID);
         delete.link(deleteID);
+        delete.link(deleteConfirm);
 
         otazky.link(ano);
         otazky.link(ne);
@@ -280,6 +344,7 @@ public class Event extends CommandHelp {
         manageID.link(setObjective);
         manageID.link(setNote);
         page.link(pageID);
+        deleteConfirm.link(deleteConfirmID);
 
         ano.link(otazkaAno);
         ne.link(otazkaNe);
@@ -806,5 +871,17 @@ public class Event extends CommandHelp {
             throwables.printStackTrace();
         }
         return null;
+    }
+
+    private void deleteEvent(int id) {
+        try {
+            PreparedStatement stm = db.getCon().prepareStatement("DELETE FROM " + prefix.getTablePrefix(plugin) + "events WHERE id=" + id + "");
+            stm.execute();
+        } catch (CommunicationsException e) {
+            db.openConnection();
+            deleteEvent(id);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
     }
 }
