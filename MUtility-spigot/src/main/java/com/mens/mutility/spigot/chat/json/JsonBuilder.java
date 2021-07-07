@@ -148,7 +148,10 @@ public class JsonBuilder {
     public void toPlayer( List<Player> players ) {
         for(Player p : players)
             this.toPlayer( p );
+    }
 
+    public void toAllPlayers() {
+        Bukkit.getOnlinePlayers().forEach(this::toPlayer);
     }
 
     public void toPlayer(Player player) {

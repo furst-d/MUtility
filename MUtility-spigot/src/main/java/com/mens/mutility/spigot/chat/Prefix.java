@@ -79,6 +79,11 @@ public class Prefix {
         return getPrefix(hexColor, json);
     }
 
+    public String getCustomPrefix(String prefix, boolean hexColor, boolean json) {
+        setPrefixName(prefix);
+        return getPrefix(hexColor, json);
+    }
+
     public String getTablePrefix(MUtilitySpigot plugin) {
         return plugin.getConfig().getString("MYSQL.Table prefix");
     }

@@ -5,6 +5,7 @@ import com.mens.mutility.spigot.chat.Errors;
 import com.mens.mutility.spigot.chat.PluginColors;
 import com.mens.mutility.spigot.chat.Prefix;
 import com.mens.mutility.spigot.chat.json.JsonBuilder;
+import com.mens.mutility.spigot.commands.commands.event.programmed.questions.Questions;
 import com.mens.mutility.spigot.commands.system.CommandData;
 import com.mens.mutility.spigot.commands.system.CommandHelp;
 import com.mens.mutility.spigot.commands.system.enums.ArgumentTypes;
@@ -38,6 +39,7 @@ public class Event extends CommandHelp {
     private final MessageChannel messageChannel;
     private final Database db;
     private final List<DeleteConfirmation> deleteConfirmationList;
+    private final Questions questions;
 
     public Event(MUtilitySpigot plugin) {
         this.plugin = plugin;
@@ -51,6 +53,7 @@ public class Event extends CommandHelp {
         manageIDList = new PageList(20, prefix.getEventPrefix(true, true).replace("]", " - úprava]"), "/event spravuj");
         messageChannel = new MessageChannel(plugin);
         deleteConfirmationList = new ArrayList<>();
+        questions = new Questions(plugin);
     }
 
     /**
@@ -156,12 +159,14 @@ public class Event extends CommandHelp {
         CommandData ano = new CommandData(ArgumentTypes.DEFAULT, "ano", TabCompleterTypes.DEFAULT, "mutility.eventy.otazky.create");
         CommandData ne = new CommandData(ArgumentTypes.DEFAULT, "ne", TabCompleterTypes.DEFAULT, "mutility.eventy.otazky.create");
         CommandData resetEvent = new CommandData(ArgumentTypes.DEFAULT, "resetevent", TabCompleterTypes.DEFAULT, "mutility.eventy.otazky.reset", CommandExecutors.BOTH, t -> {
-            //TODO
-            System.out.println("Reset event");
+            questions.resetEvent();
+            t.getSender().sendMessage(prefix.getEventPrefix(true, false)
+                    + colors.getSecondaryColor() + "Event byl zresetován!");
         });
         CommandData resetKolo = new CommandData(ArgumentTypes.DEFAULT, "resetkolo", TabCompleterTypes.DEFAULT, "mutility.eventy.otazky.reset", CommandExecutors.BOTH, t -> {
-            //TODO
-            System.out.println("Reset kolo");
+            questions.resetKolo();
+            t.getSender().sendMessage(prefix.getEventPrefix(true, false)
+                    + colors.getSecondaryColor() + "Kolo bylo zresetováno!");
         });
         CommandData vote = new CommandData(ArgumentTypes.DEFAULT, "vote", TabCompleterTypes.NONE);
         CommandData startHledacka = new CommandData(ArgumentTypes.DEFAULT, "start", TabCompleterTypes.DEFAULT, "mutility.eventy.hledacka.create", CommandExecutors.BOTH, t -> {
@@ -206,8 +211,7 @@ public class Event extends CommandHelp {
                                 valid = true;
                                 deleteConfirmationList.get(i).setFinished(true);
                                 deleteEvent(id);
-                                t.getSender().sendMessage(prefix.getEventPrefix(true, false)
-                                        + colors.getSecondaryColor() + "Event "
+                                t.getSender().sendMessage(prefix.getEventPrefix(true, false) + "Event "
                                         + colors.getPrimaryColor() + data.getName()
                                         + colors.getSecondaryColor() + " byl smazán!");
                                 break;
@@ -216,7 +220,7 @@ public class Event extends CommandHelp {
                     }
                     if(!valid) {
                         t.getSender().sendMessage(prefix.getEventPrefix(true, false)
-                                + colors.getSecondaryColor() + "Potvrzení o smazání eventu není platné!");
+                                + "Potvrzení o smazání eventu není platné!");
                     }
                     deleteConfirmationList.removeIf(DeleteConfirmation::isFinished);
                 }
@@ -226,21 +230,21 @@ public class Event extends CommandHelp {
         });
 
         // 4. stupeň
-        CommandData otazkaAno = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Otázka >]", "mutility.eventy.otazky.create", CommandExecutors.BOTH, t -> {
-            //TODO
-            System.out.println("Otazka ano");
-        });
-        CommandData otazkaNe = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Otázka >]", "mutility.eventy.otazky.create", CommandExecutors.BOTH, t -> {
-            //TODO
-            System.out.println("Otazka ne");
-        });
+        CommandData otazkaAno = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Otázka >]", "mutility.eventy.otazky.create", CommandExecutors.BOTH, t -> questions.run(strUt.getStringFromArgs(t.getArgs(), 3), t.getArgs()[2]));
+        CommandData otazkaNe = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Otázka >]", "mutility.eventy.otazky.create", CommandExecutors.BOTH, t -> questions.run(strUt.getStringFromArgs(t.getArgs(), 3), t.getArgs()[2]));
         CommandData voteAno = new CommandData(ArgumentTypes.DEFAULT, "ano", TabCompleterTypes.NONE, "mutility.eventy.otazky.vote", CommandExecutors.PLAYER, t -> {
-            //TODO
-            System.out.println("Vote ano");
+            if(questions.isRegistered((Player)t.getSender())) {
+                questions.vote((Player)t.getSender(), t.getArgs()[3]);
+            } else {
+                t.getSender().sendMessage(prefix.getEventPrefix(true, false) + "Již jsi hlasoval!");
+            }
         });
         CommandData voteNe = new CommandData(ArgumentTypes.DEFAULT, "ne", TabCompleterTypes.NONE, "mutility.eventy.otazky.vote", CommandExecutors.PLAYER, t -> {
-            //TODO
-            System.out.println("Vote ne");
+            if(questions.isRegistered((Player)t.getSender())) {
+                questions.vote((Player)t.getSender(), t.getArgs()[3]);
+            } else {
+                t.getSender().sendMessage(prefix.getEventPrefix(true, false) + "Již jsi hlasoval!");
+            }
         });
         CommandData blockHledacka = new CommandData(ArgumentTypes.STRING, TabCompleterTypes.BLOCKS, "mutility.eventy.hledacka.create", CommandExecutors.PLAYER, t -> {
             //TODO

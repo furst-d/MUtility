@@ -70,6 +70,10 @@ public final class MUtilitySpigot extends JavaPlugin {
         getLogger().info("Plugin vypnut!");
     }
 
+    public MUtilitySpigot getInstance() {
+        return this;
+    }
+
     public Database getDb() {
         return db;
     }

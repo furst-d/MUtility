@@ -8,6 +8,7 @@ Hledacka:
   PosX2: 75145
   PosY2: 256
   PosZ2: 502
+  World: world
 
 Otazky:
   PosX1: 154447
@@ -16,6 +17,7 @@ Otazky:
   PosX2: 154413
   PosY2: 80
   PosZ2: 65645
+  World: world
 
 Hrbitov:
   Enable: false
@@ -27,3 +29,4 @@ Hrbitov:
   PosX2: 154168
   PosY2: 88
   PosZ2: 65531
+  World: world
