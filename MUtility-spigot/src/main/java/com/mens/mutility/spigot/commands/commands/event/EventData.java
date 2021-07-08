@@ -58,4 +58,32 @@ public class EventData {
     public String getNote() {
         return note;
     }
+
+    public void setTpX(float tpX) {
+        this.tpX = tpX;
+    }
+
+    public void setTpY(float tpY) {
+        this.tpY = tpY;
+    }
+
+    public void setTpZ(float tpZ) {
+        this.tpZ = tpZ;
+    }
+
+    public void setWorld(String world) {
+        this.world = world;
+    }
+
+    public void setServer(String server) {
+        this.server = server;
+    }
+
+    public void setObjective(String objective) {
+        this.objective = objective;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
+    }
 }

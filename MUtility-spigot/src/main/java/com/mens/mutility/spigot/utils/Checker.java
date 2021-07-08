@@ -3,6 +3,8 @@ package com.mens.mutility.spigot.utils;
 import com.mens.mutility.spigot.MUtilitySpigot;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -119,5 +121,32 @@ public class Checker {
                 && (location.getZ() >= posZ1)
                 && (location.getZ() <= posZ2)
                 && (Objects.requireNonNull(location.getWorld()).getName().equals(world));
+    }
+
+    public boolean checkBlock(String block) {
+        for(Material m : Material.values()){
+            if(m.toString().toLowerCase().equalsIgnoreCase(block)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean checkWorld(String worldName) {
+        for(World world : Bukkit.getWorlds()){
+            if(world.getName().equalsIgnoreCase(worldName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean checkServer(String serverName) {
+        for(ServerInfo server : plugin.getServers()){
+            if(server.getName().equalsIgnoreCase(serverName)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

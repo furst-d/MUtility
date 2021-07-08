@@ -226,11 +226,11 @@ public class Questions {
         activeQuestion = true;
         getTitle(String.valueOf(10));
         Timer timer = new Timer();
-        timer.setOnFinish(t -> {
+        timer.setOnFinish((sec, tt) -> {
             activeQuestion = false;
             getAnswer();
         });
-        timer.setOnRunning(sec -> {
+        timer.setOnRunning((sec, tt) -> {
             if(sec < 10) {
                 getTitle(String.valueOf(10 - sec));
             }

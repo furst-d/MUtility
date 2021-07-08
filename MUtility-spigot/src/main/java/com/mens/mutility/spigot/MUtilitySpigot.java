@@ -6,6 +6,8 @@
  */
 package com.mens.mutility.spigot;
 
+import com.mens.mutility.spigot.commands.commands.event.programmed.finder.eventhandlers.OnPlayerInteractEvent;
+import com.mens.mutility.spigot.commands.commands.event.programmed.graveyard.eventhandlers.OnBlockBreakEvent;
 import com.mens.mutility.spigot.messages.MessageChannel;
 import com.mens.mutility.spigot.commands.commands.anketa.Anketa;
 import com.mens.mutility.spigot.commands.commands.minv.MInv;
@@ -125,6 +127,8 @@ public final class MUtilitySpigot extends JavaPlugin {
         pm.registerEvents(new OnEntityPortalEvent(this), this);
         pm.registerEvents(new OnPlayerPortalEvent(this), this);
         pm.registerEvents(new OnPlayerJoinEvent(this), this);
+        pm.registerEvents(new OnPlayerInteractEvent(this), this);
+        pm.registerEvents(new OnBlockBreakEvent(this), this);
     }
 
     /**

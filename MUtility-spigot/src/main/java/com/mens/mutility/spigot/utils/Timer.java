@@ -1,12 +1,12 @@
 package com.mens.mutility.spigot.utils;
 
 import java.util.TimerTask;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 public class Timer {
     private boolean running;
-    private Consumer<Integer> onRunning;
-    private Consumer<Integer> onFinish;
+    private BiConsumer<Integer, TimerTask> onRunning;
+    private BiConsumer<Integer, TimerTask> onFinish;
 
     public Timer() {
         running = false;
@@ -18,11 +18,11 @@ public class Timer {
         this.running = running;
     }
 
-    public void setOnRunning(Consumer<Integer> onRunning) {
+    public void setOnRunning(BiConsumer<Integer, TimerTask> onRunning) {
         this.onRunning = onRunning;
     }
 
-    public void setOnFinish(Consumer<Integer> onFinish) {
+    public void setOnFinish(BiConsumer<Integer, TimerTask> onFinish) {
         this.onFinish = onFinish;
     }
 
@@ -35,13 +35,13 @@ public class Timer {
                 if(running) {
                     if(seconds == timeInSec) {
                         if(onFinish != null) {
-                            onFinish.accept(seconds);
+                            onFinish.accept(seconds, this);
                         }
                         running = false;
                         this.cancel();
                     }
                     if(onRunning != null) {
-                        onRunning.accept(seconds);
+                        onRunning.accept(seconds, this);
                     }
                     seconds++;
                 } else {
