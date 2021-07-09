@@ -76,6 +76,10 @@ public final class MUtilitySpigot extends JavaPlugin {
         return this;
     }
 
+    public PluginManager getPm() {
+        return pm;
+    }
+
     public Database getDb() {
         return db;
     }

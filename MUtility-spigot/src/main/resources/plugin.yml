@@ -101,6 +101,9 @@ permissions:
   mutility.inventory.manage:
     default: op
     description: Sprava inventare
+  mutility.inventory.show:
+    default: op
+    description: Zobrazeni inventare
   mutility.anketa.help:
     default: op
     description: Napoveda k anketam

@@ -13,6 +13,7 @@ import com.mens.mutility.spigot.commands.system.enums.ArgumentTypes;
 import com.mens.mutility.spigot.commands.system.enums.CommandExecutors;
 import com.mens.mutility.spigot.commands.system.enums.TabCompleterTypes;
 import com.mens.mutility.spigot.database.Database;
+import com.mens.mutility.spigot.database.DatabaseTables;
 import com.mens.mutility.spigot.messages.MessageChannel;
 import com.mens.mutility.spigot.utils.Checker;
 import com.mens.mutility.spigot.utils.DeleteConfirmation;
@@ -45,6 +46,7 @@ public class Event extends CommandHelp {
     private final EventFinder finder;
     private final EventFinder graveyard;
     private final Checker checker;
+    private final DatabaseTables tables;
 
     public Event(MUtilitySpigot plugin) {
         this.plugin = plugin;
@@ -62,6 +64,7 @@ public class Event extends CommandHelp {
         finder = new EventFinder(plugin, "Hledacka");
         graveyard = new EventFinder(plugin, "Hrbitov");
         checker = new Checker(plugin);
+        tables = new DatabaseTables(plugin);
     }
 
     /**
@@ -468,7 +471,7 @@ public class Event extends CommandHelp {
     private void loadManageListData() {
         try {
             manageList.clear();
-            PreparedStatement stm = db.getCon().prepareStatement("SELECT id, event_name, tpX, tpY, tpZ, world, server, objective, note FROM " + prefix.getTablePrefix(plugin) +"events");
+            PreparedStatement stm = db.getCon().prepareStatement("SELECT id, event_name, tpX, tpY, tpZ, world, server, objective, note FROM " + tables.getEventsTable());
             ResultSet rs =  stm.executeQuery();
             String startHover = new JsonBuilder(">> ")
                     .color(colors.getSecondaryColorHEX())
@@ -651,7 +654,7 @@ public class Event extends CommandHelp {
         manageIDList.clear();
         try {
             int id = Integer.parseInt(idStr);
-            PreparedStatement stm = db.getCon().prepareStatement("SELECT event_name, tpX, tpY, tpZ, world, server, objective, note FROM "+ prefix.getTablePrefix(plugin) + "events WHERE id = ?");
+            PreparedStatement stm = db.getCon().prepareStatement("SELECT event_name, tpX, tpY, tpZ, world, server, objective, note FROM "+ tables.getEventsTable() + " WHERE id = ?");
             stm.setInt(1, id);
             ResultSet rs =  stm.executeQuery();
             String manageTPHover = new JsonBuilder(">> Klikni pro úpravu ")
@@ -815,7 +818,7 @@ public class Event extends CommandHelp {
     private void createEvent(String eventName, Player player) {
         try {
             PreparedStatement stm;
-            stm = db.getCon().prepareStatement("INSERT INTO " + prefix.getTablePrefix(plugin) + "events (event_name, tpX, tpY, tpZ, world, server, objective, note) VALUE (?, ?, ?, ?, ?, ?, ?, ?)");
+            stm = db.getCon().prepareStatement("INSERT INTO " + tables.getEventsTable() + " (event_name, tpX, tpY, tpZ, world, server, objective, note) VALUE (?, ?, ?, ?, ?, ?, ?, ?)");
             stm.setString(1, eventName);
             stm.setInt(2, 0);
             stm.setInt(3, 100);
@@ -857,7 +860,7 @@ public class Event extends CommandHelp {
     private int getEventIdFromName(String name) {
         int id = 0;
         try {
-            PreparedStatement stm = db.getCon().prepareStatement("SELECT id FROM " + prefix.getTablePrefix(plugin) + "events WHERE event_name = ?");
+            PreparedStatement stm = db.getCon().prepareStatement("SELECT id FROM " + tables.getEventsTable() + " WHERE event_name = ?");
             stm.setString(1, name);
             ResultSet rs =  stm.executeQuery();
             if(rs.next()) {
@@ -875,7 +878,7 @@ public class Event extends CommandHelp {
     private boolean isEvent(int id) {
         int count = 0;
         try {
-            PreparedStatement stm = db.getCon().prepareStatement("SELECT count(id) FROM " + prefix.getTablePrefix(plugin) + "events WHERE id= ?");
+            PreparedStatement stm = db.getCon().prepareStatement("SELECT count(id) FROM " + tables.getEventsTable() + " WHERE id= ?");
             stm.setInt(1, id);
             ResultSet rs =  stm.executeQuery();
             if(rs.next()) {
@@ -893,7 +896,7 @@ public class Event extends CommandHelp {
     private PageList getEventMessageData(int id) {
         PageList list = new PageList(10, prefix.getEventPrefix(true, true), null);
         try {
-            PreparedStatement stm = db.getCon().prepareStatement("SELECT event_name, objective, note FROM " + prefix.getTablePrefix(plugin) + "events WHERE id= ?");
+            PreparedStatement stm = db.getCon().prepareStatement("SELECT event_name, objective, note FROM " + tables.getEventsTable() + " WHERE id= ?");
             stm.setInt(1, id);
             ResultSet rs =  stm.executeQuery();
             String name = "";
@@ -943,7 +946,7 @@ public class Event extends CommandHelp {
     private EventData getEventData(int id) {
         try {
             EventData data;
-            PreparedStatement stm = db.getCon().prepareStatement("SELECT event_name, tpX, tpY, tpZ, world, server, objective, note FROM " + prefix.getTablePrefix(plugin) + "events WHERE id= ?");
+            PreparedStatement stm = db.getCon().prepareStatement("SELECT event_name, tpX, tpY, tpZ, world, server, objective, note FROM " + tables.getEventsTable() + " WHERE id= ?");
             stm.setInt(1, id);
             ResultSet rs =  stm.executeQuery();
             if(rs.next()) {
@@ -970,7 +973,7 @@ public class Event extends CommandHelp {
     private void setEventData(EventData eventData) {
         try {
             EventData data;
-            PreparedStatement stm = db.getCon().prepareStatement("UPDATE " + prefix.getTablePrefix(plugin) + "events SET event_name = ?, tpX = ?, tpY = ?, tpZ = ?, world = ?, server = ?, objective = ?, note = ? WHERE id = ?");
+            PreparedStatement stm = db.getCon().prepareStatement("UPDATE " + tables.getEventsTable() + " SET event_name = ?, tpX = ?, tpY = ?, tpZ = ?, world = ?, server = ?, objective = ?, note = ? WHERE id = ?");
             stm.setString(1, eventData.getName());
             stm.setFloat(2, eventData.getTpX());
             stm.setFloat(3, eventData.getTpY());
@@ -991,7 +994,7 @@ public class Event extends CommandHelp {
 
     private void deleteEvent(int id) {
         try {
-            PreparedStatement stm = db.getCon().prepareStatement("DELETE FROM " + prefix.getTablePrefix(plugin) + "events WHERE id=" + id + "");
+            PreparedStatement stm = db.getCon().prepareStatement("DELETE FROM " + tables.getEventsTable() + "events WHERE id=" + id + "");
             stm.execute();
         } catch (CommunicationsException e) {
             db.openConnection();

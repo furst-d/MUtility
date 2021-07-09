@@ -11,9 +11,11 @@ import com.mens.mutility.spigot.commands.system.enums.ArgumentTypes;
 import com.mens.mutility.spigot.commands.system.enums.CommandExecutors;
 import com.mens.mutility.spigot.commands.system.enums.TabCompleterTypes;
 import com.mens.mutility.spigot.database.Database;
+import com.mens.mutility.spigot.database.DatabaseTables;
 import com.mens.mutility.spigot.utils.MyStringUtils;
 import com.mens.mutility.spigot.utils.PageList;
 import com.mens.mutility.spigot.utils.PageList2;
+import com.mens.mutility.spigot.utils.PlayerManager;
 import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -33,12 +35,14 @@ public class Zalohy extends CommandHelp {
     private final MUtilitySpigot plugin;
     private PageList helpList;
     private final Database db;
+    private final DatabaseTables tables;
 
     public Zalohy(MUtilitySpigot plugin) {
         this.plugin = plugin;
         db = plugin.getDb();
         Prefix prefix = new Prefix();
         helpList = new PageList(10, prefix.getZalohyPrefix(true, true).replace("]", " - nápověda]"), "/zalohy");
+        tables = new DatabaseTables(plugin);
     }
 
     /**
@@ -66,7 +70,7 @@ public class Zalohy extends CommandHelp {
             showList.clear();
             try {
                 Player player = (Player) t.getSender();
-                PreparedStatement stm = db.getCon().prepareStatement("SELECT record_id, building_name, note, rejected, rejected_reason, completed, admin_id, posX, posY, posZ, world, create_date, update_date FROM "+ prefix.getTablePrefix(plugin) + "zalohy WHERE user_id = (SELECT id FROM web_users WHERE username = ?) ORDER BY record_id");
+                PreparedStatement stm = db.getCon().prepareStatement("SELECT record_id, building_name, note, rejected, rejected_reason, completed, admin_id, posX, posY, posZ, world, create_date, update_date FROM "+ tables.getZalohyTable() + " WHERE user_id = (SELECT id FROM web_users WHERE username = ?) ORDER BY record_id");
                 stm.setString(1, player.getName());
                 ResultSet rs =  stm.executeQuery();
                 int record_id;
@@ -166,7 +170,7 @@ public class Zalohy extends CommandHelp {
                 int statRejected = 0;
                 int statTotal = 0;
                 float statPercent = 0;
-                PreparedStatement stm = db.getCon().prepareStatement("SELECT (SELECT count(completed) FROM "+ prefix.getTablePrefix(plugin) + "zalohy WHERE completed = 1),(SELECT count(completed) FROM "+ prefix.getTablePrefix(plugin) + "zalohy WHERE rejected = 1),(SELECT count(completed) FROM "+ prefix.getTablePrefix(plugin) + "zalohy) FROM "+ prefix.getTablePrefix(plugin) + "zalohy LIMIT 1");
+                PreparedStatement stm = db.getCon().prepareStatement("SELECT (SELECT count(completed) FROM "+ tables.getZalohyTable() + " WHERE completed = 1),(SELECT count(completed) FROM "+ tables.getZalohyTable() + "zalohy WHERE rejected = 1),(SELECT count(completed) FROM "+ tables.getZalohyTable() + "zalohy) FROM "+ tables.getZalohyTable() + "zalohy LIMIT 1");
                 ResultSet rs =  stm.executeQuery();
                 if(rs.next()) {
                     statCompleted = rs.getInt(1);
@@ -174,7 +178,7 @@ public class Zalohy extends CommandHelp {
                     statTotal = rs.getInt(3);
                     statPercent = 100 / (float)statTotal * (statCompleted + statRejected);
                 }
-                stm = db.getCon().prepareStatement("SELECT (SELECT username FROM web_users WHERE id = user_id), SUM(rejected) AS zamitnute, SUM(completed) AS presunute, count(user_id) AS celkem, CASE WHEN (SUM(rejected)+SUM(completed)) = count(user_id) THEN 1 ELSE 0 END AS hotovo FROM " + prefix.getTablePrefix(plugin) + "zalohy GROUP BY user_id ORDER BY hotovo");
+                stm = db.getCon().prepareStatement("SELECT (SELECT username FROM web_users WHERE id = user_id), SUM(rejected) AS zamitnute, SUM(completed) AS presunute, count(user_id) AS celkem, CASE WHEN (SUM(rejected)+SUM(completed)) = count(user_id) THEN 1 ELSE 0 END AS hotovo FROM " + tables.getZalohyTable() + " GROUP BY user_id ORDER BY hotovo");
                 rs =  stm.executeQuery();
                 String username;
                 int rejected;
@@ -242,10 +246,11 @@ public class Zalohy extends CommandHelp {
             try {
                 Player player = (Player) t.getSender();
                 int id = Integer.parseInt(t.getArgs()[1]);
-                if(isZaloha(player, id, false, prefix.getTablePrefix(plugin))) {
-                    PreparedStatement stm = db.getCon().prepareStatement("SELECT rejected, completed FROM " + prefix.getTablePrefix(plugin) + "zalohy WHERE record_id= ? and user_id = (SELECT id FROM web_users WHERE username = ?)");
+                if(isZaloha(player, id, false, tables.getZalohyTable())) {
+                    PreparedStatement stm = db.getCon().prepareStatement("SELECT rejected, completed FROM " + tables.getZalohyTable() + " WHERE record_id= ? AND user_id = ?");
                     stm.setInt(1, id);
                     stm.setString(2, player.getName());
+                    stm.setInt(3, new PlayerManager(plugin).getUserId(player.getName()));
                     ResultSet rs =  stm.executeQuery();
                     int rejected = 0;
                     int completed = 0;
@@ -254,7 +259,7 @@ public class Zalohy extends CommandHelp {
                         completed = rs.getInt(2);
                     }
                     if(rejected == 0 && completed == 0) {
-                        stm = db.getCon().prepareStatement("SELECT building_name, posX, posY, posZ, note FROM " + prefix.getTablePrefix(plugin) + "zalohy WHERE user_id = (SELECT id FROM web_users WHERE username = ?) AND record_id = ?");
+                        stm = db.getCon().prepareStatement("SELECT building_name, posX, posY, posZ, note FROM " + tables.getZalohyTable() + " WHERE user_id = (SELECT id FROM web_users WHERE username = ?) AND record_id = ?");
                         stm.setString(1, player.getName());
                         stm.setInt(2, id);
                         rs =  stm.executeQuery();
@@ -292,8 +297,8 @@ public class Zalohy extends CommandHelp {
             int id = Integer.parseInt(t.getArgs()[1]);
             Player player = (Player) t.getSender();
             try {
-                if(isZaloha(player, id, false, prefix.getTablePrefix(plugin))) {
-                    PreparedStatement stm = db.getCon().prepareStatement("SELECT rejected, completed FROM "+ prefix.getTablePrefix(plugin) + "zalohy WHERE record_id= ? and user_id = (SELECT id FROM web_users WHERE username = ?)");
+                if(isZaloha(player, id, false, tables.getZalohyTable())) {
+                    PreparedStatement stm = db.getCon().prepareStatement("SELECT rejected, completed FROM "+ tables.getZalohyTable() + " WHERE record_id= ? and user_id = (SELECT id FROM web_users WHERE username = ?)");
                     stm.setInt(1, id);
                     stm.setString(2, player.getName());
                     ResultSet rs =  stm.executeQuery();
@@ -306,18 +311,18 @@ public class Zalohy extends CommandHelp {
                     if(rejected == 0 && completed == 0) {
                         int max_record_id = 1;
                         String name = "";
-                        stm = db.getCon().prepareStatement("SELECT building_name FROM "+ prefix.getTablePrefix(plugin) + "zalohy WHERE user_id = (SELECT id FROM web_users WHERE username = ?) AND record_id = ?");
+                        stm = db.getCon().prepareStatement("SELECT building_name FROM "+ tables.getZalohyTable() + " WHERE user_id = (SELECT id FROM web_users WHERE username = ?) AND record_id = ?");
                         stm.setString(1, player.getName());
                         stm.setInt(2, id);
                         rs = stm.executeQuery();
                         if(rs.next()) {
                             name = rs.getString(1);
                         }
-                        stm = db.getCon().prepareStatement("DELETE FROM "+ prefix.getTablePrefix(plugin) + "zalohy WHERE user_id = (SELECT id FROM web_users WHERE username = ?) AND record_id = ?");
+                        stm = db.getCon().prepareStatement("DELETE FROM "+ tables.getZalohyTable() + " WHERE user_id = (SELECT id FROM web_users WHERE username = ?) AND record_id = ?");
                         stm.setString(1, player.getName());
                         stm.setInt(2, id);
                         stm.executeUpdate();
-                        stm = db.getCon().prepareStatement("SELECT MAX(record_id) FROM "+ prefix.getTablePrefix(plugin) + "zalohy WHERE user_id = (SELECT id FROM web_users WHERE username = ?)");
+                        stm = db.getCon().prepareStatement("SELECT MAX(record_id) FROM "+ tables.getZalohyTable() + " WHERE user_id = (SELECT id FROM web_users WHERE username = ?)");
                         stm.setString(1, player.getName());
                         rs = stm.executeQuery();
                         if(rs.next()) {
@@ -325,7 +330,7 @@ public class Zalohy extends CommandHelp {
                         }
                         while(id <= max_record_id) {
                             int currentId = id - 1;
-                            stm = db.getCon().prepareStatement("UPDATE "+ prefix.getTablePrefix(plugin) + "zalohy SET record_id = ? WHERE user_id = (SELECT id FROM web_users WHERE username = ?) AND record_id = ?");
+                            stm = db.getCon().prepareStatement("UPDATE "+ tables.getZalohyTable() + " SET record_id = ? WHERE user_id = (SELECT id FROM web_users WHERE username = ?) AND record_id = ?");
                             stm.setInt(1, currentId);
                             stm.setString(2, player.getName());
                             stm.setInt(3, id);
@@ -351,7 +356,7 @@ public class Zalohy extends CommandHelp {
             adminUserList.clear();
             adminUserList.setCommand("/zalohy admin " + username);
             try {
-                PreparedStatement stm = db.getCon().prepareStatement("SELECT id, record_id, building_name, note, rejected, rejected_reason, completed, admin_id, posX, posY, posZ, world, create_date, update_date FROM "+ prefix.getTablePrefix(plugin) +"zalohy WHERE user_id = (SELECT id FROM web_users WHERE username = ?) ORDER BY record_id");
+                PreparedStatement stm = db.getCon().prepareStatement("SELECT id, record_id, building_name, note, rejected, rejected_reason, completed, admin_id, posX, posY, posZ, world, create_date, update_date FROM "+ tables.getZalohyTable() +" WHERE user_id = (SELECT id FROM web_users WHERE username = ?) ORDER BY record_id");
                 stm.setString(1, username);
                 ResultSet rs =  stm.executeQuery();
                 int id;
@@ -443,8 +448,8 @@ public class Zalohy extends CommandHelp {
             try {
                 Player player = (Player) t.getSender();
                 int id = Integer.parseInt(t.getArgs()[1]);
-                if(isZaloha(player, id, true, prefix.getTablePrefix(plugin))) {
-                    PreparedStatement stm = db.getCon().prepareStatement("SELECT building_name, posX, posY, posZ FROM "+ prefix.getTablePrefix(plugin) + "zalohy WHERE id= ?");
+                if(isZaloha(player, id, true, tables.getZalohyTable())) {
+                    PreparedStatement stm = db.getCon().prepareStatement("SELECT building_name, posX, posY, posZ FROM "+ tables.getZalohyTable() + " WHERE id= ?");
                     stm.setInt(1, id);
                     ResultSet rs =  stm.executeQuery();
                     float x = 0;
@@ -474,15 +479,15 @@ public class Zalohy extends CommandHelp {
         CommandData completeID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.admin", CommandExecutors.PLAYER, t -> {
             int id = Integer.parseInt(t.getArgs()[1]);
             Player player = (Player) t.getSender();
-            if(isZaloha(player, id, true, prefix.getTablePrefix(plugin))) {
+            if(isZaloha(player, id, true, tables.getZalohyTable())) {
                 String name = "";
                 try {
-                    PreparedStatement stm = db.getCon().prepareStatement("UPDATE "+ prefix.getTablePrefix(plugin) + "zalohy SET rejected = 0, completed = 1, rejected_reason = null, admin_id = (SELECT id FROM web_users WHERE username = ?), update_date = ? WHERE id= ? ");
+                    PreparedStatement stm = db.getCon().prepareStatement("UPDATE "+ tables.getZalohyTable() + " SET rejected = 0, completed = 1, rejected_reason = null, admin_id = (SELECT id FROM web_users WHERE username = ?), update_date = ? WHERE id= ? ");
                     stm.setString(1, player.getName());
                     stm.setDate(2, Date.valueOf(LocalDate.now()));
                     stm.setInt(3, id);
                     stm.execute();
-                    stm = db.getCon().prepareStatement("SELECT building_name FROM " + prefix.getTablePrefix(plugin) + "zalohy WHERE id = ?");
+                    stm = db.getCon().prepareStatement("SELECT building_name FROM " + tables.getZalohyTable() + " WHERE id = ?");
                     stm.setInt(1, id);
                     ResultSet rs = stm.executeQuery();
                     if(rs.next()) {
@@ -500,13 +505,13 @@ public class Zalohy extends CommandHelp {
         CommandData returnID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.admin", CommandExecutors.PLAYER, t -> {
             int id = Integer.parseInt(t.getArgs()[1]);
             Player player = (Player) t.getSender();
-            if(isZaloha(player, id, true, prefix.getTablePrefix(plugin))) {
+            if(isZaloha(player, id, true, tables.getZalohyTable())) {
                 String name = "";
                 try {
-                    PreparedStatement stm = db.getCon().prepareStatement("UPDATE "+ prefix.getTablePrefix(plugin) + "zalohy SET rejected = 0, completed = 0, rejected_reason = null, admin_id = null, update_date = null WHERE id= ? ");
+                    PreparedStatement stm = db.getCon().prepareStatement("UPDATE "+ tables.getZalohyTable() + " SET rejected = 0, completed = 0, rejected_reason = null, admin_id = null, update_date = null WHERE id= ? ");
                     stm.setInt(1, id);
                     stm.execute();
-                    stm = db.getCon().prepareStatement("SELECT building_name FROM " + prefix.getTablePrefix(plugin) + "zalohy WHERE id = ?");
+                    stm = db.getCon().prepareStatement("SELECT building_name FROM " + tables.getZalohyTable() + " WHERE id = ?");
                     stm.setInt(1, id);
                     ResultSet rs = stm.executeQuery();
                     if(rs.next()) {
@@ -535,16 +540,16 @@ public class Zalohy extends CommandHelp {
             int id = Integer.parseInt(t.getArgs()[1]);
             String reason = utils.getStringFromArgs(t.getArgs(), 2);
             Player player = (Player) t.getSender();
-            if(isZaloha(player, id, true, prefix.getTablePrefix(plugin))) {
+            if(isZaloha(player, id, true, tables.getZalohyTable())) {
                 try {
                     String name = "";
-                    PreparedStatement stm = db.getCon().prepareStatement("UPDATE "+ prefix.getTablePrefix(plugin) + "zalohy SET rejected = 1, completed = 0, rejected_reason = ?, admin_id = (SELECT id FROM web_users WHERE username = ?), update_date = ? WHERE id= ? ");
+                    PreparedStatement stm = db.getCon().prepareStatement("UPDATE "+ tables.getZalohyTable() + " SET rejected = 1, completed = 0, rejected_reason = ?, admin_id = (SELECT id FROM web_users WHERE username = ?), update_date = ? WHERE id= ? ");
                     stm.setString(1, reason);
                     stm.setString(2, player.getName());
                     stm.setDate(3, Date.valueOf(LocalDate.now()));
                     stm.setInt(4, id);
                     stm.execute();
-                    stm = db.getCon().prepareStatement("SELECT building_name FROM " + prefix.getTablePrefix(plugin) + "zalohy WHERE id = ?");
+                    stm = db.getCon().prepareStatement("SELECT building_name FROM " + tables.getZalohyTable() + " WHERE id = ?");
                     stm.setInt(1, id);
                     ResultSet rs = stm.executeQuery();
                     if(rs.next()) {
@@ -565,9 +570,9 @@ public class Zalohy extends CommandHelp {
             int id = Integer.parseInt(t.getArgs()[1]);
             float x = Float.parseFloat(t.getArgs()[3]);
             Player player = (Player) t.getSender();
-            if(isZaloha(player, id, false, prefix.getTablePrefix(plugin))) {
+            if(isZaloha(player, id, false, tables.getZalohyTable())) {
                 try {
-                    PreparedStatement stm = db.getCon().prepareStatement("SELECT rejected, completed FROM "+ prefix.getTablePrefix(plugin) + "zalohy WHERE record_id= ? and user_id = (SELECT id FROM web_users WHERE username = ?)");
+                    PreparedStatement stm = db.getCon().prepareStatement("SELECT rejected, completed FROM "+ tables.getZalohyTable() + " WHERE record_id= ? and user_id = (SELECT id FROM web_users WHERE username = ?)");
                     stm.setInt(1, id);
                     stm.setString(2, player.getName());
                     ResultSet rs =  stm.executeQuery();
@@ -578,7 +583,7 @@ public class Zalohy extends CommandHelp {
                         completed = rs.getInt(2);
                     }
                     if(rejected == 0 && completed == 0) {
-                        stm = db.getCon().prepareStatement("UPDATE "+ prefix.getTablePrefix(plugin) + "zalohy SET posX = ? WHERE record_id = ? AND user_id = (SELECT id FROM web_users WHERE username = ?)");
+                        stm = db.getCon().prepareStatement("UPDATE "+ tables.getZalohyTable() + " SET posX = ? WHERE record_id = ? AND user_id = (SELECT id FROM web_users WHERE username = ?)");
                         stm.setFloat(1, x);
                         stm.setInt(2, id);
                         stm.setString(3, player.getName());
@@ -598,9 +603,9 @@ public class Zalohy extends CommandHelp {
             int id = Integer.parseInt(t.getArgs()[1]);
             float y = Float.parseFloat(t.getArgs()[3]);
             Player player = (Player) t.getSender();
-            if(isZaloha(player, id, false, prefix.getTablePrefix(plugin))) {
+            if(isZaloha(player, id, false, tables.getZalohyTable())) {
                 try {
-                    PreparedStatement stm = db.getCon().prepareStatement("SELECT rejected, completed FROM "+ prefix.getTablePrefix(plugin) + "zalohy WHERE record_id= ? and user_id = (SELECT id FROM web_users WHERE username = ?)");
+                    PreparedStatement stm = db.getCon().prepareStatement("SELECT rejected, completed FROM "+ tables.getZalohyTable() + " WHERE record_id= ? and user_id = (SELECT id FROM web_users WHERE username = ?)");
                     stm.setInt(1, id);
                     stm.setString(2, player.getName());
                     ResultSet rs =  stm.executeQuery();
@@ -611,7 +616,7 @@ public class Zalohy extends CommandHelp {
                         completed = rs.getInt(2);
                     }
                     if(rejected == 0 && completed == 0) {
-                        stm = db.getCon().prepareStatement("UPDATE "+ prefix.getTablePrefix(plugin) + "zalohy SET posY = ? WHERE record_id = ? AND user_id = (SELECT id FROM web_users WHERE username = ?)");
+                        stm = db.getCon().prepareStatement("UPDATE "+ tables.getZalohyTable() + " SET posY = ? WHERE record_id = ? AND user_id = (SELECT id FROM web_users WHERE username = ?)");
                         stm.setFloat(1, y);
                         stm.setInt(2, id);
                         stm.setString(3, player.getName());
@@ -631,9 +636,9 @@ public class Zalohy extends CommandHelp {
             int id = Integer.parseInt(t.getArgs()[1]);
             float z = Float.parseFloat(t.getArgs()[3]);
             Player player = (Player) t.getSender();
-            if(isZaloha(player, id, false, prefix.getTablePrefix(plugin))) {
+            if(isZaloha(player, id, false, tables.getZalohyTable())) {
                 try {
-                    PreparedStatement stm = db.getCon().prepareStatement("SELECT rejected, completed FROM "+ prefix.getTablePrefix(plugin) + "zalohy WHERE record_id= ? and user_id = (SELECT id FROM web_users WHERE username = ?)");
+                    PreparedStatement stm = db.getCon().prepareStatement("SELECT rejected, completed FROM "+ tables.getZalohyTable() + " WHERE record_id= ? and user_id = (SELECT id FROM web_users WHERE username = ?)");
                     stm.setInt(1, id);
                     stm.setString(2, player.getName());
                     ResultSet rs =  stm.executeQuery();
@@ -644,7 +649,7 @@ public class Zalohy extends CommandHelp {
                         completed = rs.getInt(2);
                     }
                     if(rejected == 0 && completed == 0) {
-                        stm = db.getCon().prepareStatement("UPDATE "+ prefix.getTablePrefix(plugin) + "zalohy SET posZ = ? WHERE record_id = ? AND user_id = (SELECT id FROM web_users WHERE username = ?)");
+                        stm = db.getCon().prepareStatement("UPDATE "+ tables.getZalohyTable() + " SET posZ = ? WHERE record_id = ? AND user_id = (SELECT id FROM web_users WHERE username = ?)");
                         stm.setFloat(1, z);
                         stm.setInt(2, id);
                         stm.setString(3, player.getName());
@@ -664,9 +669,9 @@ public class Zalohy extends CommandHelp {
             int id = Integer.parseInt(t.getArgs()[1]);
             String note = utils.getStringFromArgs(t.getArgs(), 3);
             Player player = (Player) t.getSender();
-            if(isZaloha(player, id, false, prefix.getTablePrefix(plugin))) {
+            if(isZaloha(player, id, false, tables.getZalohyTable())) {
                 try {
-                    PreparedStatement stm = db.getCon().prepareStatement("SELECT rejected, completed FROM "+ prefix.getTablePrefix(plugin) + "zalohy WHERE record_id= ? and user_id = (SELECT id FROM web_users WHERE username = ?)");
+                    PreparedStatement stm = db.getCon().prepareStatement("SELECT rejected, completed FROM "+ tables.getZalohyTable() + " WHERE record_id= ? and user_id = (SELECT id FROM web_users WHERE username = ?)");
                     stm.setInt(1, id);
                     stm.setString(2, player.getName());
                     ResultSet rs =  stm.executeQuery();
@@ -677,7 +682,7 @@ public class Zalohy extends CommandHelp {
                         completed = rs.getInt(2);
                     }
                     if(rejected == 0 && completed == 0) {
-                        stm = db.getCon().prepareStatement("UPDATE "+ prefix.getTablePrefix(plugin) + "zalohy SET note = ? WHERE record_id = ? AND user_id = (SELECT id FROM web_users WHERE username = ?)");
+                        stm = db.getCon().prepareStatement("UPDATE "+ tables.getZalohyTable() + " SET note = ? WHERE record_id = ? AND user_id = (SELECT id FROM web_users WHERE username = ?)");
                         stm.setString(1, note);
                         stm.setInt(2, id);
                         stm.setString(3, player.getName());
@@ -697,9 +702,9 @@ public class Zalohy extends CommandHelp {
             int id = Integer.parseInt(t.getArgs()[1]);
             String name = utils.getStringFromArgs(t.getArgs(), 3);
             Player player = (Player) t.getSender();
-            if(isZaloha(player, id, false, prefix.getTablePrefix(plugin))) {
+            if(isZaloha(player, id, false, tables.getZalohyTable())) {
                 try {
-                    PreparedStatement stm = db.getCon().prepareStatement("SELECT rejected, completed FROM "+ prefix.getTablePrefix(plugin) + "zalohy WHERE record_id= ? and user_id = (SELECT id FROM web_users WHERE username = ?)");
+                    PreparedStatement stm = db.getCon().prepareStatement("SELECT rejected, completed FROM "+ tables.getZalohyTable() + " WHERE record_id= ? and user_id = (SELECT id FROM web_users WHERE username = ?)");
                     stm.setInt(1, id);
                     stm.setString(2, player.getName());
                     ResultSet rs =  stm.executeQuery();
@@ -710,7 +715,7 @@ public class Zalohy extends CommandHelp {
                         completed = rs.getInt(2);
                     }
                     if(rejected == 0 && completed == 0) {
-                        stm = db.getCon().prepareStatement("UPDATE "+ prefix.getTablePrefix(plugin) + "zalohy SET building_name = ? WHERE record_id = ? AND user_id = (SELECT id FROM web_users WHERE username = ?)");
+                        stm = db.getCon().prepareStatement("UPDATE "+ tables.getZalohyTable() + " SET building_name = ? WHERE record_id = ? AND user_id = (SELECT id FROM web_users WHERE username = ?)");
                         stm.setString(1, name);
                         stm.setInt(2, id);
                         stm.setString(3, player.getName());
@@ -736,14 +741,14 @@ public class Zalohy extends CommandHelp {
             String name = utils.getStringFromArgs(t.getArgs(), 4);
             Player player = (Player) t.getSender();
             try {
-                PreparedStatement stm = db.getCon().prepareStatement("SELECT COALESCE(MAX(record_id), 0) FROM "+ prefix.getTablePrefix(plugin) + "zalohy WHERE user_id = (SELECT id FROM web_users WHERE username = ?)");
+                PreparedStatement stm = db.getCon().prepareStatement("SELECT COALESCE(MAX(record_id), 0) FROM "+ tables.getZalohyTable() + " WHERE user_id = (SELECT id FROM web_users WHERE username = ?)");
                 stm.setString(1, player.getName());
                 ResultSet rs = stm.executeQuery();
                 int max_record_id = 0;
                 if(rs.next()) {
                     max_record_id = rs.getInt(1);
                 }
-                stm = db.getCon().prepareStatement("INSERT INTO "+ prefix.getTablePrefix(plugin) + "zalohy (user_id, record_id, building_name, note, rejected, completed, posX, posY, posZ, world, create_date) " +
+                stm = db.getCon().prepareStatement("INSERT INTO "+ tables.getZalohyTable() + " (user_id, record_id, building_name, note, rejected, completed, posX, posY, posZ, world, create_date) " +
                         "VALUE ((SELECT id FROM web_users WHERE username = ?), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                 stm.setString(1, player.getName());
                 stm.setInt(2, (max_record_id + 1));
@@ -827,10 +832,10 @@ public class Zalohy extends CommandHelp {
         PreparedStatement stm;
         try {
             if(global) {
-                stm = db.getCon().prepareStatement("SELECT count(id) FROM "+ tablePrefix + "zalohy WHERE id = ?");
+                stm = db.getCon().prepareStatement("SELECT count(id) FROM "+ tablePrefix + " WHERE id = ?");
                 stm.setInt(1, id);
             } else {
-                stm = db.getCon().prepareStatement("SELECT count(record_id) FROM "+ tablePrefix + "zalohy WHERE user_id= (SELECT id FROM web_users WHERE username = ?) AND record_id = ?");
+                stm = db.getCon().prepareStatement("SELECT count(record_id) FROM "+ tablePrefix + " WHERE user_id= (SELECT id FROM web_users WHERE username = ?) AND record_id = ?");
                 stm.setString(1, player.getName());
                 stm.setInt(2, id);
             }
