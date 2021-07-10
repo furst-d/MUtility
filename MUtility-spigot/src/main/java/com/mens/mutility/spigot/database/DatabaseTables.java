@@ -33,7 +33,7 @@ public class DatabaseTables {
     }
 
     public String getStavbaKeysTable() {
-        return getTable("stavba_keys");
+        return getTable("stavba_keys2");
     }
 
     public String getStavbaSeasonsTable() {

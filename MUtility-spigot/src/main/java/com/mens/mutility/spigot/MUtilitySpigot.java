@@ -8,6 +8,7 @@ package com.mens.mutility.spigot;
 
 import com.mens.mutility.spigot.commands.commands.event.programmed.finder.eventhandlers.OnPlayerInteractEvent;
 import com.mens.mutility.spigot.commands.commands.event.programmed.graveyard.eventhandlers.OnBlockBreakEvent;
+import com.mens.mutility.spigot.commands.commands.mstavba.MStavbaVoteManager;
 import com.mens.mutility.spigot.messages.MessageChannel;
 import com.mens.mutility.spigot.commands.commands.anketa.Anketa;
 import com.mens.mutility.spigot.commands.commands.minv.MInv;
@@ -26,6 +27,7 @@ import com.mens.mutility.spigot.eventhandlers.OnPlayerJoinEvent;
 import com.mens.mutility.spigot.eventhandlers.OnPlayerPortalEvent;
 import com.mens.mutility.spigot.messages.MessageChannelListener;
 import com.mens.mutility.spigot.utils.ServerInfo;
+import com.mens.mutility.spigot.utils.Timer;
 import com.mens.mutility.spigot.utils.YamlFile;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
@@ -60,6 +62,7 @@ public final class MUtilitySpigot extends JavaPlugin {
         loadConfig();
         loadFiles();
         registerChannels();
+        setMstavba();
         messageChannel = new MessageChannel(this);
         servers = new ArrayList<>();
     }
@@ -129,6 +132,7 @@ public final class MUtilitySpigot extends JavaPlugin {
         pm.registerEvents(new OnPlayerJoinEvent(this), this);
         pm.registerEvents(new OnPlayerInteractEvent(this), this);
         pm.registerEvents(new OnBlockBreakEvent(this), this);
+        pm.registerEvents(new com.mens.mutility.spigot.commands.commands.mstavba.eventhandlers.OnPlayerJoinEvent(this), this);
     }
 
     /**
@@ -175,5 +179,14 @@ public final class MUtilitySpigot extends JavaPlugin {
             }
         }
         return null;
+    }
+
+    private void setMstavba() {
+        MStavbaVoteManager manager = new MStavbaVoteManager(this);
+        manager.synchronizeActive();
+        manager.deleteKeys();
+        if(manager.isActive()) {
+            manager.startTimer();
+        }
     }
 }

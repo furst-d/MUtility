@@ -16,6 +16,7 @@ import net.md_5.bungee.api.scheduler.ScheduledTask;
 import net.md_5.bungee.chat.ComponentSerializer;
 import net.md_5.bungee.event.EventHandler;
 
+import javax.swing.text.html.parser.Entity;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;

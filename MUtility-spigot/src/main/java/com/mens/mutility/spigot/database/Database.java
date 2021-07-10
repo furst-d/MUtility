@@ -35,7 +35,7 @@ public class Database {
         String URL = "jdbc:mysql://" + HOST + ":" + PORT + "/" + DATABASE + "?autoReconnect=true&useSSL=false&useUnicode=yes&characterEncoding=UTF-8";
         try {
             con = DriverManager.getConnection(URL, USER, PASSWORD);
-            Bukkit.getConsoleSender().sendMessage(prefix.getMutilityPrefix(false, false) + " Databaze " + colors.getConsolePrimaryColor() + "MYSQL" + colors.getConsoleSecondaryColor() + " pripojena!");
+            Bukkit.getConsoleSender().sendMessage(prefix.getMutilityPrefix(false, false) + "Databaze " + colors.getConsolePrimaryColor() + "MYSQL" + colors.getConsoleSecondaryColor() + " pripojena!");
             createTablesIfNotExists();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -48,19 +48,19 @@ public class Database {
         PreparedStatement stm;
         stm = con.prepareStatement("CREATE TABLE IF NOT EXISTS " + tables.getEventsTable() + "(id INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT, event_name varchar(255), tpX double, tpY double, tpZ double, world varchar(255), server varchar(255), necessaryItems varchar(255), forbiddenItems varchar(255), objective varchar(255), note varchar(255))");
         stm.execute();
-        stm = con.prepareStatement("CREATE TABLE IF NOT EXISTS " + tables.getInventoryTable() + "(id INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT, user_id int(4), id_user_record int(4), inventory_name varchar(255), inventory longtext)");
+        stm = con.prepareStatement("CREATE TABLE IF NOT EXISTS " + tables.getInventoryTable() + "(id INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT, user_id int(8), id_user_record int(4), inventory_name varchar(255), inventory longtext)");
         stm.execute();
         stm = con.prepareStatement("CREATE TABLE IF NOT EXISTS " + tables.getNavrhyTable() + "(id INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT, username varchar(255), content varchar(255), create_date date, active int(1))");
         stm.execute();
-        stm = con.prepareStatement("CREATE TABLE IF NOT EXISTS " + tables.getStavbaCompetitorsTable() + "(id INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT, season_id int(4), building_id int(4), forum_id int(4), user_id int(8), building_name varchar(255), image varchar(255))");
+        stm = con.prepareStatement("CREATE TABLE IF NOT EXISTS " + tables.getStavbaCompetitorsTable() + "(id INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT, season_id int(4), building_id int(4), forum_id int(12), user_id int(8), building_name varchar(255), image varchar(255))");
         stm.execute();
-        stm = con.prepareStatement("CREATE TABLE IF NOT EXISTS " + tables.getStavbaKeysTable() + "(username varchar(255), confirm_key varchar(255))");
+        stm = con.prepareStatement("CREATE TABLE IF NOT EXISTS " + tables.getStavbaKeysTable() + "(user_id int(8), confirm_key varchar(255))");
         stm.execute();
-        stm = con.prepareStatement("CREATE TABLE IF NOT EXISTS " + tables.getStavbaSeasonsTable() + "(id INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT, season_id int(4), admin_id int(4), start_date datetime, close_date datetime, reward int(1), web_new int(1), active int(1), description varchar(255))");
+        stm = con.prepareStatement("CREATE TABLE IF NOT EXISTS " + tables.getStavbaSeasonsTable() + "(id INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT, season_id int(4), admin_id int(8), start_date datetime, close_date datetime, reward int(1), web_new int(1), active int(1), description varchar(255))");
         stm.execute();
         stm = con.prepareStatement("CREATE TABLE IF NOT EXISTS " + tables.getStavbaVotesTable() + "(id INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT, username varchar(255), season_id int(5), stavba_id int(5))");
         stm.execute();
-        stm = con.prepareStatement("CREATE TABLE IF NOT EXISTS " + tables.getZalohyTable() + "(id INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT, user_id int(11), record_id int(11), building_name varchar(255), note varchar(255), rejected int(11), rejected_reason varchar(255), completed int(11), admin_id int(11), world varchar(255), posX double, posY double, posZ double, create_date date, update_date date)");
+        stm = con.prepareStatement("CREATE TABLE IF NOT EXISTS " + tables.getZalohyTable() + "(id INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT, user_id int(8), record_id int(4), building_name varchar(255), note varchar(255), rejected int(11), rejected_reason varchar(255), completed int(11), admin_id int(8), world varchar(255), posX double, posY double, posZ double, create_date date, update_date date)");
         stm.execute();
         Bukkit.getConsoleSender().sendMessage(prefix.getMutilityPrefix(false, false) + "Chybejici tabulky vytvoreny!");
     }

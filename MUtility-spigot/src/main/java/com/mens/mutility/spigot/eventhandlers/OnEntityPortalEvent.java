@@ -14,6 +14,6 @@ public class OnEntityPortalEvent implements Listener {
 
     @EventHandler
     public void onEntityPortalEvent(EntityPortalEvent event) {
-
+        event.setCancelled(true);
     }
 }

@@ -37,4 +37,22 @@ public class PlayerManager {
         }
         return id;
     }
+
+    public String getUsername(int id) {
+        String username = "";
+        try {
+            PreparedStatement stm = db.getCon().prepareStatement("SELECT username FROM web_users WHERE id = ?");
+            stm.setInt(1, id);
+            ResultSet rs =  stm.executeQuery();
+            if(rs.next()) {
+                username = rs.getString(1);
+            }
+        } catch (CommunicationsException e) {
+            db.openConnection();
+            getUserId(username);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return username;
+    }
 }
