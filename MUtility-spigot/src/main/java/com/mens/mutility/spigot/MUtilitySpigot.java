@@ -92,10 +92,6 @@ public final class MUtilitySpigot extends JavaPlugin {
         return joinEffects;
     }
 
-    public YamlFile getMessages() {
-        return messages;
-    }
-
     /**
      * Metoda pro registraci prikazu
      */
@@ -146,7 +142,6 @@ public final class MUtilitySpigot extends JavaPlugin {
     private void loadFiles() {
         events = new YamlFile(this, "/events.yml");
         joinEffects = new YamlFile(this, "/joineffects.yml");
-        messages = new YamlFile(this, "/messages.yml");
     }
 
     /**

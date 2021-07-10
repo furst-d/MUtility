@@ -53,4 +53,8 @@ public class YamlFile {
         }
         return conf;
     }
+
+    public void reload() {
+        loadData();
+    }
 }

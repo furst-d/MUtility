@@ -242,7 +242,8 @@ public class CommandListener implements CommandExecutor, TabCompleter {
         Player player = (Player) sender;
         List<CommandData> commands = plugin.getCommands();
         for (CommandData commandData: commands) {
-            if(command.getName().equalsIgnoreCase(commandData.getCommandName())) {
+            if(command.getName().equalsIgnoreCase(commandData.getCommandName())
+                    || command.getName().equalsIgnoreCase(commandData.getAlias())) {
                 List<CommandData> subcommands = commandData.getNext();
                 for (int i = 0; i < args.length; i++) {
                     for (CommandData subcommand: subcommands) {

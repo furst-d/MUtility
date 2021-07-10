@@ -34,6 +34,11 @@ public class Prefix {
         }
     }
 
+    public String getKostkujPrefix(boolean hexColor, boolean json) {
+        setPrefixName("Kostkuj");
+        return getPrefix(hexColor, json);
+    }
+
     public String getMutilityPrefix(boolean hexColor, boolean json) {
         setPrefixName("M-Utility");
         return getPrefix(hexColor, json);

@@ -8,6 +8,7 @@ import com.mens.mutility.spigot.commands.system.enums.ArgumentTypes;
 import com.mens.mutility.spigot.commands.system.enums.CommandExecutors;
 import com.mens.mutility.spigot.commands.system.enums.TabCompleterTypes;
 import com.mens.mutility.spigot.utils.PageList;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 public class MUtility extends CommandHelp {
@@ -35,8 +36,13 @@ public class MUtility extends CommandHelp {
         // 1. stupeň
         CommandData helpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         CommandData reload = new CommandData(ArgumentTypes.DEFAULT, "reload", TabCompleterTypes.DEFAULT, "mutility.reload", CommandExecutors.BOTH, (t) -> {
-            //TODO
-            System.out.println("Reload");
+            Bukkit.getConsoleSender().sendMessage(prefix.getMutilityPrefix(false, false) + "Znovu načítám configy...");
+            t.getSender().sendMessage(prefix.getMutilityPrefix(true, false) + "Znovu načítám configy...");
+            plugin.getEvents().reload();
+            plugin.getJoinEffects().reload();
+            plugin.reloadConfig();
+            Bukkit.getConsoleSender().sendMessage(prefix.getMutilityPrefix(false, false) + "Configy načteny");
+            t.getSender().sendMessage(prefix.getMutilityPrefix(true, false) + "Configy načteny");
         });
         CommandData pluginHelp = new CommandData(ArgumentTypes.DEFAULT, "help", TabCompleterTypes.DEFAULT, "mutility.help", CommandExecutors.BOTH, (t) -> {
             pluginHelpList = getMainHelp(plugin, t.getSender(), pluginHelpList);
