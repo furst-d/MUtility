@@ -9,7 +9,6 @@ package com.mens.mutility.spigot;
 import com.mens.mutility.spigot.commands.commands.event.programmed.finder.eventhandlers.OnPlayerInteractEvent;
 import com.mens.mutility.spigot.commands.commands.event.programmed.graveyard.eventhandlers.OnBlockBreakEvent;
 import com.mens.mutility.spigot.commands.commands.mstavba.MStavbaVoteManager;
-import com.mens.mutility.spigot.messages.MessageChannel;
 import com.mens.mutility.spigot.commands.commands.anketa.Anketa;
 import com.mens.mutility.spigot.commands.commands.minv.MInv;
 import com.mens.mutility.spigot.commands.commands.mresidence.MResidence;
@@ -27,7 +26,6 @@ import com.mens.mutility.spigot.eventhandlers.OnPlayerJoinEvent;
 import com.mens.mutility.spigot.eventhandlers.OnPlayerPortalEvent;
 import com.mens.mutility.spigot.messages.MessageChannelListener;
 import com.mens.mutility.spigot.utils.ServerInfo;
-import com.mens.mutility.spigot.utils.Timer;
 import com.mens.mutility.spigot.utils.YamlFile;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
@@ -42,7 +40,6 @@ public final class MUtilitySpigot extends JavaPlugin {
     private List<ServerInfo> servers;
     private Database db;
     private PluginManager pm;
-    private MessageChannel messageChannel;
 
     private YamlFile events;
     private YamlFile joinEffects;
@@ -63,7 +60,6 @@ public final class MUtilitySpigot extends JavaPlugin {
         loadFiles();
         registerChannels();
         setMstavba();
-        messageChannel = new MessageChannel(this);
         servers = new ArrayList<>();
     }
 
