@@ -69,18 +69,13 @@ public class Prefix {
         return getPrefix(hexColor, json);
     }
 
-    public String getNavrhPrefix(boolean hexColor, boolean json) {
-        setPrefixName("Navrh");
-        return getPrefix(hexColor, json);
-    }
-
     public String getNavrhyPrefix(boolean hexColor, boolean json) {
-        setPrefixName("Navrhy");
+        setPrefixName("Návrhy");
         return getPrefix(hexColor, json);
     }
 
     public String getZalohyPrefix(boolean hexColor, boolean json) {
-        setPrefixName("Zalohy");
+        setPrefixName("Zálohy");
         return getPrefix(hexColor, json);
     }
 

@@ -21,8 +21,6 @@ commands:
     description: Ankety
   zalohy:
     description: Zalohy
-  navrh:
-    description: Navrh
   navrhy:
     description: Navrhy
 permissions:
@@ -131,33 +129,21 @@ permissions:
   mutility.zalohy.delete:
     default: op
     description: Mazani zaloh
-  mutility.navrh.help:
-    default: op
-    description: Napoveda k navrhu
-  mutility.navrh.add:
-    default: op
-    description: Pridavani navrhu
   mutility.navrhy.help:
     default: op
     description: Napoveda k navrhum
+  mutility.navrhy.add:
+    default: op
+    description: Pridavani navrhu
   mutility.navrhy.show:
     default: op
     description: Seznam hracovych navrhu
   mutility.navrhy.delete:
     default: op
     description: Smazani navrhu
-  mutility.navrhy.get:
+  mutility.navrhy.admin:
     default: op
     description: Vraceni nevyrizenych navrhu
-  mutility.navrhy.getall:
-    default: op
-    description: Vraceni vsech navrhu
-  mutility.navrhy.getrejected:
-    default: op
-    description: Vraceni zamitnutych navrhu
-  mutility.navrhy.getaccepted:
-    default: op
-    description: Vraceni schvalenych navrhu
   mutility.navrhy.accept:
     default: op
     description: Schvalovani navrhu
@@ -167,6 +153,9 @@ permissions:
   mutility.navrhy.return:
     default: op
     description: Vraceni zamitnuteho navrhu do nevyrizenych
+  mutility.navrhy.manage:
+    default: op
+    description: Uprava navrhu
 
 
 

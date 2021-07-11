@@ -16,14 +16,11 @@ import com.mens.mutility.spigot.utils.PageList;
 import com.mens.mutility.spigot.utils.PlayerManager;
 import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 /**
  * Trida reprezentujici prikaz /mstavba
@@ -347,10 +344,7 @@ public class MStavba extends CommandHelp {
 
     private void insertAcceptComment(int forumId, String months) {
         String message = "<p><h1 style=\"color:green;text-align:center\"><strong>Stavba byla zařazena do soutěže za " + months + "</strong></h1></p>";
-        LocalDateTime myDateObj = LocalDateTime.now();
-        DateTimeFormatter myFormatObj = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        String date = myDateObj.format(myFormatObj);
-        String formattedDate = myDateObj.format(myFormatObj);
+        String date = strUt.getCurrentFormattedDate();
         try {
             PreparedStatement stm = db.getCon().prepareStatement("INSERT INTO web_forum_posts_messages (user_created, post_id, message, date_created, date_edited) VALUES (?, ?, ?, ?, ?)");
             stm.setInt(1, 11);

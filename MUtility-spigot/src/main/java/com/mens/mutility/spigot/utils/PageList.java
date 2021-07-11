@@ -15,11 +15,12 @@ public class PageList {
     private int index;
     private int maxPage;
     private String titleRaw;
-    private final String titleJson;
+    private String titleJson;
     private String command;
     private final JsonBuilder jb;
     private final List<String> rows;
     private JsonBuilder head;
+    private String emptyMessage;
     private int extraDistance;
     private double titleLength;
     private double topLineFinalLength;
@@ -37,6 +38,7 @@ public class PageList {
         titleLength = 0;
         topLineFinalLength = 0;
         titleRaw = "";
+        emptyMessage = "   Seznam je prázdný! ";
     }
 
     public int getLimit() {
@@ -53,6 +55,10 @@ public class PageList {
 
     public int getMaxPage() {
         return maxPage;
+    }
+
+    public String getTitleJson() {
+        return titleJson;
     }
 
     public void setMaxPage(int maxPage) {
@@ -79,10 +85,18 @@ public class PageList {
         this.head = head;
     }
 
+    public void setEmptyMessage(String emptyMessage) {
+        this.emptyMessage = emptyMessage;
+    }
+
+    public void setTitleJson(String titleJson) {
+        this.titleJson = titleJson;
+    }
+
     public void add(String row) {
         rows.add(row);
         setIndex(getIndex() + 1);
-        if(getIndex() == getLimit()) {
+        if(getIndex() == getLimit() + 1) {
             setMaxPage(getMaxPage() + 1);
             setIndex(0);
         }
@@ -132,7 +146,7 @@ public class PageList {
                     error = true;
                     if(pageNumber == 1 && getRows().isEmpty()) {
                         sb.append(",{\"text\":\"\n\n\"},");
-                        sb.append("{\"text\":\"   Seznam je prázdný! \n\",");
+                        sb.append("{\"text\":\"").append(emptyMessage).append("\n\",");
                         sb.append("\"color\":\"");
                         sb.append(colors.getPrimaryColorHEX());
                         sb.append("\"}");

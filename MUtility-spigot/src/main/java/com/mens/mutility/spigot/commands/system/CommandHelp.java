@@ -38,7 +38,7 @@ public abstract class CommandHelp {
                             .color(colors.getSecondaryColorHEX())
                             .text(commandData.getDescription())
                             .color(colors.getPrimaryColorHEX())
-                            .text("\n Alias: ")
+                            .text("\nAlias: ")
                             .color(colors.getSecondaryColorHEX())
                             .text("/" + commandData.getAlias())
                             .color(colors.getPrimaryColorHEX())

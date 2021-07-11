@@ -5,6 +5,8 @@ import java.awt.font.FontRenderContext;
 import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Random;
 
 public class MyStringUtils {
@@ -37,5 +39,12 @@ public class MyStringUtils {
                 .limit(targetStringLength)
                 .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
                 .toString();
+    }
+
+    public String getCurrentFormattedDate() {
+        LocalDateTime myDateObj = LocalDateTime.now();
+        DateTimeFormatter myFormatObj = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String date = myDateObj.format(myFormatObj);
+        return myDateObj.format(myFormatObj);
     }
 }

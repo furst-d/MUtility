@@ -98,7 +98,7 @@ public class MInv extends CommandHelp {
             InventoryManager invManager = new InventoryManager();
             JsonObject inventory = invManager.getInventory((Player)t.getSender());
             saveInventory(((Player) t.getSender()), inventory, inventoryName, false);
-            t.getSender().sendMessage(prefix.getEventPrefix(true, false) + "Inventář " + colors.getPrimaryColor() + inventoryName + colors.getSecondaryColor() + " úspěšně uložen");
+            t.getSender().sendMessage(prefix.getInventoryPrefix(true, false) + "Inventář " + colors.getPrimaryColor() + inventoryName + colors.getSecondaryColor() + " úspěšně uložen");
         });
         CommandData loadPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         CommandData loadID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.inventory.load", CommandExecutors.PLAYER, t -> {
@@ -108,12 +108,12 @@ public class MInv extends CommandHelp {
                 Pair<String, String> inventoryInfo = getInventory((Player) t.getSender(), id_user_record);
                 invManager.loadInventory((Player) t.getSender(), invManager.toJsonObject(inventoryInfo.getValue()));
                 if(inventoryInfo.getKey() == null) {
-                    t.getSender().sendMessage(prefix.getEventPrefix(true, false) + "Inventář úspěšně načten");
+                    t.getSender().sendMessage(prefix.getInventoryPrefix(true, false) + "Inventář úspěšně načten");
                 } else {
-                    t.getSender().sendMessage(prefix.getEventPrefix(true, false) + "Inventář " + colors.getPrimaryColor() + inventoryInfo.getKey() + colors.getSecondaryColor() + " úspěšně načten");
+                    t.getSender().sendMessage(prefix.getInventoryPrefix(true, false) + "Inventář " + colors.getPrimaryColor() + inventoryInfo.getKey() + colors.getSecondaryColor() + " úspěšně načten");
                 }
             } else {
-                t.getSender().sendMessage(prefix.getEventPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1], true, false));
+                t.getSender().sendMessage(prefix.getInventoryPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1], true, false));
             }
         });
         CommandData deleteID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.inventory.delete", CommandExecutors.PLAYER, t -> {
@@ -121,7 +121,7 @@ public class MInv extends CommandHelp {
             if(isInventory((Player)t.getSender(), id_user_record)) {
                     DeleteConfirmation deleteConfirmation = new DeleteConfirmation(id_user_record, (Player) t.getSender(), "/minv delete confirm");
                     deleteConfirmation.setMessage(new JsonBuilder()
-                            .addJsonSegment(prefix.getEventPrefix(true, true))
+                            .addJsonSegment(prefix.getInventoryPrefix(true, true))
                             .text(": Opravdu si přejete odstranit inventář ")
                             .color(colors.getSecondaryColorHEX())
                             .text(getInventory((Player) t.getSender(), id_user_record).getKey())
@@ -134,11 +134,11 @@ public class MInv extends CommandHelp {
                         deleteConfirmation.startTimer();
                         deleteConfirmationList.add(deleteConfirmation);
                     } else {
-                        t.getSender().sendMessage(prefix.getEventPrefix(true, false)
+                        t.getSender().sendMessage(prefix.getInventoryPrefix(true, false)
                                 + colors.getSecondaryColor() + "Žádost o potvrzení již byla vytvořena!");
                     }
             } else {
-                t.getSender().sendMessage(prefix.getEventPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1],true, false));
+                t.getSender().sendMessage(prefix.getInventoryPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1],true, false));
             }
         });
         CommandData deleteConfirm = new CommandData(ArgumentTypes.DEFAULT, "confirm", TabCompleterTypes.NONE);
@@ -192,9 +192,9 @@ public class MInv extends CommandHelp {
                 InventoryManager invManager = new InventoryManager();
                 Pair<String, String> inventoryInfo = getInventory((Player) t.getSender(), id_user_record);
                 updateInventory((Player)t.getSender(), id_user_record, invManager.getInventory((Player)t.getSender()));
-                t.getSender().sendMessage(prefix.getEventPrefix(true, false) + "Inventář " + colors.getPrimaryColor() + inventoryInfo.getKey() + colors.getSecondaryColor() + " úspěšně přepsán");
+                t.getSender().sendMessage(prefix.getInventoryPrefix(true, false) + "Inventář " + colors.getPrimaryColor() + inventoryInfo.getKey() + colors.getSecondaryColor() + " úspěšně přepsán");
             } else {
-                t.getSender().sendMessage(prefix.getEventPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1], true, false));
+                t.getSender().sendMessage(prefix.getInventoryPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1], true, false));
             }
         });
         CommandData managePageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.inventory.manage", CommandExecutors.PLAYER, t -> {
@@ -213,7 +213,7 @@ public class MInv extends CommandHelp {
                             valid = true;
                             deleteConfirmationList.get(i).setFinished(true);
                             deleteInventory((Player)t.getSender(), id_user_record);
-                            t.getSender().sendMessage(prefix.getEventPrefix(true, false) + "Inventář "
+                            t.getSender().sendMessage(prefix.getInventoryPrefix(true, false) + "Inventář "
                                     + colors.getPrimaryColor() + inventoryName
                                     + colors.getSecondaryColor() + " byl smazán!");
                             break;
@@ -221,12 +221,12 @@ public class MInv extends CommandHelp {
                     }
                 }
                 if(!valid) {
-                    t.getSender().sendMessage(prefix.getEventPrefix(true, false)
+                    t.getSender().sendMessage(prefix.getInventoryPrefix(true, false)
                             + "Potvrzení o smazání inventáře není platné!");
                 }
                 deleteConfirmationList.removeIf(DeleteConfirmation::isFinished);
             } else {
-                t.getSender().sendMessage(prefix.getEventPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1],true, false));
+                t.getSender().sendMessage(prefix.getInventoryPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1],true, false));
             }
         });
 
@@ -237,9 +237,9 @@ public class MInv extends CommandHelp {
             if(isInventory((Player)t.getSender(), id_user_record)) {
                 updateInventoryName((Player)t.getSender(), id_user_record, inventoryName);
                 Pair<String, String> inventoryInfo = getInventory((Player) t.getSender(), id_user_record);
-                t.getSender().sendMessage(prefix.getEventPrefix(true, false) + "Jméno inventáře úspěšně nastaveno na " + colors.getPrimaryColor() + inventoryInfo.getKey());
+                t.getSender().sendMessage(prefix.getInventoryPrefix(true, false) + "Jméno inventáře úspěšně nastaveno na " + colors.getPrimaryColor() + inventoryInfo.getKey());
             } else {
-                t.getSender().sendMessage(prefix.getEventPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1], true, false));
+                t.getSender().sendMessage(prefix.getInventoryPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1], true, false));
             }
         });
         minv.setDescription("Systém pro ukládání a obnovování inventářů");
@@ -629,7 +629,6 @@ public class MInv extends CommandHelp {
 
     private void deleteInventory(Player player, int id_user_record) {
         try {
-            int max_id_user_record = 1;
             PreparedStatement stm;
             ResultSet rs;
             stm = db.getCon().prepareStatement("DELETE FROM " + tables.getInventoryTable() + " WHERE id_user_record = ? AND user_id = ?");

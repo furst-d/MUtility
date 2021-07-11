@@ -15,7 +15,6 @@ import com.mens.mutility.spigot.commands.commands.mresidence.MResidence;
 import com.mens.mutility.spigot.commands.commands.mstavba.MStavba;
 import com.mens.mutility.spigot.commands.commands.event.Event;
 import com.mens.mutility.spigot.commands.commands.mutility.MUtility;
-import com.mens.mutility.spigot.commands.commands.navrhy.Navrh;
 import com.mens.mutility.spigot.commands.commands.navrhy.Navrhy;
 import com.mens.mutility.spigot.commands.commands.zalohy.Zalohy;
 import com.mens.mutility.spigot.commands.system.CommandData;
@@ -103,7 +102,6 @@ public final class MUtilitySpigot extends JavaPlugin {
         commands.add(new MInv(this).create());
         commands.add(new Anketa(this).create());
         commands.add(new Zalohy(this).create());
-        commands.add(new Navrh(this).create());
         commands.add(new Navrhy(this).create());
 
         CommandListener commandListener = new CommandListener(this);
@@ -115,7 +113,6 @@ public final class MUtilitySpigot extends JavaPlugin {
         Objects.requireNonNull(getCommand("minv")).setExecutor(commandListener);
         Objects.requireNonNull(getCommand("anketa")).setExecutor(commandListener);
         Objects.requireNonNull(getCommand("zalohy")).setExecutor(commandListener);
-        Objects.requireNonNull(getCommand("navrh")).setExecutor(commandListener);
         Objects.requireNonNull(getCommand("navrhy")).setExecutor(commandListener);
     }
 
