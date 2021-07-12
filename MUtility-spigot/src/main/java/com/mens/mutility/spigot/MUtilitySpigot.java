@@ -1,9 +1,3 @@
-/*
- * TODO
- * Příkazy - řešit, jestli to odeslal hráč nebo console
- * TabCompleter na hráče nejspíše nebude fungovat pro bungee, bude zobrazovat pouze hráče na jednom serveru
- * Vyřešit timeout databáze
- */
 package com.mens.mutility.spigot;
 
 import com.mens.mutility.spigot.commands.commands.event.programmed.finder.eventhandlers.OnPlayerInteractEvent;

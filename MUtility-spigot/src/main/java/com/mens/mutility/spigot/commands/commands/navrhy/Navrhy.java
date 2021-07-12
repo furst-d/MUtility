@@ -45,9 +45,9 @@ public class Navrhy extends CommandHelp {
         this.plugin = plugin;
         prefix = new Prefix();
         helpList = new PageList(10, prefix.getNavrhyPrefix(true, true).replace("]", " - nápověda]"), "/navrhy");
-        adminList = new PageList(10, prefix.getNavrhyPrefix(true, true).replace("]", " - seznam]"), "/navrhy admin");
+        adminList = new PageList(10, prefix.getNavrhyPrefix(true, true).replace("]", " - admin]"), "/navrhy admin");
         adminList.setEmptyMessage(" Nejsou vytvořené žádné návrhy!");
-        adminNameList = new PageList(10, prefix.getNavrhyPrefix(true, true).replace("]", " - #PLAYER#]"), "/navrhy admin #PLAYER#");
+        adminNameList = new PageList(10, null, null);
         adminNameList.setEmptyMessage(" Hráč nemá vytvořené žádné návrhy!");
         showList = new PageList(10, prefix.getNavrhyPrefix(true, true).replace("]", " - seznam]"), "/navrhy zobraz");
         showList.setEmptyMessage(" Nemáš vytvořené žádné návrhy!\n Pro přidání návrhu použij /navrhy pridej [<Tvůj návrh>]");
@@ -124,22 +124,27 @@ public class Navrhy extends CommandHelp {
         CommandData deleteID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.navrhy.delete", CommandExecutors.PLAYER, (t) -> {
             int recordId = Integer.parseInt(t.getArgs()[1]);
             if(isRecordId((Player)t.getSender(), recordId)) {
-                DeleteConfirmation deleteConfirmation = new DeleteConfirmation(recordId, (Player) t.getSender(), "/navrhy delete confirm");
-                deleteConfirmation.setMessage(new JsonBuilder()
-                        .addJsonSegment(prefix.getNavrhyPrefix(true, true))
-                        .text(": Opravdu si přejete odstranit tento návrh?")
-                        .color(colors.getSecondaryColorHEX()));
-                if(deleteConfirmationList.stream().noneMatch(x -> (x.getId() == recordId
-                        && x.getPlayer().getName().equals(t.getSender().getName())
-                        && !x.isFinished()))) {
-                    deleteConfirmation.startTimer();
-                    deleteConfirmationList.add(deleteConfirmation);
+                if(!isCompleted((Player)t.getSender(), recordId)) {
+                    DeleteConfirmation deleteConfirmation = new DeleteConfirmation(recordId, (Player) t.getSender(), "/navrhy delete confirm");
+                    deleteConfirmation.setMessage(new JsonBuilder()
+                            .addJsonSegment(prefix.getZalohyPrefix(true, true))
+                            .text(": Opravdu si přejete odstranit tento návrh?")
+                            .color(colors.getSecondaryColorHEX()));
+                    if(deleteConfirmationList.stream().noneMatch(x -> (x.getId() == recordId
+                            && x.getPlayer().getName().equals(t.getSender().getName())
+                            && !x.isFinished()))) {
+                        deleteConfirmation.startTimer();
+                        deleteConfirmationList.add(deleteConfirmation);
+                    } else {
+                        t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false)
+                                + colors.getSecondaryColor() + "Žádost o potvrzení již byla vytvořena!");
+                    }
                 } else {
-                    t.getSender().sendMessage(prefix.getInventoryPrefix(true, false)
-                            + colors.getSecondaryColor() + "Žádost o potvrzení již byla vytvořena!");
+                    t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false)
+                            + colors.getSecondaryColor() + "Návrh již není možné smazat");
                 }
             } else {
-                t.getSender().sendMessage(prefix.getInventoryPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1],true, false));
+                t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1],true, false));
             }
         });
         CommandData deleteConfirm = new CommandData(ArgumentTypes.DEFAULT, "confirm", TabCompleterTypes.NONE);
@@ -182,19 +187,24 @@ public class Navrhy extends CommandHelp {
                     }
                 }
                 if(!valid) {
-                    t.getSender().sendMessage(prefix.getInventoryPrefix(true, false)
-                            + "Potvrzení o smazání inventáře není platné!");
+                    t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false)
+                            + "Potvrzení o smazání návrhu není platné!");
                 }
                 deleteConfirmationList.removeIf(DeleteConfirmation::isFinished);
             } else {
-                t.getSender().sendMessage(prefix.getInventoryPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1],true, false));
+                t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1],true, false));
             }
         });
         CommandData manageIdText = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Tvůj návrh >]", "mutility.navrhy.manage", CommandExecutors.PLAYER, t -> {
             int recordId = Integer.parseInt(t.getArgs()[1]);
-            String content = strUt.getStringFromArgs(t.getArgs(), 2);
-            editNavrh((Player)t.getSender(), recordId, content);
-            t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false) + "Návrh byl upraven");
+            if(!isCompleted((Player)t.getSender(), recordId)) {
+                String content = strUt.getStringFromArgs(t.getArgs(), 2);
+                editNavrh((Player)t.getSender(), recordId, content);
+                t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false) + "Návrh byl upraven");
+            } else {
+                t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false)
+                        + colors.getSecondaryColor() + "Návrh již není možné upravit");
+            }
         });
 
         //4. stupeň
@@ -320,8 +330,8 @@ public class Navrhy extends CommandHelp {
     private void loadAdminNameList(String playerName) {
         try {
             adminNameList.clear();
-            adminNameList.setCommand(adminNameList.getCommand().replace("#PLAYER#", playerName));
-            adminNameList.setTitleJson(adminNameList.getTitleJson().replace("#PLAYER#", playerName));
+            adminNameList.setCommand("/navrhy admin " + playerName);
+            adminNameList.setTitleJson(prefix.getNavrhyPrefix(true, true).replace("]", " - " + playerName));
             PreparedStatement stm = db.getCon().prepareStatement("SELECT id, content, rejected, rejected_reason, accepted, admin_id, create_date, update_date, (SUM(accepted+rejected)) FROM " + tables.getNavrhyTable() + " WHERE user_id = ? GROUP BY id ORDER BY (SUM(accepted+rejected)), create_date DESC");
             stm.setInt(1, playerManager.getUserId(playerName));
             ResultSet rs =  stm.executeQuery();
@@ -764,5 +774,24 @@ public class Navrhy extends CommandHelp {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    private boolean isCompleted(Player player, int recordId) {
+        int sum = 0;
+        try {
+            PreparedStatement stm = db.getCon().prepareStatement("SELECT (accepted+rejected) FROM " + tables.getNavrhyTable() + " WHERE user_id = ? AND record_id = ?");
+            stm.setInt(1, playerManager.getUserId(player.getName()));
+            stm.setInt(2, recordId);
+            ResultSet rs =  stm.executeQuery();
+            if(rs.next()) {
+                sum = rs.getInt(1);
+            }
+        } catch (CommunicationsException e) {
+            db.openConnection();
+            isCompleted(player, recordId);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return (sum != 0);
     }
 }

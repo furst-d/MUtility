@@ -1,10 +1,10 @@
 package com.mens.mutility.spigot.commands.commands.zalohy;
 
 import com.mens.mutility.spigot.MUtilitySpigot;
-import com.mens.mutility.spigot.chat.MyComp;
 import com.mens.mutility.spigot.chat.Errors;
 import com.mens.mutility.spigot.chat.PluginColors;
 import com.mens.mutility.spigot.chat.Prefix;
+import com.mens.mutility.spigot.chat.json.JsonBuilder;
 import com.mens.mutility.spigot.commands.system.CommandData;
 import com.mens.mutility.spigot.commands.system.CommandHelp;
 import com.mens.mutility.spigot.commands.system.enums.ArgumentTypes;
@@ -12,52 +12,60 @@ import com.mens.mutility.spigot.commands.system.enums.CommandExecutors;
 import com.mens.mutility.spigot.commands.system.enums.TabCompleterTypes;
 import com.mens.mutility.spigot.database.Database;
 import com.mens.mutility.spigot.database.DatabaseTables;
-import com.mens.mutility.spigot.utils.MyStringUtils;
-import com.mens.mutility.spigot.utils.PageList;
-import com.mens.mutility.spigot.utils.PageList2;
-import com.mens.mutility.spigot.utils.PlayerManager;
+import com.mens.mutility.spigot.utils.*;
 import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDate;
-
+import java.util.ArrayList;
+import java.util.List;
 
 public class Zalohy extends CommandHelp {
     private final MUtilitySpigot plugin;
     private PageList helpList;
     private final Database db;
     private final DatabaseTables tables;
+    private final Prefix prefix;
+    private final PlayerManager playerManager;
+    private final PluginColors colors;
+    private final MyStringUtils strUt;
+    private final Errors errors;
+    private final PageList showList;
+    private final PageList manageList;
+    private final PageList adminList;
+    private final PageList adminUserList;
+    private final Checker checker;
+    private final List<DeleteConfirmation> deleteConfirmationList;
 
     public Zalohy(MUtilitySpigot plugin) {
         this.plugin = plugin;
         db = plugin.getDb();
-        Prefix prefix = new Prefix();
+        prefix = new Prefix();
         helpList = new PageList(10, prefix.getZalohyPrefix(true, true).replace("]", " - nápověda]"), "/zalohy");
+        showList = new PageList(10, prefix.getZalohyPrefix(true, true).replace("]", " - seznam]"), "/zalohy zobraz");
+        showList.setEmptyMessage(" Nemáš vytvořené žádné zálohy!\n Pro přidání zálohy použij /zalohy pridej [<Parametry>]");
+        manageList = new PageList(10, prefix.getZalohyPrefix(true, true).replace("]", " - úprava]"), "/zalohy manage");
+        adminList = new PageList(10, prefix.getZalohyPrefix(true, true).replace("]", " - admin]"), "/zalohy admin");
+        adminList.setEmptyMessage(" Nejsou vytvořené žádné zálohy!");
+        adminUserList = new PageList(10, null, null);
+        adminUserList.setEmptyMessage(" Hráč nemá vytvořené žádné zálohy!");
         tables = new DatabaseTables(plugin);
+        playerManager = new PlayerManager(plugin);
+        colors = new PluginColors();
+        strUt = new MyStringUtils();
+        errors = new Errors();
+        checker = new Checker(plugin);
+        deleteConfirmationList = new ArrayList<>();
     }
 
     /**
      * Metoda slouzici k definovani a sestaveni prikazu a jeho parametru v ramci vlastniho prikazovaho systemu
      */
     public CommandData create() {
-        Prefix prefix = new Prefix();
-        PluginColors colors = new PluginColors();
-        Errors errors = new Errors();
-        MyStringUtils utils = new MyStringUtils();
-        PageList2 showList = new PageList2(10, prefix.getZalohyPrefix(true, false), "/zalohy zobraz");
-        PageList2 manageList = new PageList2(10, prefix.getZalohyPrefix(true, false), "/zalohy manage");
-        PageList2 adminList = new PageList2(10, prefix.getZalohyPrefix(true, false), "/zalohy admin");
-        PageList2 adminUserList = new PageList2(10, prefix.getZalohyPrefix(true, false), null);
-
         CommandData zalohy = new CommandData("zalohy", prefix.getZalohyPrefix(true, false),"mutility.zalohy.help", CommandExecutors.BOTH, t -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
             helpList.getList(1).toPlayer((Player) t.getSender());
@@ -67,167 +75,16 @@ public class Zalohy extends CommandHelp {
         CommandData helpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         CommandData pridej = new CommandData(ArgumentTypes.DEFAULT, "pridej", TabCompleterTypes.DEFAULT, "mutility.zalohy.create");
         CommandData zobraz = new CommandData(ArgumentTypes.DEFAULT, "zobraz", TabCompleterTypes.DEFAULT, "mutility.zalohy.manage", CommandExecutors.PLAYER, t -> {
-            showList.clear();
-            try {
-                Player player = (Player) t.getSender();
-                PreparedStatement stm = db.getCon().prepareStatement("SELECT record_id, building_name, note, rejected, rejected_reason, completed, admin_id, posX, posY, posZ, world, create_date, update_date FROM "+ tables.getZalohyTable() + " WHERE user_id = (SELECT id FROM web_users WHERE username = ?) ORDER BY record_id");
-                stm.setString(1, player.getName());
-                ResultSet rs =  stm.executeQuery();
-                int record_id;
-                String building_name;
-                String note;
-                int rejected;
-                String rejected_reason;
-                int completed;
-                int admin_id;
-                float x;
-                float y;
-                float z;
-                String world;
-                String date;
-                String updateDate;
-                while(rs.next()) {
-                    record_id = rs.getInt(1);
-                    building_name = rs.getString(2);
-                    note = rs.getString(3);
-                    rejected = rs.getInt(4);
-                    rejected_reason = rs.getString(5);
-                    completed = rs.getInt(6);
-                    admin_id = rs.getInt(7);
-                    x = rs.getFloat(8);
-                    y = rs.getFloat(9);
-                    z = rs.getFloat(10);
-                    world = rs.getString(11);
-                    date = String.valueOf(rs.getDate(12));
-                    updateDate = String.valueOf(rs.getDate(13));
-                    MyComp manageMyComp = new MyComp(HoverEvent.Action.SHOW_TEXT, ClickEvent.Action.RUN_COMMAND);
-                    MyComp deleteMyComp = new MyComp(HoverEvent.Action.SHOW_TEXT, ClickEvent.Action.RUN_COMMAND);
-                    MyComp textMyComp = new MyComp(HoverEvent.Action.SHOW_TEXT);
-                    manageMyComp.setText(colors.getSecondaryColor() + " [" + ChatColor.DARK_GRAY + "•••" + colors.getSecondaryColor() + "]");
-                    manageMyComp.setHover(colors.getSecondaryColor() + ">> " + ChatColor.GRAY + "Tuto zálohu již "+ ChatColor.DARK_RED + "nelze " + ChatColor.GRAY + "upravit "+ colors.getSecondaryColor() + "<<");
-                    deleteMyComp.setText(colors.getSecondaryColor() + " [" + ChatColor.DARK_GRAY + "✖" + colors.getSecondaryColor() + "]");
-                    deleteMyComp.setHover(colors.getSecondaryColor() + ">> " + ChatColor.GRAY + "Tuto zálohu již "+ ChatColor.DARK_RED + "nelze " + ChatColor.GRAY + "smazat "+ colors.getSecondaryColor() + "<<");
-                    if(rejected == 1) {
-                        String admin = getUserFromID(admin_id);
-                        textMyComp.setText(" " + colors.getSecondaryColor() +"- ["+ colors.getPrimaryColor() + record_id + colors.getSecondaryColor() + "] "+ ChatColor.DARK_RED + building_name);
-                        textMyComp.setHover(
-                                colors.getSecondaryColor() + "X: "+ colors.getPrimaryColor() + x + "\n" +
-                                        colors.getSecondaryColor() + "Y: "+ colors.getPrimaryColor() + y + "\n" +
-                                        colors.getSecondaryColor() + "Z: "+ colors.getPrimaryColor() + z + "\n" +
-                                        colors.getSecondaryColor() + "Svět: "+ colors.getPrimaryColor() + world + "\n" +
-                                        colors.getSecondaryColor() + "Vytvořeno: "+ colors.getPrimaryColor() + date + "\n" +
-                                        colors.getSecondaryColor() + "Poznámka: "+ colors.getPrimaryColor() + note + "\n" +
-                                        colors.getSecondaryColor() + "Stav: "+ ChatColor.DARK_RED + "Zamítnuto\n" +
-                                        colors.getSecondaryColor() + "Datum: "+ ChatColor.DARK_RED + updateDate + "\n" +
-                                        colors.getSecondaryColor() + "Zamítnul/a: "+ ChatColor.DARK_RED + admin + "\n" +
-                                        colors.getSecondaryColor() + "Důvod zamítnutí: "+ ChatColor.DARK_RED + rejected_reason);
-                    } else if(completed == 1) {
-                        String admin = getUserFromID(admin_id);
-                        textMyComp.setText(" " + colors.getSecondaryColor() +"- ["+ colors.getPrimaryColor() + record_id + colors.getSecondaryColor() + "] "+ ChatColor.GREEN + building_name);
-                        textMyComp.setHover(
-                                colors.getSecondaryColor() + "X: "+ colors.getPrimaryColor() + x + "\n" +
-                                        colors.getSecondaryColor() + "Y: "+ colors.getPrimaryColor() + y + "\n" +
-                                        colors.getSecondaryColor() + "Z: "+ colors.getPrimaryColor() + z + "\n" +
-                                        colors.getSecondaryColor() + "Svět: "+ colors.getPrimaryColor() + world + "\n" +
-                                        colors.getSecondaryColor() + "Vytvořeno: "+ colors.getPrimaryColor() + date + "\n" +
-                                        colors.getSecondaryColor() + "Poznámka: "+ colors.getPrimaryColor() + note + "\n" +
-                                        colors.getSecondaryColor() + "Stav: "+ ChatColor.GREEN + "Přesunuto\n" +
-                                        colors.getSecondaryColor() + "Datum: "+ ChatColor.GREEN + updateDate + "\n" +
-                                        colors.getSecondaryColor() + "Přesunul/a: "+ ChatColor.GREEN + admin);
-                    } else {
-                        manageMyComp.setText(colors.getSecondaryColor() + " [" + ChatColor.GOLD + "•••" + colors.getSecondaryColor() + "]");
-                        manageMyComp.setHover(colors.getSecondaryColor() + ">> " + ChatColor.GRAY + "Klikni pro "+ ChatColor.GOLD + "úpravu " + ChatColor.GRAY + "zálohy "+ colors.getSecondaryColor() + "<<");
-                        manageMyComp.setCommand("/zalohy manage " + record_id);
+            loadShowList((Player)t.getSender());
+            showList.getList(1).toPlayer((Player) t.getSender());
 
-                        deleteMyComp.setText(colors.getSecondaryColor() + " [" + ChatColor.DARK_RED + "✖" + colors.getSecondaryColor() + "]");
-                        deleteMyComp.setHover(colors.getSecondaryColor() + ">> " + ChatColor.GRAY + "Klikni pro "+ ChatColor.DARK_RED + "smazání " + ChatColor.GRAY + "zálohy "+ colors.getSecondaryColor() + "<<");
-                        deleteMyComp.setCommand("/zalohy delete " + record_id);
-
-                        textMyComp.setText(" " + colors.getSecondaryColor() +"- ["+ colors.getPrimaryColor() + record_id + colors.getSecondaryColor() + "] "+ ChatColor.GOLD + building_name);
-                        textMyComp.setHover(
-                                colors.getSecondaryColor() + "X: "+ colors.getPrimaryColor() + x + "\n" +
-                                        colors.getSecondaryColor() + "Y: "+ colors.getPrimaryColor() + y + "\n" +
-                                        colors.getSecondaryColor() + "Z: "+ colors.getPrimaryColor() + z + "\n" +
-                                        colors.getSecondaryColor() + "Svět: "+ colors.getPrimaryColor() + world + "\n" +
-                                        colors.getSecondaryColor() + "Vytvořeno: "+ colors.getPrimaryColor() + date + "\n" +
-                                        colors.getSecondaryColor() + "Poznámka: "+ colors.getPrimaryColor() + note + "\n" +
-                                        colors.getSecondaryColor() + "Stav: "+ ChatColor.GOLD + "Čeká na přesun");
-                    }
-                    showList.add(manageMyComp, deleteMyComp, textMyComp);
-                }
-                t.getSender().spigot().sendMessage(showList.getList(1).create());
-
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         });
         CommandData manage = new CommandData(ArgumentTypes.DEFAULT, "manage", TabCompleterTypes.NONE);
         CommandData delete = new CommandData(ArgumentTypes.DEFAULT, "delete", TabCompleterTypes.NONE);
         CommandData admin = new CommandData(ArgumentTypes.DEFAULT, "admin", TabCompleterTypes.DEFAULT, "mutility.zalohy.admin", CommandExecutors.PLAYER, t -> {
-            adminList.clear();
-            try {
-                int statCompleted = 0;
-                int statRejected = 0;
-                int statTotal = 0;
-                float statPercent = 0;
-                PreparedStatement stm = db.getCon().prepareStatement("SELECT (SELECT count(completed) FROM "+ tables.getZalohyTable() + " WHERE completed = 1),(SELECT count(completed) FROM "+ tables.getZalohyTable() + "zalohy WHERE rejected = 1),(SELECT count(completed) FROM "+ tables.getZalohyTable() + "zalohy) FROM "+ tables.getZalohyTable() + "zalohy LIMIT 1");
-                ResultSet rs =  stm.executeQuery();
-                if(rs.next()) {
-                    statCompleted = rs.getInt(1);
-                    statRejected = rs.getInt(2);
-                    statTotal = rs.getInt(3);
-                    statPercent = 100 / (float)statTotal * (statCompleted + statRejected);
-                }
-                stm = db.getCon().prepareStatement("SELECT (SELECT username FROM web_users WHERE id = user_id), SUM(rejected) AS zamitnute, SUM(completed) AS presunute, count(user_id) AS celkem, CASE WHEN (SUM(rejected)+SUM(completed)) = count(user_id) THEN 1 ELSE 0 END AS hotovo FROM " + tables.getZalohyTable() + " GROUP BY user_id ORDER BY hotovo");
-                rs =  stm.executeQuery();
-                String username;
-                int rejected;
-                int completed;
-                int total;
-                int done;
-                MyComp statsMyComp = new MyComp(HoverEvent.Action.SHOW_TEXT, colors.getSecondaryColor() + "Celkem: "+ colors.getPrimaryColor() + statTotal + "\n" +
-                        colors.getSecondaryColor() + "Přesunuto: " + ChatColor.GREEN + statCompleted + "\n" +
-                        colors.getSecondaryColor() + "Zamítnuto: "+ ChatColor.DARK_RED + statRejected + "\n" +
-                        colors.getSecondaryColor() + "Zbývá: "+ ChatColor.GOLD + (statTotal - (statCompleted + statRejected)));
-                if(statPercent <= 33) {
-                    statsMyComp.setText(colors.getSecondaryColor() + "Celkem přesunuto: " + ChatColor.DARK_RED + String.format("%1.1f", statPercent) + colors.getSecondaryColor() + " %");
-                } else if(statPercent <= 66) {
-                    statsMyComp.setText(colors.getSecondaryColor() + "Celkem přesunuto: " + ChatColor.GOLD + String.format("%1.1f", statPercent) + colors.getSecondaryColor() + " %");
-                } else {
-                    statsMyComp.setText(colors.getSecondaryColor() + "Celkem přesunuto: " + ChatColor.GREEN + String.format("%1.1f", statPercent) + colors.getSecondaryColor() + " %");
-                }
-                adminList.setHead(statsMyComp);
-                while(rs.next()) {
-                    username = rs.getString(1);
-                    rejected = rs.getInt(2);
-                    completed = rs.getInt(3);
-                    total = rs.getInt(4);
-                    done = rs.getInt(5);
-                    MyComp userStatsMyComp = new MyComp(ClickEvent.Action.RUN_COMMAND,"/zalohy admin " + username);
-                    userStatsMyComp.setHoverAction(HoverEvent.Action.SHOW_TEXT);
-                    if(done == 0) {
-                        userStatsMyComp.setText(colors.getSecondaryColor() + "- "+ ChatColor.GOLD + "➥" + username);
-                        userStatsMyComp.setHover(
-                                colors.getSecondaryColor() + "Stav: "+ ChatColor.GOLD + "Nekompletní\n" +
-                                        colors.getSecondaryColor() + "Celkem: "+ colors.getPrimaryColor() + total + "\n" +
-                                        colors.getSecondaryColor() + "Přesunuto: "+ ChatColor.GREEN + completed + "\n" +
-                                        colors.getSecondaryColor() + "Zamítnuto: "+ ChatColor.DARK_RED + rejected + "\n" +
-                                        colors.getSecondaryColor() + "Zbývá: " + ChatColor.GOLD + (total-(rejected+completed)));
-                    } else {
-                        userStatsMyComp.setText(colors.getSecondaryColor() + "- "+ ChatColor.GREEN + "➥" + username);
-                        userStatsMyComp.setHover(
-                                colors.getSecondaryColor() + "Stav: "+ ChatColor.GREEN + "Kompletní\n" +
-                                        colors.getSecondaryColor() + "Celkem: "+ colors.getPrimaryColor() + total + "\n" +
-                                        colors.getSecondaryColor() + "Přesunuto: "+ ChatColor.GREEN + completed + "\n" +
-                                        colors.getSecondaryColor() + "Zamítnuto: "+ ChatColor.DARK_RED + rejected + "\n" +
-                                        colors.getSecondaryColor() + "Zbývá: " + ChatColor.GOLD + (total-(rejected+completed)));
-                    }
-                    adminList.add(userStatsMyComp);
-                }
-                t.getSender().spigot().sendMessage(adminList.getList(1).create());
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            loadAdminList();
+            adminList.getList(1).toPlayer((Player) t.getSender());
+
         });
         CommandData tp = new CommandData(ArgumentTypes.DEFAULT, "tp", TabCompleterTypes.NONE);
         CommandData complete = new CommandData(ArgumentTypes.DEFAULT, "complete", TabCompleterTypes.NONE);
@@ -242,261 +99,68 @@ public class Zalohy extends CommandHelp {
         CommandData pridejX = new CommandData(ArgumentTypes.FLOAT, TabCompleterTypes.POSX, "mutility.zalohy.create");
         CommandData zobrazPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         CommandData manageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.manage", CommandExecutors.PLAYER, t -> {
-            manageList.clear();
-            try {
-                Player player = (Player) t.getSender();
-                int id = Integer.parseInt(t.getArgs()[1]);
-                if(isZaloha(player, id, false, tables.getZalohyTable())) {
-                    PreparedStatement stm = db.getCon().prepareStatement("SELECT rejected, completed FROM " + tables.getZalohyTable() + " WHERE record_id= ? AND user_id = ?");
-                    stm.setInt(1, id);
-                    stm.setString(2, player.getName());
-                    stm.setInt(3, new PlayerManager(plugin).getUserId(player.getName()));
-                    ResultSet rs =  stm.executeQuery();
-                    int rejected = 0;
-                    int completed = 0;
-                    if(rs.next()) {
-                        rejected = rs.getInt(1);
-                        completed = rs.getInt(2);
-                    }
-                    if(rejected == 0 && completed == 0) {
-                        stm = db.getCon().prepareStatement("SELECT building_name, posX, posY, posZ, note FROM " + tables.getZalohyTable() + " WHERE user_id = (SELECT id FROM web_users WHERE username = ?) AND record_id = ?");
-                        stm.setString(1, player.getName());
-                        stm.setInt(2, id);
-                        rs =  stm.executeQuery();
-                        String name;
-                        float tpX;
-                        float tpY;
-                        float tpZ;
-                        String note;
-                        if(rs.next()) {
-                            name = rs.getString(1);
-                            tpX = rs.getFloat(2);
-                            tpY = rs.getFloat(3);
-                            tpZ = rs.getFloat(4);
-                            note = rs.getString(5);
-                            manageList.add(new MyComp(colors.getSecondaryColor() + "ID: " + colors.getPrimaryColor() + id));
-                            manageList.add(new MyComp(colors.getSecondaryColor() + "Název: " + colors.getPrimaryColor() + name), new MyComp(colors.getSecondaryColor() + " [" + ChatColor.GOLD + "•••" + colors.getSecondaryColor() + "]", HoverEvent.Action.SHOW_TEXT, colors.getSecondaryColor() + ">> Klikni pro úpravu " + colors.getPrimaryColor() + "Názvu " + colors.getSecondaryColor() + "<<", ClickEvent.Action.SUGGEST_COMMAND, "/zalohy manage "+ id +" setName "));
-                            manageList.add(new MyComp(colors.getSecondaryColor() + "Souřadnice: "));
-                            manageList.add(new MyComp(colors.getSecondaryColor() + "   - X = " + colors.getPrimaryColor() + tpX), new MyComp(colors.getSecondaryColor() + " [" + ChatColor.GOLD + "•••" + colors.getSecondaryColor() + "]", HoverEvent.Action.SHOW_TEXT, colors.getSecondaryColor() + ">> Klikni pro úpravu souřadnice " + colors.getPrimaryColor() + "X " + colors.getSecondaryColor() + "<<", ClickEvent.Action.SUGGEST_COMMAND, "/zalohy manage "+ id +" setX "));
-                            manageList.add(new MyComp(colors.getSecondaryColor() + "   - Y = " + colors.getPrimaryColor() + tpY), new MyComp(colors.getSecondaryColor() + " [" + ChatColor.GOLD + "•••" + colors.getSecondaryColor() + "]", HoverEvent.Action.SHOW_TEXT, colors.getSecondaryColor() + ">> Klikni pro úpravu souřadnice " + colors.getPrimaryColor() + "Y " + colors.getSecondaryColor() + "<<", ClickEvent.Action.SUGGEST_COMMAND, "/zalohy manage "+ id +" setY "));
-                            manageList.add(new MyComp(colors.getSecondaryColor() + "   - Z = " + colors.getPrimaryColor() + tpZ), new MyComp(colors.getSecondaryColor() + " [" + ChatColor.GOLD + "•••" + colors.getSecondaryColor() + "]", HoverEvent.Action.SHOW_TEXT, colors.getSecondaryColor() + ">> Klikni pro úpravu souřadnice " + colors.getPrimaryColor() + "Z " + colors.getSecondaryColor() + "<<", ClickEvent.Action.SUGGEST_COMMAND, "/zalohy manage "+ id +" setZ "));
-                            manageList.add(new MyComp(colors.getSecondaryColor() + "Note: " + colors.getPrimaryColor() + note), new MyComp(colors.getSecondaryColor() + " [" + ChatColor.GOLD + "•••" + colors.getSecondaryColor() + "]", HoverEvent.Action.SHOW_TEXT, colors.getSecondaryColor() + ">> Klikni pro úpravu " + colors.getPrimaryColor() + "Poznámky " + colors.getSecondaryColor() + "<<", ClickEvent.Action.SUGGEST_COMMAND, "/zalohy manage "+ id +" setNote "));
-                        }
-                        player.spigot().sendMessage(manageList.getList(1).create());
-                    } else {
-                        player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errDenied(true, false));
-                    }
+            int recordId = Integer.parseInt(t.getArgs()[1]);
+            if(!isCompleted((Player)t.getSender(), recordId)) {
+                if(isZaloha((Player) t.getSender(), recordId, false)) {
+                    loadManageList((Player)t.getSender(), recordId);
+                    manageList.getList(1).toPlayer((Player) t.getSender());
                 } else {
-                    player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(String.valueOf(id), true, false));
+                    t.getSender().sendMessage(prefix.getInventoryPrefix(true, false) + errors.errWrongArgument(String.valueOf(recordId),true, false));
                 }
-            } catch (SQLException e) {
-                e.printStackTrace();
+
+            } else {
+                t.getSender().sendMessage(prefix.getZalohyPrefix(true, false)
+                        + colors.getSecondaryColor() + "Zálohu již není možné upravit");
             }
         });
         CommandData deleteID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.delete", CommandExecutors.PLAYER, t -> {
-            int id = Integer.parseInt(t.getArgs()[1]);
-            Player player = (Player) t.getSender();
-            try {
-                if(isZaloha(player, id, false, tables.getZalohyTable())) {
-                    PreparedStatement stm = db.getCon().prepareStatement("SELECT rejected, completed FROM "+ tables.getZalohyTable() + " WHERE record_id= ? and user_id = (SELECT id FROM web_users WHERE username = ?)");
-                    stm.setInt(1, id);
-                    stm.setString(2, player.getName());
-                    ResultSet rs =  stm.executeQuery();
-                    int rejected = 0;
-                    int completed = 0;
-                    if(rs.next()) {
-                        rejected = rs.getInt(1);
-                        completed = rs.getInt(2);
-                    }
-                    if(rejected == 0 && completed == 0) {
-                        int max_record_id = 1;
-                        String name = "";
-                        stm = db.getCon().prepareStatement("SELECT building_name FROM "+ tables.getZalohyTable() + " WHERE user_id = (SELECT id FROM web_users WHERE username = ?) AND record_id = ?");
-                        stm.setString(1, player.getName());
-                        stm.setInt(2, id);
-                        rs = stm.executeQuery();
-                        if(rs.next()) {
-                            name = rs.getString(1);
-                        }
-                        stm = db.getCon().prepareStatement("DELETE FROM "+ tables.getZalohyTable() + " WHERE user_id = (SELECT id FROM web_users WHERE username = ?) AND record_id = ?");
-                        stm.setString(1, player.getName());
-                        stm.setInt(2, id);
-                        stm.executeUpdate();
-                        stm = db.getCon().prepareStatement("SELECT MAX(record_id) FROM "+ tables.getZalohyTable() + " WHERE user_id = (SELECT id FROM web_users WHERE username = ?)");
-                        stm.setString(1, player.getName());
-                        rs = stm.executeQuery();
-                        if(rs.next()) {
-                            max_record_id = rs.getInt(1);
-                        }
-                        while(id <= max_record_id) {
-                            int currentId = id - 1;
-                            stm = db.getCon().prepareStatement("UPDATE "+ tables.getZalohyTable() + " SET record_id = ? WHERE user_id = (SELECT id FROM web_users WHERE username = ?) AND record_id = ?");
-                            stm.setInt(1, currentId);
-                            stm.setString(2, player.getName());
-                            stm.setInt(3, id);
-                            stm.execute();
-                            stm.close();
-                            id++;
-                        }
-                        player.sendMessage(prefix.getZalohyPrefix(true, false) + "Záloha "+ colors.getPrimaryColor() + name + " "+ colors.getSecondaryColor() + "byla smazána!");
+            int recordId = Integer.parseInt(t.getArgs()[1]);
+            if(isZaloha((Player)t.getSender(), recordId, false)) {
+                if(!isCompleted((Player)t.getSender(), recordId)) {
+                    DeleteConfirmation deleteConfirmation = new DeleteConfirmation(recordId, (Player) t.getSender(), "/zalohy delete confirm");
+                    deleteConfirmation.setMessage(new JsonBuilder()
+                            .addJsonSegment(prefix.getNavrhyPrefix(true, true))
+                            .text(": Opravdu si přejete odstranit tuto zálohu?")
+                            .color(colors.getSecondaryColorHEX()));
+                    if(deleteConfirmationList.stream().noneMatch(x -> (x.getId() == recordId
+                            && x.getPlayer().getName().equals(t.getSender().getName())
+                            && !x.isFinished()))) {
+                        deleteConfirmation.startTimer();
+                        deleteConfirmationList.add(deleteConfirmation);
                     } else {
-                        player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errDenied(true, false));
+                        t.getSender().sendMessage(prefix.getZalohyPrefix(true, false)
+                                + colors.getSecondaryColor() + "Žádost o potvrzení již byla vytvořena!");
                     }
                 } else {
-                    player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(String.valueOf(id), true, false));
+                    t.getSender().sendMessage(prefix.getZalohyPrefix(true, false)
+                            + colors.getSecondaryColor() + "Zálohu již není možné smazat");
                 }
-
-            } catch (SQLException e) {
-                e.printStackTrace();
+            } else {
+                t.getSender().sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1],true, false));
             }
         });
+        CommandData deleteConfirm = new CommandData(ArgumentTypes.DEFAULT, "confirm", TabCompleterTypes.NONE);
         CommandData adminPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         CommandData adminName = new CommandData(ArgumentTypes.STRING, TabCompleterTypes.ONLINE_PLAYERS, "mutility.zalohy.admin", CommandExecutors.PLAYER, t -> {
-            String username = t.getArgs()[1];
-            adminUserList.clear();
-            adminUserList.setCommand("/zalohy admin " + username);
-            try {
-                PreparedStatement stm = db.getCon().prepareStatement("SELECT id, record_id, building_name, note, rejected, rejected_reason, completed, admin_id, posX, posY, posZ, world, create_date, update_date FROM "+ tables.getZalohyTable() +" WHERE user_id = (SELECT id FROM web_users WHERE username = ?) ORDER BY record_id");
-                stm.setString(1, username);
-                ResultSet rs =  stm.executeQuery();
-                int id;
-                int record_id;
-                String building_name;
-                String note;
-                int rejected;
-                String rejected_reason;
-                int completed;
-                int admin_id;
-                float x;
-                float y;
-                float z;
-                String world;
-                String date;
-                String updateDate;
-                adminUserList.setHead(new MyComp(colors.getSecondaryColor() + "Hráč: " + colors.getPrimaryColor() + username));
-                while(rs.next()) {
-                    id = rs.getInt(1);
-                    record_id = rs.getInt(2);
-                    building_name = rs.getString(3);
-                    note = rs.getString(4);
-                    rejected = rs.getInt(5);
-                    rejected_reason = rs.getString(6);
-                    completed = rs.getInt(7);
-                    admin_id = rs.getInt(8);
-                    x = rs.getFloat(9);
-                    y = rs.getFloat(10);
-                    z = rs.getFloat(11);
-                    world = rs.getString(12);
-                    date = String.valueOf(rs.getDate(13));
-                    updateDate = String.valueOf(rs.getDate(14));
-
-                    MyComp backupMyComp = new MyComp(HoverEvent.Action.SHOW_TEXT);
-                    if(rejected == 1) {
-                        String adminUsername = getUserFromID(admin_id);
-                        backupMyComp.setText(colors.getSecondaryColor() + "- ["+ colors.getPrimaryColor() + record_id + colors.getSecondaryColor() + "] "+ ChatColor.DARK_RED + building_name);
-                        backupMyComp.setHover(
-                                colors.getSecondaryColor() + "X: "+ colors.getPrimaryColor() + x + "\n" +
-                                        colors.getSecondaryColor() + "Y: "+ colors.getPrimaryColor() + y + "\n" +
-                                        colors.getSecondaryColor() + "Z: "+ colors.getPrimaryColor() + z + "\n" +
-                                        colors.getSecondaryColor() + "Svět: "+ colors.getPrimaryColor() + world + "\n" +
-                                        colors.getSecondaryColor() + "Vytvořeno: "+ colors.getPrimaryColor() + date + "\n" +
-                                        colors.getSecondaryColor() + "Poznámka: "+ colors.getPrimaryColor() + note + "\n" +
-                                        colors.getSecondaryColor() + "Stav: "+ ChatColor.DARK_RED + "Zamítnuto \n" +
-                                        colors.getSecondaryColor() + "Datum: "+ ChatColor.DARK_RED + updateDate + "\n" +
-                                        colors.getSecondaryColor() + "Zamítnul/a: "+ ChatColor.DARK_RED + adminUsername + "\n" +
-                                        colors.getSecondaryColor() + "Důvod zamítnutí: "+ ChatColor.DARK_RED + rejected_reason);
-                    } else if(completed == 1) {
-                        String adminUsername = getUserFromID(admin_id);
-                        backupMyComp.setText(colors.getSecondaryColor() + "- ["+ colors.getPrimaryColor() + record_id + colors.getSecondaryColor() + "] "+ ChatColor.GREEN + building_name);
-                        backupMyComp.setHover(
-                                colors.getSecondaryColor() + "X: "+ colors.getPrimaryColor() + x + "\n" +
-                                        colors.getSecondaryColor() + "Y: "+ colors.getPrimaryColor() + y + "\n" +
-                                        colors.getSecondaryColor() + "Z: "+ colors.getPrimaryColor() + z + "\n" +
-                                        colors.getSecondaryColor() + "Svět: "+ colors.getPrimaryColor() + world + "\n" +
-                                        colors.getSecondaryColor() + "Vytvořeno: "+ colors.getPrimaryColor() + date + "\n" +
-                                        colors.getSecondaryColor() + "Poznámka: "+ colors.getPrimaryColor() + note + "\n" +
-                                        colors.getSecondaryColor() + "Stav: "+ ChatColor.GREEN + "Přesunuto \n" +
-                                        colors.getSecondaryColor() + "Datum: "+ ChatColor.GREEN + updateDate + "\n" +
-                                        colors.getSecondaryColor() + "Přesunul/a: "+ ChatColor.GREEN + adminUsername);
-                    } else {
-                        backupMyComp.setText(colors.getSecondaryColor() + "- ["+ colors.getPrimaryColor() + record_id + colors.getSecondaryColor() + "] "+ ChatColor.GOLD + building_name);
-                        backupMyComp.setHover(
-                                colors.getSecondaryColor() + "X: "+ colors.getPrimaryColor() + x + "\n" +
-                                        colors.getSecondaryColor() + "Y: "+ colors.getPrimaryColor() + y + "\n" +
-                                        colors.getSecondaryColor() + "Z: "+ colors.getPrimaryColor() + z + "\n" +
-                                        colors.getSecondaryColor() + "Svět: "+ colors.getPrimaryColor() + world + "\n" +
-                                        colors.getSecondaryColor() + "Vytvořeno: "+ colors.getPrimaryColor() + date + "\n" +
-                                        colors.getSecondaryColor() + "Poznámka: "+ colors.getPrimaryColor() + note + "\n" +
-                                        colors.getSecondaryColor() + "Stav: "+ ChatColor.GOLD + "Čeká na přesun");
-                    }
-                    MyComp completeMyComp = new MyComp(colors.getSecondaryColor() + "["+ ChatColor.GREEN + "✔"+ colors.getSecondaryColor() + "]", HoverEvent.Action.SHOW_TEXT, colors.getSecondaryColor() + ">> Klikni pro "+ ChatColor.GREEN + "Dokončení "+ colors.getSecondaryColor() + "zálohy <<", ClickEvent.Action.RUN_COMMAND, "/zalohy complete " + id);
-                    MyComp rejectMyComp = new MyComp(colors.getSecondaryColor() + "["+ ChatColor.DARK_RED + "✖"+ colors.getSecondaryColor() + "]", HoverEvent.Action.SHOW_TEXT, colors.getSecondaryColor() + ">> Klikni pro "+ ChatColor.DARK_RED + "Zamítnutí "+ colors.getSecondaryColor() + "zálohy <<", ClickEvent.Action.SUGGEST_COMMAND, "/zalohy reject " + id + " ");
-                    MyComp returnMyComp = new MyComp(colors.getSecondaryColor() + "["+ ChatColor.GOLD + "◀"+ colors.getSecondaryColor() + "]", HoverEvent.Action.SHOW_TEXT, colors.getSecondaryColor() + ">> Klikni pro "+ ChatColor.GOLD + "Vrácení "+ colors.getSecondaryColor() + "zálohy mezi nepřesunuté <<", ClickEvent.Action.RUN_COMMAND, "/zalohy return " + id);
-                    MyComp tpMyComp = new MyComp(colors.getSecondaryColor() + "["+ ChatColor.DARK_AQUA + "☄"+ colors.getSecondaryColor() + "]", HoverEvent.Action.SHOW_TEXT, colors.getSecondaryColor() + ">> Klikni pro "+ ChatColor.DARK_AQUA + "Teleportaci "+ colors.getSecondaryColor() + "na místo zálohy <<", ClickEvent.Action.RUN_COMMAND, "/zalohy tp " + id);
-                    if(rejected == 1 || completed == 1) {
-                        adminUserList.add(new MyComp("    "), returnMyComp, tpMyComp, backupMyComp);
-                    } else {
-                        adminUserList.add(completeMyComp, rejectMyComp, tpMyComp, backupMyComp);
-                    }
-                }
-                t.getSender().spigot().sendMessage(adminUserList.getList(1).create());
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            loadAdminUserList(t.getArgs()[1]);
+            adminUserList.getList(1).toPlayer((Player) t.getSender());
         });
         CommandData tpID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.admin", CommandExecutors.PLAYER, t -> {
-            try {
-                Player player = (Player) t.getSender();
-                int id = Integer.parseInt(t.getArgs()[1]);
-                if(isZaloha(player, id, true, tables.getZalohyTable())) {
-                    PreparedStatement stm = db.getCon().prepareStatement("SELECT building_name, posX, posY, posZ FROM "+ tables.getZalohyTable() + " WHERE id= ?");
-                    stm.setInt(1, id);
-                    ResultSet rs =  stm.executeQuery();
-                    float x = 0;
-                    float y = 0;
-                    float z = 0;
-                    String name = "";
-                    if(rs.next()) {
-                        name = rs.getString(1);
-                        x = rs.getFloat(2);
-                        y = rs.getFloat(3);
-                        z = rs.getFloat(4);
-                    }
-                    Location destination = player.getLocation();
-                    destination.setX(x);
-                    destination.setY(y);
-                    destination.setZ(z);
-                    player.teleport(destination);
-                    player.sendMessage(prefix.getZalohyPrefix(true, false) + "Byl jsi teleportován k záloze " + colors.getPrimaryColor() + name + colors.getSecondaryColor() + "!");
-                } else {
-                    player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(String.valueOf(id), true, false));
-                }
-
-            } catch (SQLException e) {
-                e.printStackTrace();
+            Player player = (Player) t.getSender();
+            int id = Integer.parseInt(t.getArgs()[1]);
+            if(isZaloha(player, id, true)) {
+                teleportPlayer(player, id);
+            } else {
+                player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(String.valueOf(id), true, false));
             }
         });
         CommandData completeID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.admin", CommandExecutors.PLAYER, t -> {
             int id = Integer.parseInt(t.getArgs()[1]);
             Player player = (Player) t.getSender();
-            if(isZaloha(player, id, true, tables.getZalohyTable())) {
-                String name = "";
-                try {
-                    PreparedStatement stm = db.getCon().prepareStatement("UPDATE "+ tables.getZalohyTable() + " SET rejected = 0, completed = 1, rejected_reason = null, admin_id = (SELECT id FROM web_users WHERE username = ?), update_date = ? WHERE id= ? ");
-                    stm.setString(1, player.getName());
-                    stm.setDate(2, Date.valueOf(LocalDate.now()));
-                    stm.setInt(3, id);
-                    stm.execute();
-                    stm = db.getCon().prepareStatement("SELECT building_name FROM " + tables.getZalohyTable() + " WHERE id = ?");
-                    stm.setInt(1, id);
-                    ResultSet rs = stm.executeQuery();
-                    if(rs.next()) {
-                        name = rs.getString(1);
-                    }
-                    player.sendMessage(prefix.getZalohyPrefix(true, false) + "Záloha "+ colors.getPrimaryColor() + name + colors.getSecondaryColor() + " byla nastavena jako "+ ChatColor.GREEN + "dokončená" + colors.getSecondaryColor() + "!");
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+            if(isZaloha((Player)t.getSender(), id, true)) {
+                completeZaloha(player, id);
+                player.sendMessage(prefix.getZalohyPrefix(true, false)
+                        + colors.getSecondaryColor() + "Záloha " + colors.getPrimaryColor() + getBuildingName(id) + colors.getSecondaryColor() + " byla nastavena jako dokončená");
             } else {
                 player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(String.valueOf(id), true, false));
             }
@@ -505,22 +169,10 @@ public class Zalohy extends CommandHelp {
         CommandData returnID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.admin", CommandExecutors.PLAYER, t -> {
             int id = Integer.parseInt(t.getArgs()[1]);
             Player player = (Player) t.getSender();
-            if(isZaloha(player, id, true, tables.getZalohyTable())) {
-                String name = "";
-                try {
-                    PreparedStatement stm = db.getCon().prepareStatement("UPDATE "+ tables.getZalohyTable() + " SET rejected = 0, completed = 0, rejected_reason = null, admin_id = null, update_date = null WHERE id= ? ");
-                    stm.setInt(1, id);
-                    stm.execute();
-                    stm = db.getCon().prepareStatement("SELECT building_name FROM " + tables.getZalohyTable() + " WHERE id = ?");
-                    stm.setInt(1, id);
-                    ResultSet rs = stm.executeQuery();
-                    if(rs.next()) {
-                        name = rs.getString(1);
-                    }
-                    player.sendMessage(prefix.getZalohyPrefix(true, false) + "Záloha "+ colors.getPrimaryColor() + name + colors.getSecondaryColor() + " byla vrácena mezi "+ ChatColor.GOLD + "nepřesunuté" + colors.getSecondaryColor() + "!");
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+            if(isZaloha((Player)t.getSender(), id, true)) {
+                returnZaloha(id);
+                player.sendMessage(prefix.getZalohyPrefix(true, false)
+                        + colors.getSecondaryColor() + "Záloha " + colors.getPrimaryColor() + getBuildingName(id) + colors.getSecondaryColor() + " byla nastavena jako nedokončená");
             } else {
                 player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(String.valueOf(id), true, false));
             }
@@ -528,244 +180,179 @@ public class Zalohy extends CommandHelp {
 
         // 3. stupeň
         CommandData pridejY = new CommandData(ArgumentTypes.FLOAT, TabCompleterTypes.POSY, "mutility.zalohy.create");
-        CommandData zobrazPageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.manage", CommandExecutors.PLAYER, t-> t.getSender().spigot().sendMessage(showList.getList(Integer.parseInt(t.getArgs()[2])).create()));
+        CommandData zobrazPageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.manage", CommandExecutors.PLAYER, t-> {
+            loadShowList((Player)t.getSender());
+            showList.getList(Integer.parseInt(t.getArgs()[2])).toPlayer((Player) t.getSender());
+        });
         CommandData setX = new CommandData(ArgumentTypes.DEFAULT, "setx", TabCompleterTypes.NONE);
         CommandData setY = new CommandData(ArgumentTypes.DEFAULT, "sety", TabCompleterTypes.NONE);
         CommandData setZ = new CommandData(ArgumentTypes.DEFAULT, "setz", TabCompleterTypes.NONE);
+        CommandData setWorld = new CommandData(ArgumentTypes.DEFAULT, "setworld", TabCompleterTypes.NONE);
         CommandData setNote = new CommandData(ArgumentTypes.DEFAULT, "setnote", TabCompleterTypes.NONE);
         CommandData setName = new CommandData(ArgumentTypes.DEFAULT, "setname", TabCompleterTypes.NONE);
-        CommandData adminPageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.admin", CommandExecutors.PLAYER, t -> t.getSender().spigot().sendMessage(adminList.getList(Integer.parseInt(t.getArgs()[2])).create()));
+        CommandData adminPageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.admin", CommandExecutors.PLAYER, t -> {
+            loadAdminList();
+            adminList.getList(Integer.parseInt(t.getArgs()[2])).toPlayer((Player) t.getSender());
+        });
         CommandData adminNamePage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         CommandData rejectReason = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Důvod zamítnutí >]", "mutility.zalohy.admin", CommandExecutors.PLAYER, t -> {
             int id = Integer.parseInt(t.getArgs()[1]);
-            String reason = utils.getStringFromArgs(t.getArgs(), 2);
+            String reason = strUt.getStringFromArgs(t.getArgs(), 2);
             Player player = (Player) t.getSender();
-            if(isZaloha(player, id, true, tables.getZalohyTable())) {
-                try {
-                    String name = "";
-                    PreparedStatement stm = db.getCon().prepareStatement("UPDATE "+ tables.getZalohyTable() + " SET rejected = 1, completed = 0, rejected_reason = ?, admin_id = (SELECT id FROM web_users WHERE username = ?), update_date = ? WHERE id= ? ");
-                    stm.setString(1, reason);
-                    stm.setString(2, player.getName());
-                    stm.setDate(3, Date.valueOf(LocalDate.now()));
-                    stm.setInt(4, id);
-                    stm.execute();
-                    stm = db.getCon().prepareStatement("SELECT building_name FROM " + tables.getZalohyTable() + " WHERE id = ?");
-                    stm.setInt(1, id);
-                    ResultSet rs = stm.executeQuery();
-                    if(rs.next()) {
-                        name = rs.getString(1);
-                    }
-                    player.sendMessage(prefix.getZalohyPrefix(true, false) + "Záloha "+ colors.getPrimaryColor() + name + colors.getSecondaryColor() + " byla nastavena jako "+ ChatColor.DARK_RED + "zamítnutá" + colors.getSecondaryColor() + "!");
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+            if(isZaloha((Player)t.getSender(), id, true)) {
+                rejectZaloha(player, id, reason);
+                player.sendMessage(prefix.getZalohyPrefix(true, false)
+                        + colors.getSecondaryColor() + "Záloha " + colors.getPrimaryColor() + getBuildingName(id) + colors.getSecondaryColor() + " byla nastavena jako zamítnutá");
             } else {
                 player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(String.valueOf(id), true, false));
+            }
+        });
+        CommandData deleteConfirmID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.delete", CommandExecutors.PLAYER, t -> {
+            int recordId = Integer.parseInt(t.getArgs()[2]);
+            if(isZaloha((Player)t.getSender(), recordId, false)) {
+                boolean valid = false;
+                for (int i = deleteConfirmationList.size() - 1; i >= 0; i--) {
+                    if(deleteConfirmationList.get(i).getId() == recordId
+                            && deleteConfirmationList.get(i).getPlayer().getName().equals(t.getSender().getName())) {
+                        if(!deleteConfirmationList.get(i).isFinished()) {
+                            valid = true;
+                            deleteConfirmationList.get(i).setFinished(true);
+                            deleteZaloha((Player)t.getSender(), recordId);
+                            t.getSender().sendMessage(prefix.getZalohyPrefix(true, false) + "Záloha byla smazána!");
+                            break;
+                        }
+                    }
+                }
+                if(!valid) {
+                    t.getSender().sendMessage(prefix.getZalohyPrefix(true, false)
+                            + "Potvrzení o smazání zálohy není platné!");
+                }
+                deleteConfirmationList.removeIf(DeleteConfirmation::isFinished);
+            } else {
+                t.getSender().sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1],true, false));
             }
         });
 
         // 4. stupeň
         CommandData pridejZ = new CommandData(ArgumentTypes.FLOAT, TabCompleterTypes.POSZ, "mutility.zalohy.create");
         CommandData setXX = new CommandData(ArgumentTypes.FLOAT, TabCompleterTypes.POSX, "mutility.zalohy.manage", CommandExecutors.PLAYER, t -> {
-            int id = Integer.parseInt(t.getArgs()[1]);
+            int recordId = Integer.parseInt(t.getArgs()[1]);
             float x = Float.parseFloat(t.getArgs()[3]);
             Player player = (Player) t.getSender();
-            if(isZaloha(player, id, false, tables.getZalohyTable())) {
-                try {
-                    PreparedStatement stm = db.getCon().prepareStatement("SELECT rejected, completed FROM "+ tables.getZalohyTable() + " WHERE record_id= ? and user_id = (SELECT id FROM web_users WHERE username = ?)");
-                    stm.setInt(1, id);
-                    stm.setString(2, player.getName());
-                    ResultSet rs =  stm.executeQuery();
-                    int rejected = 0;
-                    int completed = 0;
-                    if(rs.next()) {
-                        rejected = rs.getInt(1);
-                        completed = rs.getInt(2);
-                    }
-                    if(rejected == 0 && completed == 0) {
-                        stm = db.getCon().prepareStatement("UPDATE "+ tables.getZalohyTable() + " SET posX = ? WHERE record_id = ? AND user_id = (SELECT id FROM web_users WHERE username = ?)");
-                        stm.setFloat(1, x);
-                        stm.setInt(2, id);
-                        stm.setString(3, player.getName());
-                        stm.execute();
-                        player.sendMessage(prefix.getZalohyPrefix(true, false) + "Souřadnice "+ colors.getPrimaryColor() + "X "+ colors.getSecondaryColor() + "byla aktualizována na " + colors.getPrimaryColor() +  x + colors.getSecondaryColor() + "!");
-                    } else {
-                        player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errDenied(true, false));
-                    }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+            if(isZaloha(player, recordId, false)) {
+                setX(player, recordId, x);
+                player.sendMessage(prefix.getZalohyPrefix(true, false)
+                        + colors.getSecondaryColor() + "Souřadnice " + colors.getPrimaryColor() + "X " + colors.getSecondaryColor() + "byla nastavena na " + colors.getPrimaryColor() + x);
             } else {
-                player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(String.valueOf(id), true, false));
+                player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(String.valueOf(recordId), true, false));
             }
         });
         CommandData setYY = new CommandData(ArgumentTypes.FLOAT, TabCompleterTypes.POSY, "mutility.zalohy.manage", CommandExecutors.PLAYER, t -> {
-            int id = Integer.parseInt(t.getArgs()[1]);
+            int recordId = Integer.parseInt(t.getArgs()[1]);
             float y = Float.parseFloat(t.getArgs()[3]);
             Player player = (Player) t.getSender();
-            if(isZaloha(player, id, false, tables.getZalohyTable())) {
-                try {
-                    PreparedStatement stm = db.getCon().prepareStatement("SELECT rejected, completed FROM "+ tables.getZalohyTable() + " WHERE record_id= ? and user_id = (SELECT id FROM web_users WHERE username = ?)");
-                    stm.setInt(1, id);
-                    stm.setString(2, player.getName());
-                    ResultSet rs =  stm.executeQuery();
-                    int rejected = 0;
-                    int completed = 0;
-                    if(rs.next()) {
-                        rejected = rs.getInt(1);
-                        completed = rs.getInt(2);
-                    }
-                    if(rejected == 0 && completed == 0) {
-                        stm = db.getCon().prepareStatement("UPDATE "+ tables.getZalohyTable() + " SET posY = ? WHERE record_id = ? AND user_id = (SELECT id FROM web_users WHERE username = ?)");
-                        stm.setFloat(1, y);
-                        stm.setInt(2, id);
-                        stm.setString(3, player.getName());
-                        stm.execute();
-                        player.sendMessage(prefix.getZalohyPrefix(true, false) + "Souřadnice "+ colors.getPrimaryColor() + "Y "+ colors.getSecondaryColor() + "byla aktualizována na " + colors.getPrimaryColor() +  y + colors.getSecondaryColor() + "!");
-                    } else {
-                        player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errDenied(true, false));
-                    }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+            if(isZaloha(player, recordId, false)) {
+                setY(player, recordId, y);
+                player.sendMessage(prefix.getZalohyPrefix(true, false)
+                        + colors.getSecondaryColor() + "Souřadnice " + colors.getPrimaryColor() + "Y " + colors.getSecondaryColor() + "byla nastavena na " + colors.getPrimaryColor() + y);
             } else {
-                player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(String.valueOf(id), true, false));
+                player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(String.valueOf(recordId), true, false));
             }
         });
         CommandData setZZ = new CommandData(ArgumentTypes.FLOAT, TabCompleterTypes.POSZ, "mutility.zalohy.manage", CommandExecutors.PLAYER, t -> {
-            int id = Integer.parseInt(t.getArgs()[1]);
+            int recordId = Integer.parseInt(t.getArgs()[1]);
             float z = Float.parseFloat(t.getArgs()[3]);
             Player player = (Player) t.getSender();
-            if(isZaloha(player, id, false, tables.getZalohyTable())) {
-                try {
-                    PreparedStatement stm = db.getCon().prepareStatement("SELECT rejected, completed FROM "+ tables.getZalohyTable() + " WHERE record_id= ? and user_id = (SELECT id FROM web_users WHERE username = ?)");
-                    stm.setInt(1, id);
-                    stm.setString(2, player.getName());
-                    ResultSet rs =  stm.executeQuery();
-                    int rejected = 0;
-                    int completed = 0;
-                    if(rs.next()) {
-                        rejected = rs.getInt(1);
-                        completed = rs.getInt(2);
-                    }
-                    if(rejected == 0 && completed == 0) {
-                        stm = db.getCon().prepareStatement("UPDATE "+ tables.getZalohyTable() + " SET posZ = ? WHERE record_id = ? AND user_id = (SELECT id FROM web_users WHERE username = ?)");
-                        stm.setFloat(1, z);
-                        stm.setInt(2, id);
-                        stm.setString(3, player.getName());
-                        stm.execute();
-                        player.sendMessage(prefix.getZalohyPrefix(true, false) + "Souřadnice "+ colors.getPrimaryColor() + "Z "+ colors.getSecondaryColor() + "byla aktualizována na " + colors.getPrimaryColor() +  z + colors.getSecondaryColor() + "!");
-                    } else {
-                        player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errDenied(true, false));
-                    }
-                } catch (SQLException e) {
-                    e.printStackTrace();
+            if(isZaloha(player, recordId, false)) {
+                setZ(player, recordId, z);
+                player.sendMessage(prefix.getZalohyPrefix(true, false)
+                        + colors.getSecondaryColor() + "Souřadnice " + colors.getPrimaryColor() + "Z " + colors.getSecondaryColor() + "byla nastavena na " + colors.getPrimaryColor() + z);
+            } else {
+                player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(String.valueOf(recordId), true, false));
+            }
+        });
+        CommandData setWorldWorld = new CommandData(ArgumentTypes.STRING, TabCompleterTypes.WORLDS, "mutility.zalohy.manage", CommandExecutors.PLAYER, t -> {
+            int recordId = Integer.parseInt(t.getArgs()[1]);
+            String world = t.getArgs()[3];
+            Player player = (Player) t.getSender();
+            if(isZaloha(player, recordId, false)) {
+                if(checker.checkWorld(world)) {
+                    setWorld(player, recordId, world);
+                    player.sendMessage(prefix.getZalohyPrefix(true, false)
+                            + colors.getSecondaryColor() + "Svět byl nastaven na " + colors.getPrimaryColor() + world);
+                } else {
+                    player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(world, true, false));
                 }
             } else {
-                player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(String.valueOf(id), true, false));
+                player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(String.valueOf(recordId), true, false));
             }
         });
         CommandData setNoteNote = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Poznámka >]", "mutility.zalohy.manage", CommandExecutors.PLAYER, t -> {
-            int id = Integer.parseInt(t.getArgs()[1]);
-            String note = utils.getStringFromArgs(t.getArgs(), 3);
+            int recordId = Integer.parseInt(t.getArgs()[1]);
+            String note = strUt.getStringFromArgs(t.getArgs(), 3).replace("\"", "'");
             Player player = (Player) t.getSender();
-            if(isZaloha(player, id, false, tables.getZalohyTable())) {
-                try {
-                    PreparedStatement stm = db.getCon().prepareStatement("SELECT rejected, completed FROM "+ tables.getZalohyTable() + " WHERE record_id= ? and user_id = (SELECT id FROM web_users WHERE username = ?)");
-                    stm.setInt(1, id);
-                    stm.setString(2, player.getName());
-                    ResultSet rs =  stm.executeQuery();
-                    int rejected = 0;
-                    int completed = 0;
-                    if(rs.next()) {
-                        rejected = rs.getInt(1);
-                        completed = rs.getInt(2);
-                    }
-                    if(rejected == 0 && completed == 0) {
-                        stm = db.getCon().prepareStatement("UPDATE "+ tables.getZalohyTable() + " SET note = ? WHERE record_id = ? AND user_id = (SELECT id FROM web_users WHERE username = ?)");
-                        stm.setString(1, note);
-                        stm.setInt(2, id);
-                        stm.setString(3, player.getName());
-                        stm.execute();
-                        player.sendMessage(prefix.getZalohyPrefix(true, false) + "Poznámka byla aktualizována na " + colors.getPrimaryColor() +  note + colors.getSecondaryColor() + "!");
-                    } else {
-                        player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errDenied(true, false));
-                    }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+            if(isZaloha(player, recordId, false)) {
+                setNote(player, recordId, note);
+                player.sendMessage(prefix.getZalohyPrefix(true, false)
+                        + colors.getSecondaryColor() + "Poznámka byl nastaven na " + colors.getPrimaryColor() + note);
             } else {
-                player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(String.valueOf(id), true, false));
+                player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(String.valueOf(recordId), true, false));
             }
         });
         CommandData setNameName = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Název stavby/staveb >]", "mutility.zalohy.manage", CommandExecutors.PLAYER, t -> {
-            int id = Integer.parseInt(t.getArgs()[1]);
-            String name = utils.getStringFromArgs(t.getArgs(), 3);
+            int recordId = Integer.parseInt(t.getArgs()[1]);
+            String buildingName = strUt.getStringFromArgs(t.getArgs(), 3);
             Player player = (Player) t.getSender();
-            if(isZaloha(player, id, false, tables.getZalohyTable())) {
-                try {
-                    PreparedStatement stm = db.getCon().prepareStatement("SELECT rejected, completed FROM "+ tables.getZalohyTable() + " WHERE record_id= ? and user_id = (SELECT id FROM web_users WHERE username = ?)");
-                    stm.setInt(1, id);
-                    stm.setString(2, player.getName());
-                    ResultSet rs =  stm.executeQuery();
-                    int rejected = 0;
-                    int completed = 0;
-                    if(rs.next()) {
-                        rejected = rs.getInt(1);
-                        completed = rs.getInt(2);
-                    }
-                    if(rejected == 0 && completed == 0) {
-                        stm = db.getCon().prepareStatement("UPDATE "+ tables.getZalohyTable() + " SET building_name = ? WHERE record_id = ? AND user_id = (SELECT id FROM web_users WHERE username = ?)");
-                        stm.setString(1, name);
-                        stm.setInt(2, id);
-                        stm.setString(3, player.getName());
-                        stm.execute();
-                        player.sendMessage(prefix.getZalohyPrefix(true, false) + "Název byl aktualizován na " + colors.getPrimaryColor() +  name + colors.getSecondaryColor() + "!");
-                    } else {
-                        player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errDenied(true, false));
-                    }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+            if(isZaloha(player, recordId, false)) {
+                setBuildingName(player, recordId, buildingName);
+                player.sendMessage(prefix.getZalohyPrefix(true, false)
+                        + colors.getSecondaryColor() + "Název byl nastaven na " + colors.getPrimaryColor() + buildingName);
             } else {
-                player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(String.valueOf(id), true, false));
+                player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(String.valueOf(recordId), true, false));
             }
         });
-        CommandData adminNamePageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.admin", CommandExecutors.PLAYER, t -> t.getSender().spigot().sendMessage(adminUserList.getList(Integer.parseInt(t.getArgs()[3])).create()));
+        CommandData adminNamePageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.admin", CommandExecutors.PLAYER, t -> {
+            loadAdminUserList(t.getArgs()[1]);
+            adminUserList.getList(Integer.parseInt(t.getArgs()[3])).toPlayer((Player) t.getSender());
+        });
 
         // 5. stupeň
+        CommandData pridejWorld = new CommandData(ArgumentTypes.STRING, TabCompleterTypes.WORLDS, "mutility.zalohy.create");
+
+        // 6. stupeň
         CommandData pridejName = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Název stavby/staveb >]", "mutility.zalohy.create", CommandExecutors.PLAYER, t -> {
+            Player player = (Player) t.getSender();
             float x = Float.parseFloat(t.getArgs()[1]);
             float y = Float.parseFloat(t.getArgs()[2]);
             float z = Float.parseFloat(t.getArgs()[3]);
-            String name = utils.getStringFromArgs(t.getArgs(), 4);
-            Player player = (Player) t.getSender();
-            try {
-                PreparedStatement stm = db.getCon().prepareStatement("SELECT COALESCE(MAX(record_id), 0) FROM "+ tables.getZalohyTable() + " WHERE user_id = (SELECT id FROM web_users WHERE username = ?)");
-                stm.setString(1, player.getName());
-                ResultSet rs = stm.executeQuery();
-                int max_record_id = 0;
-                if(rs.next()) {
-                    max_record_id = rs.getInt(1);
-                }
-                stm = db.getCon().prepareStatement("INSERT INTO "+ tables.getZalohyTable() + " (user_id, record_id, building_name, note, rejected, completed, posX, posY, posZ, world, create_date) " +
-                        "VALUE ((SELECT id FROM web_users WHERE username = ?), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-                stm.setString(1, player.getName());
-                stm.setInt(2, (max_record_id + 1));
-                stm.setString(3, name);
-                stm.setString(4, "-");
-                stm.setInt(5, 0);
-                stm.setInt(6, 0);
-                stm.setDouble(7, x);
-                stm.setDouble(8, y);
-                stm.setDouble(9, z);
-                stm.setString(10, player.getWorld().getName());
-                stm.setDate(11, Date.valueOf(LocalDate.now()));
-                stm.execute();
-                player.sendMessage(prefix.getZalohyPrefix(true, false) + "Záloha "+ colors.getPrimaryColor() + name + colors.getSecondaryColor() +" úspěšně vytvořena!");
-                player.spigot().sendMessage(new TextComponent(colors.getSecondaryColor() + "Kliknutím "), new MyComp(colors.getPrimaryColor() + "➥Zde", HoverEvent.Action.SHOW_TEXT, colors.getSecondaryColor() + ">> "+ colors.getPrimaryColor() + "Klikni "+ colors.getSecondaryColor() +"<<", ClickEvent.Action.SUGGEST_COMMAND, "/zalohy manage "+ (max_record_id + 1) + " setNote ").getComp(), new TextComponent(colors.getSecondaryColor() + " můžete přidat poznámku pro moderátory."));
-            } catch (SQLException e) {
-                e.printStackTrace();
+            String world = t.getArgs()[4];
+            String buildingName = strUt.getStringFromArgs(t.getArgs(), 5).replace("\"", "'");
+            int recordId = getMaxRecordId((Player)t.getSender()) + 1;
+            if(checker.checkWorld(world)) {
+                insertZaloha((Player)t.getSender(), recordId, buildingName, x, y, z, world);
+                new JsonBuilder()
+                        .addJsonSegment(prefix.getZalohyPrefix(true, true))
+                        .text(": Záloha ")
+                        .color(colors.getSecondaryColorHEX())
+                        .text(buildingName)
+                        .color(colors.getPrimaryColorHEX())
+                        .text(" byla vytvořena!\nKliknutím ")
+                        .color(colors.getSecondaryColorHEX())
+                        .text("➥Zde")
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, new JsonBuilder(">> Klikni pro přidání ")
+                                .color(colors.getSecondaryColorHEX())
+                                .text("Poznámky")
+                                .color(colors.getPrimaryColorHEX())
+                                .text(" <<")
+                                .color(colors.getSecondaryColorHEX())
+                                .toString(), true)
+                        .clickEvent(JsonBuilder.ClickAction.SUGGEST_COMMAND, "/zalohy manage " + recordId + " setNote ")
+                        .color(colors.getPrimaryColorHEX())
+                        .text(" můžete přidat poznámku pro moderátory.")
+                        .color(colors.getSecondaryColorHEX())
+                        .toPlayer((Player)t.getSender());
+            } else {
+                player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(world, true, false));
             }
         });
 
@@ -796,6 +383,7 @@ public class Zalohy extends CommandHelp {
         zobraz.link(zobrazPage);
         manage.link(manageID);
         delete.link(deleteID);
+        delete.link(deleteConfirm);
         admin.link(adminPage);
         admin.link(adminName);
         tp.link(tpID);
@@ -808,35 +396,698 @@ public class Zalohy extends CommandHelp {
         manageID.link(setX);
         manageID.link(setY);
         manageID.link(setZ);
+        manageID.link(setWorld);
         manageID.link(setNote);
         manageID.link(setName);
         adminPage.link(adminPageID);
         adminName.link(adminNamePage);
         rejectID.link(rejectReason);
+        deleteConfirm.link(deleteConfirmID);
 
         pridejY.link(pridejZ);
         setX.link(setXX);
         setY.link(setYY);
         setZ.link(setZZ);
+        setWorld.link(setWorldWorld);
         setNote.link(setNoteNote);
         setName.link(setNameName);
         adminNamePage.link(adminNamePageID);
 
-        pridejZ.link(pridejName);
+        pridejZ.link(pridejWorld);
+
+        pridejWorld.link(pridejName);
 
         return zalohy;
     }
 
-    private boolean isZaloha(Player player, int id, boolean global, String tablePrefix) {
+    private void deleteZaloha(Player player, int recordId) {
+        try {
+            PreparedStatement stm;
+            ResultSet rs;
+            stm = db.getCon().prepareStatement("DELETE FROM " + tables.getZalohyTable() + " WHERE record_id = ? AND user_id = ?");
+            stm.setInt(1, recordId);
+            stm.setInt(2, playerManager.getUserId(player.getName()));
+            stm.execute();
+            stm = db.getCon().prepareStatement("UPDATE " + tables.getZalohyTable() + " SET record_id = record_id - 1 WHERE record_id > ? AND user_id = ? ");
+            stm.setInt(1, recordId);
+            stm.setInt(2, playerManager.getUserId(player.getName()));
+            stm.execute();
+        } catch (CommunicationsException e) {
+            db.openConnection();
+            deleteZaloha(player, recordId);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadManageList(Player player, int recordId) {
+        try {
+            manageList.clear();
+            PreparedStatement stm = db.getCon().prepareStatement("SELECT building_name, posX, posY, posZ, world, note  FROM " + tables.getZalohyTable() + " WHERE user_id = ? AND record_id = ?");
+            stm.setInt(1, playerManager.getUserId(player.getName()));
+            stm.setInt(2, recordId);
+            ResultSet rs =  stm.executeQuery();
+            String nameHover = new JsonBuilder(">> Klikni pro úpravu ")
+                    .color(colors.getSecondaryColorHEX())
+                    .text("Názvu")
+                    .color(colors.getPrimaryColorHEX())
+                    .text(" <<")
+                    .color(colors.getSecondaryColorHEX())
+                    .toString();
+            String posXHover = new JsonBuilder(">> Klikni pro úpravu souřadnice ")
+                    .color(colors.getSecondaryColorHEX())
+                    .text("X")
+                    .color(colors.getPrimaryColorHEX())
+                    .text(" <<")
+                    .color(colors.getSecondaryColorHEX())
+                    .toString();
+            String posYHover = new JsonBuilder(">> Klikni pro úpravu souřadnice ")
+                    .color(colors.getSecondaryColorHEX())
+                    .text("Y")
+                    .color(colors.getPrimaryColorHEX())
+                    .text(" <<")
+                    .color(colors.getSecondaryColorHEX())
+                    .toString();
+            String posZHover = new JsonBuilder(">> Klikni pro úpravu souřadnice ")
+                    .color(colors.getSecondaryColorHEX())
+                    .text("Z")
+                    .color(colors.getPrimaryColorHEX())
+                    .text(" <<")
+                    .color(colors.getSecondaryColorHEX())
+                    .toString();
+            String worldHover = new JsonBuilder(">> Klikni pro úpravu ")
+                    .color(colors.getSecondaryColorHEX())
+                    .text("Světa")
+                    .color(colors.getPrimaryColorHEX())
+                    .text(" <<")
+                    .color(colors.getSecondaryColorHEX())
+                    .toString();
+            String noteHover = new JsonBuilder(">> Klikni pro úpravu ")
+                    .color(colors.getSecondaryColorHEX())
+                    .text("Poznámky")
+                    .color(colors.getPrimaryColorHEX())
+                    .text(" <<")
+                    .color(colors.getSecondaryColorHEX())
+                    .toString();
+            String buildingName;
+            float posX;
+            float posY;
+            float posZ;
+            String world;
+            String note;
+            while(rs.next()) {
+                buildingName = rs.getString(1);
+                posX = rs.getFloat(2);
+                posY = rs.getFloat(3);
+                posZ = rs.getFloat(4);
+                world = rs.getString(5);
+                note = rs.getString(6);
+                manageList.add(new JsonBuilder("ID: ")
+                        .color(colors.getSecondaryColorHEX())
+                        .text(String.valueOf(recordId))
+                        .color(colors.getPrimaryColorHEX())
+                        .getJsonSegments());
+                manageList.add(new JsonBuilder("Název: ")
+                        .color(colors.getSecondaryColorHEX())
+                        .text(buildingName)
+                        .color(colors.getPrimaryColorHEX())
+                        .text(" [")
+                        .color(colors.getSecondaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, nameHover, true)
+                        .clickEvent(JsonBuilder.ClickAction.SUGGEST_COMMAND, "/zalohy manage " + recordId + " setName ")
+                        .text("•••")
+                        .color(ChatColor.GOLD)
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, nameHover, true)
+                        .clickEvent(JsonBuilder.ClickAction.SUGGEST_COMMAND, "/zalohy manage " + recordId + " setName ")
+                        .text("]")
+                        .color(colors.getSecondaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, nameHover, true)
+                        .clickEvent(JsonBuilder.ClickAction.SUGGEST_COMMAND, "/zalohy manage " + recordId + " setName ")
+                        .getJsonSegments());
+                manageList.add(new JsonBuilder("Souřadnice: ")
+                        .color(colors.getSecondaryColorHEX())
+                        .getJsonSegments());
+                manageList.add(new JsonBuilder("   - X = ")
+                        .color(colors.getSecondaryColorHEX())
+                        .text(String.valueOf(posX))
+                        .color(colors.getPrimaryColorHEX())
+                        .text(" [")
+                        .color(colors.getSecondaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, posXHover, true)
+                        .clickEvent(JsonBuilder.ClickAction.SUGGEST_COMMAND, "/zalohy manage " + recordId + " setX ")
+                        .text("•••")
+                        .color(ChatColor.GOLD)
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, posXHover, true)
+                        .clickEvent(JsonBuilder.ClickAction.SUGGEST_COMMAND, "/zalohy manage " + recordId + " setX ")
+                        .text("]")
+                        .color(colors.getSecondaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, posXHover, true)
+                        .clickEvent(JsonBuilder.ClickAction.SUGGEST_COMMAND, "/zalohy manage " + recordId + " setX ")
+                        .getJsonSegments());
+                manageList.add(new JsonBuilder("   - Y = ")
+                        .color(colors.getSecondaryColorHEX())
+                        .text(String.valueOf(posY))
+                        .color(colors.getPrimaryColorHEX())
+                        .text(" [")
+                        .color(colors.getSecondaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, posYHover, true)
+                        .clickEvent(JsonBuilder.ClickAction.SUGGEST_COMMAND, "/zalohy manage " + recordId + " setY ")
+                        .text("•••")
+                        .color(ChatColor.GOLD)
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, posYHover, true)
+                        .clickEvent(JsonBuilder.ClickAction.SUGGEST_COMMAND, "/zalohy manage " + recordId + " setY ")
+                        .text("]")
+                        .color(colors.getSecondaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, posYHover, true)
+                        .clickEvent(JsonBuilder.ClickAction.SUGGEST_COMMAND, "/zalohy manage " + recordId + " setY ")
+                        .getJsonSegments());
+                manageList.add(new JsonBuilder("   - Z = ")
+                        .color(colors.getSecondaryColorHEX())
+                        .text(String.valueOf(posZ))
+                        .color(colors.getPrimaryColorHEX())
+                        .text(" [")
+                        .color(colors.getSecondaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, posZHover, true)
+                        .clickEvent(JsonBuilder.ClickAction.SUGGEST_COMMAND, "/zalohy manage " + recordId + " setZ ")
+                        .text("•••")
+                        .color(ChatColor.GOLD)
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, posZHover, true)
+                        .clickEvent(JsonBuilder.ClickAction.SUGGEST_COMMAND, "/zalohy manage " + recordId + " setZ ")
+                        .text("]")
+                        .color(colors.getSecondaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, posZHover, true)
+                        .clickEvent(JsonBuilder.ClickAction.SUGGEST_COMMAND, "/zalohy manage " + recordId + " setZ ")
+                        .getJsonSegments());
+                manageList.add(new JsonBuilder("   - Svět = ")
+                        .color(colors.getSecondaryColorHEX())
+                        .text(world)
+                        .color(colors.getPrimaryColorHEX())
+                        .text(" [")
+                        .color(colors.getSecondaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, worldHover, true)
+                        .clickEvent(JsonBuilder.ClickAction.SUGGEST_COMMAND, "/zalohy manage " + recordId + " setWorld ")
+                        .text("•••")
+                        .color(ChatColor.GOLD)
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, worldHover, true)
+                        .clickEvent(JsonBuilder.ClickAction.SUGGEST_COMMAND, "/zalohy manage " + recordId + " setWorld ")
+                        .text("]")
+                        .color(colors.getSecondaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, worldHover, true)
+                        .clickEvent(JsonBuilder.ClickAction.SUGGEST_COMMAND, "/zalohy manage " + recordId + " setWorld ")
+                        .getJsonSegments());
+                manageList.add(new JsonBuilder("Poznámka: ")
+                        .color(colors.getSecondaryColorHEX())
+                        .text(note)
+                        .color(colors.getPrimaryColorHEX())
+                        .text(" [")
+                        .color(colors.getSecondaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, noteHover, true)
+                        .clickEvent(JsonBuilder.ClickAction.SUGGEST_COMMAND, "/zalohy manage " + recordId + " setNote ")
+                        .text("•••")
+                        .color(ChatColor.GOLD)
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, noteHover, true)
+                        .clickEvent(JsonBuilder.ClickAction.SUGGEST_COMMAND, "/zalohy manage " + recordId + " setNote ")
+                        .text("]")
+                        .color(colors.getSecondaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, noteHover, true)
+                        .clickEvent(JsonBuilder.ClickAction.SUGGEST_COMMAND, "/zalohy manage " + recordId + " setNote ")
+                        .getJsonSegments());
+            }
+        } catch (CommunicationsException e) {
+            db.openConnection();
+            loadManageList(player, recordId);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
+
+    private void loadShowList(Player player) {
+        try {
+            showList.clear();
+            PreparedStatement stm = db.getCon().prepareStatement("SELECT * FROM " + tables.getZalohyTable() + " WHERE user_id = ?");
+            stm.setInt(1, playerManager.getUserId(player.getName()));
+            ResultSet rs =  stm.executeQuery();
+            String manageHover = new JsonBuilder(">> Klikni pro ")
+                    .color(colors.getSecondaryColorHEX())
+                    .text("Úpravu")
+                    .color(ChatColor.GOLD)
+                    .text(" zálohy <<")
+                    .color(colors.getSecondaryColorHEX())
+                    .toString();
+            String deleteHover = new JsonBuilder(">> Klikni pro ")
+                    .color(colors.getSecondaryColorHEX())
+                    .text("Smazání")
+                    .color(ChatColor.DARK_RED)
+                    .text(" zálohy <<")
+                    .color(colors.getSecondaryColorHEX())
+                    .toString();
+            String manageDisableHover = new JsonBuilder(">> ")
+                    .color(colors.getSecondaryColorHEX())
+                    .text("Zálohu již ")
+                    .color(colors.getDisableColorHEX())
+                    .text("nelze")
+                    .color(ChatColor.DARK_RED)
+                    .text(" upravit")
+                    .color(colors.getDisableColorHEX())
+                    .text(" <<")
+                    .color(colors.getSecondaryColorHEX())
+                    .toString();
+            String deleteDisableHover = new JsonBuilder(">> ")
+                    .color(colors.getSecondaryColorHEX())
+                    .text("Zálohu již ")
+                    .color(colors.getDisableColorHEX())
+                    .text("nelze")
+                    .color(ChatColor.DARK_RED)
+                    .text(" smazat")
+                    .color(colors.getDisableColorHEX())
+                    .text(" <<")
+                    .color(colors.getSecondaryColorHEX())
+                    .toString();
+            int recordId;
+            String buildingName;
+            String note;
+            int rejected;
+            String rejectedReason;
+            int completed;
+            int adminId;
+            String world;
+            float posX;
+            float posY;
+            float posZ;
+            String createDate;
+            String updateDate;
+            while(rs.next()) {
+                recordId = rs.getInt(3);
+                buildingName = rs.getString(4);
+                note = rs.getString(5);
+                rejected = rs.getInt(6);
+                rejectedReason = rs.getString(7);
+                completed = rs.getInt(8);
+                adminId = rs.getInt(9);
+                world = rs.getString(10);
+                posX = rs.getFloat(11);
+                posY = rs.getFloat(12);
+                posZ = rs.getFloat(13);
+                createDate = rs.getString(14);
+                updateDate = rs.getString(15);
+                JsonBuilder jb = new JsonBuilder();
+                JsonBuilder hoverInfo = getZalohaInfoHover(rejected, completed, posX, posY, posZ, world, adminId, rejectedReason, createDate, updateDate, note);
+                jb.text("[")
+                        .color(colors.getSecondaryColorHEX());
+                if(completed == 0 && rejected == 0) {
+                    jb.hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, manageHover, true)
+                            .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, "/zalohy manage " + recordId + " ")
+                            .text("•••")
+                            .color(ChatColor.GOLD)
+                            .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, manageHover, true)
+                            .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, "/zalohy manage " + recordId + " ")
+                            .text("]")
+                            .color(colors.getSecondaryColorHEX())
+                            .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, manageHover, true)
+                            .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, "/zalohy manage " + recordId + " ")
+                            .text(" ")
+                            .text("[")
+                            .color(colors.getSecondaryColorHEX())
+                            .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, deleteHover, true)
+                            .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, "/zalohy delete " + recordId)
+                            .text("✖")
+                            .color(ChatColor.DARK_RED)
+                            .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, deleteHover, true)
+                            .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, "/zalohy delete " + recordId)
+                            .text("]")
+                            .color(colors.getSecondaryColorHEX())
+                            .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, deleteHover, true)
+                            .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, "/zalohy delete " + recordId);
+                } else {
+                    jb.hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, manageDisableHover, true)
+                            .text("•••")
+                            .color(colors.getDisableColorHEX())
+                            .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, manageDisableHover, true)
+                            .text("]")
+                            .color(colors.getSecondaryColorHEX())
+                            .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, manageDisableHover, true)
+                            .text(" ")
+                            .text("[")
+                            .color(colors.getSecondaryColorHEX())
+                            .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, deleteDisableHover, true)
+                            .text("✖")
+                            .color(colors.getDisableColorHEX())
+                            .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, deleteDisableHover, true)
+                            .text("]")
+                            .color(colors.getSecondaryColorHEX())
+                            .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, deleteDisableHover, true);
+                }
+                jb.text(" - ")
+                        .color(colors.getSecondaryColorHEX())
+                        .text("[")
+                        .color(colors.getSecondaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, hoverInfo.toString(), true)
+                        .text(String.valueOf(recordId))
+                        .color(colors.getPrimaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, hoverInfo.toString(), true)
+                        .text("] ")
+                        .color(colors.getSecondaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, hoverInfo.toString(), true)
+                        .text(buildingName);
+                if(completed == 0 && rejected == 0) {
+                    jb.color(ChatColor.GOLD);
+                } else if(completed == 1) {
+                    jb.color(ChatColor.GREEN);
+                } else {
+                    jb.color(ChatColor.DARK_RED);
+                }
+                jb.hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, hoverInfo.toString(), true);
+                showList.add(jb.getJsonSegments());
+            }
+        } catch (CommunicationsException e) {
+            db.openConnection();
+            loadShowList(player);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
+
+    private void loadAdminList() {
+        adminList.clear();
+        try {
+            int statCompleted = 0;
+            int statRejected = 0;
+            int statTotal = 0;
+            float statPercent = 0;
+            PreparedStatement stm = db.getCon().prepareStatement("SELECT (SELECT count(completed) FROM "+ tables.getZalohyTable() + " WHERE completed = 1),(SELECT count(completed) FROM "+ tables.getZalohyTable() + " WHERE rejected = 1),(SELECT count(completed) FROM "+ tables.getZalohyTable() + ") FROM "+ tables.getZalohyTable() + " LIMIT 1");
+            ResultSet rs =  stm.executeQuery();
+            if(rs.next()) {
+                statCompleted = rs.getInt(1);
+                statRejected = rs.getInt(2);
+                statTotal = rs.getInt(3);
+                statPercent = 100 / (float)statTotal * (statCompleted + statRejected);
+            }
+            stm = db.getCon().prepareStatement("SELECT (SELECT username FROM web_users WHERE id = user_id), SUM(rejected) AS zamitnute, SUM(completed) AS presunute, count(user_id) AS celkem, CASE WHEN (SUM(rejected)+SUM(completed)) = count(user_id) THEN 1 ELSE 0 END AS hotovo FROM " + tables.getZalohyTable() + " GROUP BY user_id ORDER BY hotovo");
+            rs =  stm.executeQuery();
+            String username;
+            int rejected;
+            int completed;
+            int total;
+            int done;
+            JsonBuilder statsHover = new JsonBuilder("Celkem: ")
+                    .color(colors.getSecondaryColorHEX())
+                    .text(String.valueOf(statTotal))
+                    .color(colors.getPrimaryColorHEX())
+                    .text("\nPřesunuto: ")
+                    .color(colors.getSecondaryColorHEX())
+                    .text(String.valueOf(statCompleted))
+                    .color(ChatColor.GREEN)
+                    .text("\nZamítnuto: ")
+                    .color(colors.getSecondaryColorHEX())
+                    .text(String.valueOf(statRejected))
+                    .color(ChatColor.DARK_RED)
+                    .text("\nZbývá: ")
+                    .color(colors.getSecondaryColorHEX())
+                    .text(String.valueOf((statTotal - (statCompleted + statRejected))))
+                    .color(ChatColor.GOLD);
+            JsonBuilder head = new JsonBuilder("Celkem přesunuto: ")
+                    .color(colors.getSecondaryColorHEX())
+                    .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, statsHover.toString(), true)
+                    .text(String.format("%1.1f", statPercent));
+            if(statPercent <= 33) {
+                head.color(ChatColor.DARK_RED);
+            } else if(statPercent <= 66) {
+                head.color(ChatColor.GOLD);
+            } else {
+                head.color(ChatColor.GREEN);
+            }
+            head.hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, statsHover.toString(), true);
+            head.text(" %")
+                    .color(colors.getSecondaryColorHEX())
+                    .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, statsHover.toString(), true);
+            adminList.setHead(head);
+            while(rs.next()) {
+                username = rs.getString(1);
+                rejected = rs.getInt(2);
+                completed = rs.getInt(3);
+                total = rs.getInt(4);
+                done = rs.getInt(5);
+                JsonBuilder jb = new JsonBuilder(" - ")
+                        .color(colors.getSecondaryColorHEX())
+                        .text("➥" + username);
+                JsonBuilder userStatsHover = new JsonBuilder("Stav: ")
+                        .color(colors.getSecondaryColorHEX());
+                if(done == 0) {
+                    jb.color(ChatColor.GOLD);
+                    userStatsHover.text("Nekompletní")
+                            .color(ChatColor.GOLD);
+                } else {
+                    jb.color(ChatColor.GREEN);
+                    userStatsHover.text("Kompletní")
+                            .color(ChatColor.GREEN);
+                }
+                userStatsHover.text("\nCelkem: ")
+                        .color(colors.getSecondaryColorHEX())
+                        .text(String.valueOf(total))
+                        .color(colors.getPrimaryColorHEX())
+                        .text("\nPřesunuto: ")
+                        .color(colors.getSecondaryColorHEX())
+                        .text(String.valueOf(completed))
+                        .color(ChatColor.GREEN)
+                        .text("\nZamítnuto: ")
+                        .color(colors.getSecondaryColorHEX())
+                        .text(String.valueOf(rejected))
+                        .color(ChatColor.DARK_RED)
+                        .text("\nZbývá: ")
+                        .color(colors.getSecondaryColorHEX())
+                        .text(String.valueOf(total - (completed + rejected)))
+                        .color(ChatColor.GOLD);
+                jb.hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, userStatsHover.toString(), true)
+                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, "/zalohy admin " + username);
+                adminList.add(jb.getJsonSegments());
+            }
+        } catch (CommunicationsException e) {
+            db.openConnection();
+            loadAdminList();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadAdminUserList(String playerName) {
+        try {
+            adminUserList.clear();
+            adminUserList.setCommand("/zalohy admin " + playerName);
+            adminUserList.setTitleJson(prefix.getZalohyPrefix(true, true).replace("]", " - " + playerName));
+            PreparedStatement stm = db.getCon().prepareStatement("SELECT id, building_name, note, rejected, rejected_reason, completed, admin_id, world, posX, posY, posZ, create_date, update_date, (SUM(completed+rejected)) FROM " + tables.getZalohyTable() + " WHERE user_id = ? GROUP BY id ORDER BY (SUM(completed+rejected)), create_date DESC");
+            stm.setInt(1, playerManager.getUserId(playerName));
+            ResultSet rs =  stm.executeQuery();
+            String completeHover = new JsonBuilder(">> Klikni pro ")
+                    .color(colors.getSecondaryColorHEX())
+                    .text("Dokončení")
+                    .color(ChatColor.GREEN)
+                    .text(" zálohy <<")
+                    .color(colors.getSecondaryColorHEX())
+                    .toString();
+            String rejectHover = new JsonBuilder(">> Klikni pro ")
+                    .color(colors.getSecondaryColorHEX())
+                    .text("Zamítnutí")
+                    .color(ChatColor.DARK_RED)
+                    .text(" zálohy <<")
+                    .color(colors.getSecondaryColorHEX())
+                    .toString();
+            String returnHover = new JsonBuilder(">> Klikni pro ")
+                    .color(colors.getSecondaryColorHEX())
+                    .text("Vrácení")
+                    .color(ChatColor.GOLD)
+                    .text(" zálohy mezi nepřesunuté <<")
+                    .color(colors.getSecondaryColorHEX())
+                    .toString();
+            String teleportHover = new JsonBuilder(">> Klikni pro ")
+                    .color(colors.getSecondaryColorHEX())
+                    .text("Teleportaci")
+                    .color(colors.getPrimaryColorHEX())
+                    .text(" na zálohu <<")
+                    .color(colors.getSecondaryColorHEX())
+                    .toString();
+            int id;
+            String buildingName;
+            String note;
+            int rejected;
+            String rejectedReason;
+            int completed;
+            int adminId;
+            String world;
+            float posX;
+            float posY;
+            float posZ;
+            String createDate;
+            String updateDate;
+            int done;
+            while(rs.next()) {
+                id = rs.getInt(1);
+                buildingName = rs.getString(2);
+                note = rs.getString(3);
+                rejected = rs.getInt(4);
+                rejectedReason = rs.getString(5);
+                completed = rs.getInt(6);
+                adminId = rs.getInt(7);
+                world = rs.getString(8);
+                posX = rs.getFloat(9);
+                posY = rs.getFloat(10);
+                posZ = rs.getFloat(11);
+                createDate = rs.getString(12);
+                updateDate = rs.getString(13);
+                done = rs.getInt(14);
+                JsonBuilder hoverInfo = getZalohaInfoHover(rejected, completed, posX, posY, posZ, world, adminId, rejectedReason, createDate, updateDate, note);
+                JsonBuilder jb = new JsonBuilder();
+                if(done == 0) {
+                    jb.text("[")
+                            .color(colors.getSecondaryColorHEX())
+                            .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, completeHover, true)
+                            .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, "/zalohy complete " + id)
+                            .text("✔")
+                            .color(ChatColor.GREEN)
+                            .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, completeHover, true)
+                            .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, "/zalohy complete " + id)
+                            .text("]")
+                            .color(colors.getSecondaryColorHEX())
+                            .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, completeHover, true)
+                            .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, "/zalohy complete " + id)
+                            .text(" ")
+                            .text("[")
+                            .color(colors.getSecondaryColorHEX())
+                            .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, rejectHover, true)
+                            .clickEvent(JsonBuilder.ClickAction.SUGGEST_COMMAND, "/zalohy reject " + id + " ")
+                            .text("✖")
+                            .color(ChatColor.DARK_RED)
+                            .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, rejectHover, true)
+                            .clickEvent(JsonBuilder.ClickAction.SUGGEST_COMMAND, "/zalohy reject " + id + " ")
+                            .text("]")
+                            .color(colors.getSecondaryColorHEX())
+                            .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, rejectHover, true)
+                            .clickEvent(JsonBuilder.ClickAction.SUGGEST_COMMAND, "/zalohy reject " + id + " ");
+                } else {
+                    jb.text("     [")
+                            .color(colors.getSecondaryColorHEX())
+                            .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, returnHover, true)
+                            .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, "/zalohy return " + id)
+                            .text("◀")
+                            .color(ChatColor.GOLD)
+                            .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, returnHover, true)
+                            .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, "/zalohy return " + id)
+                            .text("]")
+                            .color(colors.getSecondaryColorHEX())
+                            .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, returnHover, true)
+                            .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, "/zalohy return " + id);
+                }
+                jb.text(" [")
+                        .color(colors.getSecondaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, teleportHover, true)
+                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, "/zalohy tp " + id)
+                        .text("☄")
+                        .color(colors.getPrimaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, teleportHover, true)
+                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, "/zalohy tp " + id)
+                        .text("] ")
+                        .color(colors.getSecondaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, teleportHover, true)
+                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, "/zalohy tp " + id)
+                        .text(" - ")
+                        .color(colors.getSecondaryColorHEX())
+                        .text("[")
+                        .color(colors.getSecondaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, hoverInfo.toString(), true)
+                        .text(String.valueOf(id))
+                        .color(colors.getPrimaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, hoverInfo.toString(), true)
+                        .text("] ")
+                        .color(colors.getSecondaryColorHEX())
+                        .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, hoverInfo.toString(), true)
+                        .text(buildingName);
+                if(completed == 0 && rejected == 0) {
+                    jb.color(ChatColor.GOLD);
+                } else if(completed == 1) {
+                    jb.color(ChatColor.GREEN);
+                } else {
+                    jb.color(ChatColor.DARK_RED);
+                }
+                jb.hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, hoverInfo.toString(), true);
+                adminUserList.add(jb.getJsonSegments());
+            }
+        } catch (CommunicationsException e) {
+            db.openConnection();
+            loadAdminList();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
+
+    private JsonBuilder getZalohaInfoHover(int rejected, int completed, float posX, float posY, float posZ, String world, int adminId, String rejectedReason, String createDate, String updateDate, String note) {
+        JsonBuilder hoverInfo = new JsonBuilder("X: ")
+                .color(colors.getSecondaryColorHEX())
+                .text(String.valueOf(posX))
+                .color(colors.getPrimaryColorHEX())
+                .text("\nY: ")
+                .color(colors.getSecondaryColorHEX())
+                .text(String.valueOf(posY))
+                .color(colors.getPrimaryColorHEX())
+                .text("\nZ: ")
+                .color(colors.getSecondaryColorHEX())
+                .text(String.valueOf(posZ))
+                .color(colors.getPrimaryColorHEX())
+                .text("\nSvět: ")
+                .color(colors.getSecondaryColorHEX())
+                .text(world)
+                .color(colors.getPrimaryColorHEX())
+                .text("\nVytvořeno: ")
+                .color(colors.getSecondaryColorHEX())
+                .text(createDate)
+                .color(colors.getPrimaryColorHEX())
+                .text("\nPoznámka: ")
+                .color(colors.getSecondaryColorHEX())
+                .text(note)
+                .color(colors.getPrimaryColorHEX())
+                .text("\nStav: ")
+                .color(colors.getSecondaryColorHEX());
+        if(rejected == 0 && completed == 0) {
+            hoverInfo.text("Čeká na schválení")
+                    .color(ChatColor.GOLD);
+        } else if(completed == 1) {
+            hoverInfo.text("Schváleno")
+                    .color(ChatColor.GREEN)
+                    .text("\nDatum: ")
+                    .color(colors.getSecondaryColorHEX())
+                    .text(updateDate)
+                    .color(ChatColor.GREEN)
+                    .text("\nSchválil/a: ")
+                    .color(colors.getSecondaryColorHEX())
+                    .text(playerManager.getUsername(adminId))
+                    .color(ChatColor.GREEN);
+        } else {
+            hoverInfo.text("Zamítnuto")
+                    .color(ChatColor.DARK_RED)
+                    .text("\nDatum: ")
+                    .color(colors.getSecondaryColorHEX())
+                    .text(updateDate)
+                    .color(ChatColor.DARK_RED)
+                    .text("\nZamítnul/a: ")
+                    .color(colors.getSecondaryColorHEX())
+                    .text(playerManager.getUsername(adminId))
+                    .color(ChatColor.DARK_RED)
+                    .text("\nDůvod zamítnutí: ")
+                    .color(colors.getSecondaryColorHEX())
+                    .text(rejectedReason)
+                    .color(ChatColor.DARK_RED);
+        }
+        return hoverInfo;
+    }
+
+    private boolean isZaloha(Player player, int id, boolean global) {
         int count = 0;
         PreparedStatement stm;
         try {
             if(global) {
-                stm = db.getCon().prepareStatement("SELECT count(id) FROM "+ tablePrefix + " WHERE id = ?");
+                stm = db.getCon().prepareStatement("SELECT count(id) FROM "+ tables.getZalohyTable() + " WHERE id = ?");
                 stm.setInt(1, id);
             } else {
-                stm = db.getCon().prepareStatement("SELECT count(record_id) FROM "+ tablePrefix + " WHERE user_id= (SELECT id FROM web_users WHERE username = ?) AND record_id = ?");
-                stm.setString(1, player.getName());
+                stm = db.getCon().prepareStatement("SELECT count(record_id) FROM "+ tables.getZalohyTable() + " WHERE user_id= ? AND record_id = ?");
+                stm.setInt(1, playerManager.getUserId(player.getName()));
                 stm.setInt(2, id);
             }
             ResultSet rs =  stm.executeQuery();
@@ -845,28 +1096,263 @@ public class Zalohy extends CommandHelp {
             }
         } catch (CommunicationsException e)  {
             db.openConnection();
-            isZaloha(player, id, global, tablePrefix);
+            isZaloha(player, id, global);
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return (count != 0);
     }
 
-    private String getUserFromID(int id) {
-        String username = "";
+    private boolean isCompleted(Player player, int recordId) {
+        int sum = 0;
         try {
-            PreparedStatement stm = db.getCon().prepareStatement("SELECT username FROM web_users WHERE id = ?");
-            stm.setInt(1, id);
+            PreparedStatement stm = db.getCon().prepareStatement("SELECT (completed+rejected) FROM " + tables.getZalohyTable() + " WHERE user_id = ? AND record_id = ?");
+            stm.setInt(1, playerManager.getUserId(player.getName()));
+            stm.setInt(2, recordId);
             ResultSet rs =  stm.executeQuery();
             if(rs.next()) {
-                username = rs.getString(1);
+                sum = rs.getInt(1);
             }
-        } catch(CommunicationsException e) {
+        } catch (CommunicationsException e) {
             db.openConnection();
-            getUserFromID(id);
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+            isCompleted(player, recordId);
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        return username;
+        return (sum != 0);
+    }
+
+    private int getMaxRecordId(Player player) {
+        int maxRecordId = 0;
+        try {
+            PreparedStatement stm = db.getCon().prepareStatement("SELECT COALESCE(MAX(record_id), 0) FROM "+ tables.getZalohyTable() + " WHERE user_id = ?");
+            stm.setInt(1, playerManager.getUserId(player.getName()));
+            ResultSet rs = stm.executeQuery();
+            if(rs.next()) {
+                maxRecordId = rs.getInt(1);
+            }
+        } catch (CommunicationsException e) {
+            db.openConnection();
+            getMaxRecordId(player);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return maxRecordId;
+    }
+
+    private String getBuildingName(int id) {
+        String buildingName = "";
+        try {
+            PreparedStatement stm = db.getCon().prepareStatement("SELECT building_name FROM "+ tables.getZalohyTable() + " WHERE id = ?");
+            stm.setInt(1, id);
+            ResultSet rs = stm.executeQuery();
+            if(rs.next()) {
+                buildingName = rs.getString(1);
+            }
+        } catch (CommunicationsException e) {
+            db.openConnection();
+            getBuildingName(id);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return buildingName;
+    }
+
+    private void insertZaloha(Player player, int recordId, String buildingName, float x, float y, float z, String world) {
+        try {
+            PreparedStatement stm;
+            stm = db.getCon().prepareStatement("INSERT INTO "+ tables.getZalohyTable() + " (user_id, record_id, building_name, note, rejected, completed, posX, posY, posZ, world, create_date) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            stm.setInt(1, playerManager.getUserId(player.getName()));
+            stm.setInt(2, recordId);
+            stm.setString(3, buildingName);
+            stm.setString(4, "-");
+            stm.setInt(5, 0);
+            stm.setInt(6, 0);
+            stm.setDouble(7, x);
+            stm.setDouble(8, y);
+            stm.setDouble(9, z);
+            stm.setString(10, world);
+            stm.setString(11, strUt.getCurrentFormattedDate());
+            stm.execute();
+        } catch (CommunicationsException e) {
+            db.openConnection();
+            insertZaloha(player, recordId, buildingName, x, y, z, world);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void completeZaloha(Player player, int id) {
+        try {
+            PreparedStatement stm;
+            stm = db.getCon().prepareStatement("UPDATE "+ tables.getZalohyTable() + " SET rejected = 0, completed = 1, rejected_reason = null, admin_id = ?, update_date = ? WHERE id= ? ");
+            stm.setInt(1, playerManager.getUserId(player.getName()));
+            stm.setString(2, strUt.getCurrentFormattedDate());
+            stm.setInt(3, id);
+            stm.execute();
+        } catch (CommunicationsException e) {
+            db.openConnection();
+            completeZaloha(player, id);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void rejectZaloha(Player player, int id, String rejectedReason) {
+        try {
+            PreparedStatement stm;
+            stm = db.getCon().prepareStatement("UPDATE "+ tables.getZalohyTable() + " SET rejected = 1, completed = 0, rejected_reason = ?, admin_id = ?, update_date = ? WHERE id= ? ");
+            stm.setString(1, rejectedReason);
+            stm.setInt(2, playerManager.getUserId(player.getName()));
+            stm.setString(3, strUt.getCurrentFormattedDate());
+            stm.setInt(4, id);
+            stm.execute();
+        } catch (CommunicationsException e) {
+            db.openConnection();
+            rejectZaloha(player, id, rejectedReason);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void returnZaloha(int id) {
+        try {
+            PreparedStatement stm;
+            stm = db.getCon().prepareStatement("UPDATE "+ tables.getZalohyTable() + " SET rejected = 0, completed = 0, rejected_reason = NULL, admin_id = NULL, update_date = NULL WHERE id= ? ");
+            stm.setInt(1, id);
+            stm.execute();
+        } catch (CommunicationsException e) {
+            db.openConnection();
+            returnZaloha(id);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void setX(Player player, int recordId, float x) {
+        try {
+            PreparedStatement stm;
+            stm = db.getCon().prepareStatement("UPDATE "+ tables.getZalohyTable() + " SET posX = ? WHERE user_id = ? AND record_id = ? ");
+            stm.setFloat(1, x);
+            stm.setInt(2, playerManager.getUserId(player.getName()));
+            stm.setInt(3, recordId);
+            stm.execute();
+        } catch (CommunicationsException e) {
+            db.openConnection();
+            setX(player, recordId, x);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void setY(Player player, int recordId, float y) {
+        try {
+            PreparedStatement stm;
+            stm = db.getCon().prepareStatement("UPDATE "+ tables.getZalohyTable() + " SET posY = ? WHERE user_id = ? AND record_id = ? ");
+            stm.setFloat(1, y);
+            stm.setInt(2, playerManager.getUserId(player.getName()));
+            stm.setInt(3, recordId);
+            stm.execute();
+        } catch (CommunicationsException e) {
+            db.openConnection();
+            setY(player, recordId, y);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void setZ(Player player, int recordId, float z) {
+        try {
+            PreparedStatement stm;
+            stm = db.getCon().prepareStatement("UPDATE "+ tables.getZalohyTable() + " SET posZ = ? WHERE user_id = ? AND record_id = ? ");
+            stm.setFloat(1, z);
+            stm.setInt(2, playerManager.getUserId(player.getName()));
+            stm.setInt(3, recordId);
+            stm.execute();
+        } catch (CommunicationsException e) {
+            db.openConnection();
+            setZ(player, recordId, z);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void setWorld(Player player, int recordId, String world) {
+        try {
+            PreparedStatement stm;
+            stm = db.getCon().prepareStatement("UPDATE "+ tables.getZalohyTable() + " SET world = ? WHERE user_id = ? AND record_id = ? ");
+            stm.setString(1, world);
+            stm.setInt(2, playerManager.getUserId(player.getName()));
+            stm.setInt(3, recordId);
+            stm.execute();
+        } catch (CommunicationsException e) {
+            db.openConnection();
+            setWorld(player, recordId, world);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void setNote(Player player, int recordId, String note) {
+        try {
+            PreparedStatement stm;
+            stm = db.getCon().prepareStatement("UPDATE "+ tables.getZalohyTable() + " SET note = ? WHERE user_id = ? AND record_id = ? ");
+            stm.setString(1, note);
+            stm.setInt(2, playerManager.getUserId(player.getName()));
+            stm.setInt(3, recordId);
+            stm.execute();
+        } catch (CommunicationsException e) {
+            db.openConnection();
+            setNote(player, recordId, note);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void setBuildingName(Player player, int recordId, String buildingName) {
+        try {
+            PreparedStatement stm;
+            stm = db.getCon().prepareStatement("UPDATE "+ tables.getZalohyTable() + " SET building_name = ? WHERE user_id = ? AND record_id = ? ");
+            stm.setString(1, buildingName);
+            stm.setInt(2, playerManager.getUserId(player.getName()));
+            stm.setInt(3, recordId);
+            stm.execute();
+        } catch (CommunicationsException e) {
+            db.openConnection();
+            setBuildingName(player, recordId, buildingName);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void teleportPlayer(Player player, int id) {
+        try {
+            PreparedStatement stm = db.getCon().prepareStatement("SELECT building_name, posX, posY, posZ FROM "+ tables.getZalohyTable() + " WHERE id= ?");
+            stm.setInt(1, id);
+            ResultSet rs =  stm.executeQuery();
+            float x = 0;
+            float y = 0;
+            float z = 0;
+            String name = "";
+            if(rs.next()) {
+                name = rs.getString(1);
+                x = rs.getFloat(2);
+                y = rs.getFloat(3);
+                z = rs.getFloat(4);
+            }
+            Location destination = player.getLocation();
+            destination.setX(x);
+            destination.setY(y);
+            destination.setZ(z);
+            player.teleport(destination);
+            player.sendMessage(prefix.getZalohyPrefix(true, false) + "Byl jsi teleportován k záloze " + colors.getPrimaryColor() + name + colors.getSecondaryColor() + "!");
+        } catch (CommunicationsException e) {
+            db.openConnection();
+            teleportPlayer(player, id);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }
+
