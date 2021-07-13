@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class CraftCoinManager {
-    private MUtilitySpigot plugin;
+    private final MUtilitySpigot plugin;
     private final Connection con;
 
     public CraftCoinManager(MUtilitySpigot plugin) {
@@ -20,14 +20,14 @@ public class CraftCoinManager {
         con = plugin.getDb().getCon();
     }
 
-    public void addCC(int amount, Player player) {
+    public void addCC(int amount, String username, int type) {
         try {
             LocalDateTime myDateObj = LocalDateTime.now();
             DateTimeFormatter myFormatObj = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             String date = myDateObj.format(myFormatObj);
 
             PreparedStatement stm = con.prepareStatement("SELECT id FROM web_users WHERE username = ?");
-            stm.setString(1, player.getName());
+            stm.setString(1, username);
             ResultSet rs = stm.executeQuery();
             if(rs.next()) {
                 int id = rs.getInt(1);
@@ -35,13 +35,13 @@ public class CraftCoinManager {
                 stm.setInt(1, id);
                 stm.setString(2, date);
                 stm.setInt(3, amount);
-                stm.setInt(4, 9);
+                stm.setInt(4, type);
                 stm.execute();
             }
 
         } catch (CommunicationsException e) {
             plugin.getDb().openConnection();
-            addCC(amount, player);
+            addCC(amount, username, type);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }

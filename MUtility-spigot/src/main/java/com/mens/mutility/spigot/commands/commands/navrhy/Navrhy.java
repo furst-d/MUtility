@@ -12,14 +12,17 @@ import com.mens.mutility.spigot.commands.system.enums.CommandExecutors;
 import com.mens.mutility.spigot.commands.system.enums.TabCompleterTypes;
 import com.mens.mutility.spigot.database.Database;
 import com.mens.mutility.spigot.database.DatabaseTables;
+import com.mens.mutility.spigot.discord.DiscordManager;
 import com.mens.mutility.spigot.utils.DeleteConfirmation;
 import com.mens.mutility.spigot.utils.MyStringUtils;
 import com.mens.mutility.spigot.utils.PageList;
 import com.mens.mutility.spigot.utils.PlayerManager;
 import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.entity.Player;
 
+import java.awt.*;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -40,6 +43,7 @@ public class Navrhy extends CommandHelp {
     private final MyStringUtils strUt;
     private final Errors errors;
     private final List<DeleteConfirmation> deleteConfirmationList;
+    private final DiscordManager discordManager;
 
     public Navrhy(MUtilitySpigot plugin) {
         this.plugin = plugin;
@@ -58,6 +62,7 @@ public class Navrhy extends CommandHelp {
         strUt = new MyStringUtils();
         errors = new Errors();
         deleteConfirmationList = new ArrayList<>();
+        discordManager = new DiscordManager();
     }
 
     /**
@@ -95,6 +100,12 @@ public class Navrhy extends CommandHelp {
             String content = strUt.getStringFromArgs(t.getArgs(), 1);
             addNavrh(playerManager.getUserId(t.getSender().getName()), getMaxRecordId((Player)t.getSender()) + 1, content);
             t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false) + "Návrh byl přidán");
+            EmbedBuilder embedBuilder = new EmbedBuilder();
+            embedBuilder.setTitle("Hráč " + t.getSender().getName() + " přidal nový návrh");
+            embedBuilder.setDescription(content);
+            embedBuilder.setColor(Color.decode(colors.getPrimaryColorHEX()));
+            embedBuilder.setFooter("Hlasujte kliknutím na jednu z reakcí");
+            discordManager.sendVoteEmbedMessage(discordManager.getChannelByName(plugin.getConfig().getString("Discord.Rooms.Vote")), embedBuilder.build());
         });
         CommandData adminName = new CommandData(ArgumentTypes.STRING, TabCompleterTypes.ONLINE_PLAYERS, "mutility.navrhy.admin", CommandExecutors.PLAYER, t -> {
             loadAdminNameList(t.getArgs()[1]);

@@ -14,6 +14,7 @@ import com.mens.mutility.spigot.commands.commands.zalohy.Zalohy;
 import com.mens.mutility.spigot.commands.system.CommandData;
 import com.mens.mutility.spigot.commands.system.CommandListener;
 import com.mens.mutility.spigot.database.Database;
+import com.mens.mutility.spigot.discord.DiscordManager;
 import com.mens.mutility.spigot.eventhandlers.OnEntityPortalEvent;
 import com.mens.mutility.spigot.eventhandlers.OnPlayerJoinEvent;
 import com.mens.mutility.spigot.eventhandlers.OnPlayerPortalEvent;
@@ -52,8 +53,9 @@ public final class MUtilitySpigot extends JavaPlugin {
         loadConfig();
         loadFiles();
         registerChannels();
-        setMstavba();
         servers = new ArrayList<>();
+        DiscordManager.startBot(this);
+        setMstavba();
     }
 
     /**

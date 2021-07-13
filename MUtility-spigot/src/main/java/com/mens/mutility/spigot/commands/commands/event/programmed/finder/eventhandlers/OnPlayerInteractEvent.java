@@ -51,7 +51,7 @@ public class OnPlayerInteractEvent implements Listener {
                             int finalCC = rd.nextInt(30) + 1;
                             player.sendMessage(prefix.getCustomPrefix("Hledačka", true, false) +
                                     "Gratuluji, našel jsi " + colors.getPrimaryColor() + finalCC + colors.getSecondaryColor() + " CC!");
-                            ccManager.addCC(finalCC, player);
+                            ccManager.addCC(finalCC, player.getName(), 9);
                             location.getBlock().setType(Material.AIR);
                             Objects.requireNonNull(location.getWorld()).spawnParticle(Particle.VILLAGER_HAPPY, location, 5, 0.4D, 0.75D, 0.4D, 0.05);
                             world.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 5, 1);

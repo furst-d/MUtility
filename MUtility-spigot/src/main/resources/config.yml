@@ -28,3 +28,12 @@ MYSQL:
   # Database: '${KMC_DB_DATABASE}'
   # User: '${KMC_DB_USER}'
   # Password: '${KMC_DB_PASSWORD}'
+
+Discord:
+  Token: 'ODY0NDY5OTkwOTcwMzU5ODA5.YO16ag.ezlD6gkLmcyRub3mok3dTG1CNFw'
+  Rooms:
+    Vote: 'admin-hlasovani'
+    Infoline: 'infolinka'
+  Emotes:
+    Accepted: 864514259258310657
+    Rejected: 864514280925560832
