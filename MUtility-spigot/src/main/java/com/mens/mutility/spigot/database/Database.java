@@ -25,7 +25,7 @@ public class Database {
         return con;
     }
 
-    public void openConnection() {
+    public void openFirstConnection() {
         String HOST = plugin.getConfig().getString("MYSQL.Host");
         String PORT = plugin.getConfig().getString("MYSQL.Port");
         String DATABASE = plugin.getConfig().getString("MYSQL.Database");
@@ -44,6 +44,25 @@ public class Database {
             plugin.getPluginLoader().disablePlugin(plugin);
         }
     }
+
+    public void openConnection() {
+        String HOST = plugin.getConfig().getString("MYSQL.Host");
+        String PORT = plugin.getConfig().getString("MYSQL.Port");
+        String DATABASE = plugin.getConfig().getString("MYSQL.Database");
+        String USER = plugin.getConfig().getString("MYSQL.User");
+        String PASSWORD = plugin.getConfig().getString("MYSQL.Password");
+
+        String URL = "jdbc:mysql://" + HOST + ":" + PORT + "/" + DATABASE + "?autoReconnect=true&useSSL=false&useUnicode=yes&characterEncoding=UTF-8&connectTimeout=30000&socketTimeout=30000&waitTimeout=30000&interactiveTimeout=30000";
+        try {
+            DriverManager.setLoginTimeout(2);
+            con = DriverManager.getConnection(URL, USER, PASSWORD);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            plugin.getPluginLoader().disablePlugin(plugin);
+        }
+    }
+
+
 
     private void createTablesIfNotExists() throws SQLException {
         PreparedStatement stm;

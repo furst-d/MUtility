@@ -271,6 +271,9 @@ public class MInv extends CommandHelp {
 
     private void loadLoadData(Player player, int page) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             loadList.clear();
             PreparedStatement stm = db.getCon().prepareStatement("SELECT id_user_record, inventory_name FROM " + tables.getInventoryTable());
             ResultSet rs =  stm.executeQuery();
@@ -347,6 +350,9 @@ public class MInv extends CommandHelp {
 
     private void loadManageListData(Player player, int page) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             manageList.clear();
             PreparedStatement stm = db.getCon().prepareStatement("SELECT id_user_record, inventory_name FROM " + tables.getInventoryTable());
             ResultSet rs =  stm.executeQuery();
@@ -476,6 +482,9 @@ public class MInv extends CommandHelp {
 
     private void saveInventory(Player player, JsonObject inventory, String inventoryName, boolean quickSave) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm;
             ResultSet rs;
             if(quickSave) {
@@ -507,6 +516,9 @@ public class MInv extends CommandHelp {
 
     private void updateInventory(Player player, int id_user_record, JsonObject inventory) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm;
             ResultSet rs;
             stm = db.getCon().prepareStatement("UPDATE " + tables.getInventoryTable() + " SET inventory = ? WHERE id_user_record = ? AND user_id = ?");
@@ -525,6 +537,9 @@ public class MInv extends CommandHelp {
     private int getQuickSaveCount(Player player) {
         int count = -1;
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm;
             stm = db.getCon().prepareStatement("SELECT COALESCE(COUNT(id_user_record), 0) FROM " + tables.getInventoryTable() + " WHERE user_id = ? AND id_user_record = 0");
             stm.setInt(1, playerManager.getUserId(player.getName()));
@@ -544,6 +559,9 @@ public class MInv extends CommandHelp {
     private int getSaveCount(Player player) {
         int count = -1;
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm;
             stm = db.getCon().prepareStatement("SELECT COALESCE(MAX(id_user_record), 0) FROM " + tables.getInventoryTable() + " WHERE user_id = ?");
             stm.setInt(1, playerManager.getUserId(player.getName()));
@@ -563,6 +581,9 @@ public class MInv extends CommandHelp {
     private boolean isInventory(Player player, int id_user_record) {
         int count = 0;
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm = db.getCon().prepareStatement("SELECT count(id_user_record) FROM " + tables.getInventoryTable() + " WHERE user_id = ? AND id_user_record = ?");
             stm.setInt(1, playerManager.getUserId(player.getName()));
             stm.setInt(2, id_user_record);
@@ -583,6 +604,9 @@ public class MInv extends CommandHelp {
         String inventory = "";
         String inventory_name = null;
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm = db.getCon().prepareStatement("SELECT inventory, inventory_name FROM " + tables.getInventoryTable() + " WHERE user_id = ? AND id_user_record = ?");
             stm.setInt(1, playerManager.getUserId(player.getName()));
             stm.setInt(2, id_user_record);
@@ -602,6 +626,9 @@ public class MInv extends CommandHelp {
 
     private void updateInventoryName(Player player, int id_user_record, String inventory_name) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm;
             ResultSet rs;
             stm = db.getCon().prepareStatement("UPDATE " + tables.getInventoryTable() + " SET inventory_name = ? WHERE id_user_record = ? AND user_id = ?");
@@ -619,6 +646,9 @@ public class MInv extends CommandHelp {
 
     private void deleteInventory(Player player, int id_user_record) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm;
             ResultSet rs;
             stm = db.getCon().prepareStatement("DELETE FROM " + tables.getInventoryTable() + " WHERE id_user_record = ? AND user_id = ?");

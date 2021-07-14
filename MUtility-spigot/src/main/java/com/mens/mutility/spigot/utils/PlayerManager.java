@@ -20,6 +20,9 @@ public class PlayerManager {
     public int getUserId(String username) {
         int id = 0;
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm = db.getCon().prepareStatement("SELECT id FROM web_users WHERE username = ?");
             stm.setString(1, username);
             ResultSet rs =  stm.executeQuery();

@@ -256,6 +256,9 @@ public class Navrhy extends CommandHelp {
 
     private void loadAdminList(Player player, int page) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             adminList.clear();
             PreparedStatement stm = db.getCon().prepareStatement("SELECT id, user_id, content, rejected, rejected_reason, accepted, admin_id, create_date, update_date, (SUM(accepted+rejected)) FROM " + tables.getNavrhyTable() + " GROUP BY id ORDER BY (SUM(accepted+rejected)), create_date DESC");
             ResultSet rs =  stm.executeQuery();
@@ -326,6 +329,9 @@ public class Navrhy extends CommandHelp {
 
     private void loadAdminNameList(String playerName, Player player, int page) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             adminNameList.clear();
             adminNameList.setCommand("/navrhy admin " + playerName);
             adminNameList.setTitleJson(prefix.getNavrhyPrefix(true, true).replace("]", " - " + playerName));
@@ -401,6 +407,9 @@ public class Navrhy extends CommandHelp {
 
     private void loadShowList(Player player, int page) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             showList.clear();
             PreparedStatement stm = db.getCon().prepareStatement("SELECT * FROM " + tables.getNavrhyTable() + " WHERE user_id = ?");
             stm.setInt(1, playerManager.getUserId(player.getName()));
@@ -542,6 +551,9 @@ public class Navrhy extends CommandHelp {
 
     private void addNavrh(int userId, int recordId, String content) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm = db.getCon().prepareStatement("INSERT INTO " + tables.getNavrhyTable() + " (user_id, record_id, content, rejected, accepted, create_date) VALUES (?, ?, ?, ?, ?, ?)");
             stm.setInt(1, userId);
             stm.setInt(2, recordId);
@@ -561,6 +573,9 @@ public class Navrhy extends CommandHelp {
     private int getMaxRecordId(Player player) {
         int recordId = 0;
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm = db.getCon().prepareStatement("SELECT COALESCE(MAX(record_id), 0) FROM "+ tables.getNavrhyTable() + " WHERE user_id = ?");
             stm.setInt(1, playerManager.getUserId(player.getName()));
             ResultSet rs =  stm.executeQuery();
@@ -676,6 +691,9 @@ public class Navrhy extends CommandHelp {
 
     private void acceptNavrh(int id, int adminId) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm = db.getCon().prepareStatement("UPDATE " + tables.getNavrhyTable() + " SET accepted = 1, admin_id = ?, update_date = ? WHERE id = ?");
             stm.setInt(1, adminId);
             stm.setString(2, strUt.getCurrentFormattedDate());
@@ -691,6 +709,9 @@ public class Navrhy extends CommandHelp {
 
     private void rejectNavrh(int id, int adminId, String rejectedReason) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm = db.getCon().prepareStatement("UPDATE " + tables.getNavrhyTable() + " SET rejected = 1, admin_id = ?, update_date = ?, rejected_reason = ? WHERE id = ?");
             stm.setInt(1, adminId);
             stm.setString(2, strUt.getCurrentFormattedDate());
@@ -707,6 +728,9 @@ public class Navrhy extends CommandHelp {
 
     private void returnNavrh(int id) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm = db.getCon().prepareStatement("UPDATE " + tables.getNavrhyTable() + " SET rejected = 0, accepted = 0, admin_id = NULL, update_date = NULL, rejected_reason = NULL WHERE id = ?");
             stm.setInt(1, id);
             stm.execute();
@@ -720,6 +744,9 @@ public class Navrhy extends CommandHelp {
 
     private void editNavrh(Player player, int recordId, String content) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm = db.getCon().prepareStatement("UPDATE " + tables.getNavrhyTable() + " SET content = ? WHERE user_id = ? AND record_id = ?");
             stm.setString(1, content);
             stm.setInt(2, playerManager.getUserId(player.getName()));
@@ -736,6 +763,9 @@ public class Navrhy extends CommandHelp {
     private boolean isNavrh( int id) {
         int count = 0;
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm = db.getCon().prepareStatement("SELECT count(id) FROM " + tables.getNavrhyTable() + " WHERE id = ?");
             stm.setInt(1, id);
             ResultSet rs =  stm.executeQuery();
@@ -757,6 +787,9 @@ public class Navrhy extends CommandHelp {
 
     private void deleteNavrh(Player player, int recordId) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm;
             ResultSet rs;
             stm = db.getCon().prepareStatement("DELETE FROM " + tables.getNavrhyTable() + " WHERE record_id = ? AND user_id = ?");
@@ -778,6 +811,9 @@ public class Navrhy extends CommandHelp {
     private boolean isCompleted(Player player, int recordId) {
         int sum = 0;
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm = db.getCon().prepareStatement("SELECT (accepted+rejected) FROM " + tables.getNavrhyTable() + " WHERE user_id = ? AND record_id = ?");
             stm.setInt(1, playerManager.getUserId(player.getName()));
             stm.setInt(2, recordId);

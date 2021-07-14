@@ -47,7 +47,7 @@ public final class MUtilitySpigot extends JavaPlugin {
         getLogger().info("Plugin spusten!");
         pm = Bukkit.getPluginManager();
         db = new Database(this);
-        db.openConnection();
+        db.openFirstConnection();
         loadCommands();
         loadEvents();
         loadConfig();

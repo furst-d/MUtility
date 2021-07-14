@@ -460,6 +460,9 @@ public class Event extends CommandHelp {
 
     private void loadManageListData(Player player, int page) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             manageList.clear();
             PreparedStatement stm = db.getCon().prepareStatement("SELECT id, event_name, tpX, tpY, tpZ, world, server, objective, note FROM " + tables.getEventsTable());
             ResultSet rs =  stm.executeQuery();
@@ -644,6 +647,9 @@ public class Event extends CommandHelp {
     private void loadManageIDListData(String idStr, Player player, int page) {
         manageIDList.clear();
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             int id = Integer.parseInt(idStr);
             PreparedStatement stm = db.getCon().prepareStatement("SELECT event_name, tpX, tpY, tpZ, world, server, objective, note FROM "+ tables.getEventsTable() + " WHERE id = ?");
             stm.setInt(1, id);
@@ -809,6 +815,9 @@ public class Event extends CommandHelp {
 
     private void createEvent(String eventName, Player player) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm;
             stm = db.getCon().prepareStatement("INSERT INTO " + tables.getEventsTable() + " (event_name, tpX, tpY, tpZ, world, server, objective, note) VALUE (?, ?, ?, ?, ?, ?, ?, ?)");
             stm.setString(1, eventName);
@@ -852,6 +861,9 @@ public class Event extends CommandHelp {
     private int getEventIdFromName(String name) {
         int id = 0;
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm = db.getCon().prepareStatement("SELECT id FROM " + tables.getEventsTable() + " WHERE event_name = ?");
             stm.setString(1, name);
             ResultSet rs =  stm.executeQuery();
@@ -870,6 +882,9 @@ public class Event extends CommandHelp {
     private boolean isEvent(int id) {
         int count = 0;
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm = db.getCon().prepareStatement("SELECT count(id) FROM " + tables.getEventsTable() + " WHERE id= ?");
             stm.setInt(1, id);
             ResultSet rs =  stm.executeQuery();
@@ -888,6 +903,9 @@ public class Event extends CommandHelp {
     private PageList getEventMessageData(int id) {
         PageList list = new PageList(10, prefix.getEventPrefix(true, true), null);
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm = db.getCon().prepareStatement("SELECT event_name, objective, note FROM " + tables.getEventsTable() + " WHERE id= ?");
             stm.setInt(1, id);
             ResultSet rs =  stm.executeQuery();
@@ -937,6 +955,9 @@ public class Event extends CommandHelp {
 
     private EventData getEventData(int id) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             EventData data;
             PreparedStatement stm = db.getCon().prepareStatement("SELECT event_name, tpX, tpY, tpZ, world, server, objective, note FROM " + tables.getEventsTable() + " WHERE id= ?");
             stm.setInt(1, id);
@@ -964,6 +985,9 @@ public class Event extends CommandHelp {
 
     private void setEventData(EventData eventData) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             EventData data;
             PreparedStatement stm = db.getCon().prepareStatement("UPDATE " + tables.getEventsTable() + " SET event_name = ?, tpX = ?, tpY = ?, tpZ = ?, world = ?, server = ?, objective = ?, note = ? WHERE id = ?");
             stm.setString(1, eventData.getName());
@@ -986,6 +1010,9 @@ public class Event extends CommandHelp {
 
     private void deleteEvent(int id) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm = db.getCon().prepareStatement("DELETE FROM " + tables.getEventsTable() + "events WHERE id=" + id + "");
             stm.execute();
         } catch (CommunicationsException e) {

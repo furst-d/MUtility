@@ -401,6 +401,9 @@ public class Zalohy extends CommandHelp {
 
     private void deleteZaloha(Player player, int recordId) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm;
             ResultSet rs;
             stm = db.getCon().prepareStatement("DELETE FROM " + tables.getZalohyTable() + " WHERE record_id = ? AND user_id = ?");
@@ -421,6 +424,9 @@ public class Zalohy extends CommandHelp {
 
     private void loadManageList(Player player, int recordId) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             manageList.clear();
             PreparedStatement stm = db.getCon().prepareStatement("SELECT building_name, posX, posY, posZ, world, note  FROM " + tables.getZalohyTable() + " WHERE user_id = ? AND record_id = ?");
             stm.setInt(1, playerManager.getUserId(player.getName()));
@@ -603,6 +609,9 @@ public class Zalohy extends CommandHelp {
 
     private void loadShowList(Player player, int page) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             showList.clear();
             PreparedStatement stm = db.getCon().prepareStatement("SELECT * FROM " + tables.getZalohyTable() + " WHERE user_id = ?");
             stm.setInt(1, playerManager.getUserId(player.getName()));
@@ -751,6 +760,9 @@ public class Zalohy extends CommandHelp {
     private void loadAdminList(Player player, int page) {
         adminList.clear();
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             int statCompleted = 0;
             int statRejected = 0;
             int statTotal = 0;
@@ -853,6 +865,9 @@ public class Zalohy extends CommandHelp {
 
     private void loadAdminUserList(String playerName, Player player, int page) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             adminUserList.clear();
             adminUserList.setCommand("/zalohy admin " + playerName);
             adminUserList.setTitleJson(prefix.getZalohyPrefix(true, true).replace("]", " - " + playerName));
@@ -1065,6 +1080,9 @@ public class Zalohy extends CommandHelp {
         int count = 0;
         PreparedStatement stm;
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             if(global) {
                 stm = db.getCon().prepareStatement("SELECT count(id) FROM "+ tables.getZalohyTable() + " WHERE id = ?");
                 stm.setInt(1, id);
@@ -1089,6 +1107,9 @@ public class Zalohy extends CommandHelp {
     private boolean isCompleted(Player player, int recordId) {
         int sum = 0;
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm = db.getCon().prepareStatement("SELECT (completed+rejected) FROM " + tables.getZalohyTable() + " WHERE user_id = ? AND record_id = ?");
             stm.setInt(1, playerManager.getUserId(player.getName()));
             stm.setInt(2, recordId);
@@ -1108,6 +1129,9 @@ public class Zalohy extends CommandHelp {
     private int getMaxRecordId(Player player) {
         int maxRecordId = 0;
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm = db.getCon().prepareStatement("SELECT COALESCE(MAX(record_id), 0) FROM "+ tables.getZalohyTable() + " WHERE user_id = ?");
             stm.setInt(1, playerManager.getUserId(player.getName()));
             ResultSet rs = stm.executeQuery();
@@ -1126,6 +1150,9 @@ public class Zalohy extends CommandHelp {
     private String getBuildingName(int id) {
         String buildingName = "";
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm = db.getCon().prepareStatement("SELECT building_name FROM "+ tables.getZalohyTable() + " WHERE id = ?");
             stm.setInt(1, id);
             ResultSet rs = stm.executeQuery();
@@ -1143,6 +1170,9 @@ public class Zalohy extends CommandHelp {
 
     private void insertZaloha(Player player, int recordId, String buildingName, float x, float y, float z, String world) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm;
             stm = db.getCon().prepareStatement("INSERT INTO "+ tables.getZalohyTable() + " (user_id, record_id, building_name, note, rejected, completed, posX, posY, posZ, world, create_date) " +
                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
@@ -1168,6 +1198,9 @@ public class Zalohy extends CommandHelp {
 
     private void completeZaloha(Player player, int id) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm;
             stm = db.getCon().prepareStatement("UPDATE "+ tables.getZalohyTable() + " SET rejected = 0, completed = 1, rejected_reason = null, admin_id = ?, update_date = ? WHERE id= ? ");
             stm.setInt(1, playerManager.getUserId(player.getName()));
@@ -1184,6 +1217,9 @@ public class Zalohy extends CommandHelp {
 
     private void rejectZaloha(Player player, int id, String rejectedReason) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm;
             stm = db.getCon().prepareStatement("UPDATE "+ tables.getZalohyTable() + " SET rejected = 1, completed = 0, rejected_reason = ?, admin_id = ?, update_date = ? WHERE id= ? ");
             stm.setString(1, rejectedReason);
@@ -1201,6 +1237,9 @@ public class Zalohy extends CommandHelp {
 
     private void returnZaloha(int id) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm;
             stm = db.getCon().prepareStatement("UPDATE "+ tables.getZalohyTable() + " SET rejected = 0, completed = 0, rejected_reason = NULL, admin_id = NULL, update_date = NULL WHERE id= ? ");
             stm.setInt(1, id);
@@ -1215,6 +1254,9 @@ public class Zalohy extends CommandHelp {
 
     private void setX(Player player, int recordId, float x) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm;
             stm = db.getCon().prepareStatement("UPDATE "+ tables.getZalohyTable() + " SET posX = ? WHERE user_id = ? AND record_id = ? ");
             stm.setFloat(1, x);
@@ -1231,6 +1273,9 @@ public class Zalohy extends CommandHelp {
 
     private void setY(Player player, int recordId, float y) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm;
             stm = db.getCon().prepareStatement("UPDATE "+ tables.getZalohyTable() + " SET posY = ? WHERE user_id = ? AND record_id = ? ");
             stm.setFloat(1, y);
@@ -1247,6 +1292,9 @@ public class Zalohy extends CommandHelp {
 
     private void setZ(Player player, int recordId, float z) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm;
             stm = db.getCon().prepareStatement("UPDATE "+ tables.getZalohyTable() + " SET posZ = ? WHERE user_id = ? AND record_id = ? ");
             stm.setFloat(1, z);
@@ -1263,6 +1311,9 @@ public class Zalohy extends CommandHelp {
 
     private void setWorld(Player player, int recordId, String world) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm;
             stm = db.getCon().prepareStatement("UPDATE "+ tables.getZalohyTable() + " SET world = ? WHERE user_id = ? AND record_id = ? ");
             stm.setString(1, world);
@@ -1279,6 +1330,9 @@ public class Zalohy extends CommandHelp {
 
     private void setNote(Player player, int recordId, String note) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm;
             stm = db.getCon().prepareStatement("UPDATE "+ tables.getZalohyTable() + " SET note = ? WHERE user_id = ? AND record_id = ? ");
             stm.setString(1, note);
@@ -1295,6 +1349,9 @@ public class Zalohy extends CommandHelp {
 
     private void setBuildingName(Player player, int recordId, String buildingName) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm;
             stm = db.getCon().prepareStatement("UPDATE "+ tables.getZalohyTable() + " SET building_name = ? WHERE user_id = ? AND record_id = ? ");
             stm.setString(1, buildingName);
@@ -1311,6 +1368,9 @@ public class Zalohy extends CommandHelp {
 
     private void teleportPlayer(Player player, int id) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm = db.getCon().prepareStatement("SELECT building_name, posX, posY, posZ FROM "+ tables.getZalohyTable() + " WHERE id= ?");
             stm.setInt(1, id);
             ResultSet rs =  stm.executeQuery();

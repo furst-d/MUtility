@@ -119,6 +119,9 @@ public class MStavbaVoteManager {
     private int getMaxSeason() {
         int season_id = 0;
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm = db.getCon().prepareStatement("SELECT COALESCE(MAX(season_id), 0) FROM "+ tables.getStavbaSeasonsTable());
             ResultSet rs =  stm.executeQuery();
             if(rs.next()) {
@@ -136,6 +139,9 @@ public class MStavbaVoteManager {
     private int getPlayerVoteNumber(Player player, int seasonId) {
         int votes = 0;
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm = db.getCon().prepareStatement("SELECT COUNT(username) FROM " + tables.getStavbaVotesTable() + " WHERE username = ? AND season_id = ?");
             stm.setString(1, player.getName());
             stm.setInt(2, seasonId);
@@ -154,6 +160,9 @@ public class MStavbaVoteManager {
 
     private void deletePlayerKey(Player player) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm = db.getCon().prepareStatement("DELETE FROM " + tables.getStavbaKeysTable() + " WHERE user_id = ?");
             stm.setInt(1, playerManager.getUserId(player.getName()));
             stm.execute();
@@ -167,6 +176,9 @@ public class MStavbaVoteManager {
 
     private void insertPlayerKey(Player player, String key) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm = db.getCon().prepareStatement("INSERT INTO " + tables.getStavbaKeysTable() + " (user_id, confirm_key) VALUES (?, ?)");
             stm.setInt(1, playerManager.getUserId(player.getName()));
             stm.setString(2, key);
@@ -182,6 +194,9 @@ public class MStavbaVoteManager {
     public void synchronizeActive() {
         String closeDate = "1900-01-01 00:00:00.0";
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm = db.getCon().prepareStatement("SELECT close_date FROM " + tables.getStavbaSeasonsTable() + " WHERE active = 1");
             ResultSet rs =  stm.executeQuery();
             if(rs.next()) {
@@ -201,6 +216,9 @@ public class MStavbaVoteManager {
 
     public void deleteKeys() {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm = db.getCon().prepareStatement("DELETE FROM " + tables.getStavbaKeysTable());
             stm.execute();
         } catch (CommunicationsException e) {
@@ -217,6 +235,9 @@ public class MStavbaVoteManager {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
         LocalDateTime closeDate = null;
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm = db.getCon().prepareStatement("SELECT close_date FROM " + tables.getStavbaSeasonsTable() + " WHERE active = 1");
             ResultSet rs =  stm.executeQuery();
             if(rs.next()) {
@@ -235,6 +256,9 @@ public class MStavbaVoteManager {
 
     public void endCompetition() {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm = db.getCon().prepareStatement("SELECT building_id i, building_name, user_id, image, (SELECT COUNT(id) FROM " + tables.getStavbaVotesTable() + " WHERE stavba_id = i AND season_id = ?) hlasy, forum_id FROM " + tables.getStavbaCompetitorsTable() + " WHERE season_id = ? GROUP BY building_id ORDER BY hlasy DESC");
             int season = getMaxSeason();
             String seasonDesc = getBuildingDesc(season);
@@ -258,6 +282,9 @@ public class MStavbaVoteManager {
 
     private void createWebNews(ResultSet rs, String seasonDesc) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             int buildingId;
             String buildingName;
             int userId;
@@ -300,6 +327,9 @@ public class MStavbaVoteManager {
     private String getBuildingDesc(int seasonId) {
         String desc = "";
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm = db.getCon().prepareStatement("SELECT description FROM "+ tables.getStavbaSeasonsTable() + " WHERE season_id = ?");
             stm.setInt(1, seasonId);
             ResultSet rs =  stm.executeQuery();
@@ -317,6 +347,9 @@ public class MStavbaVoteManager {
 
     private void sendToDiscord(ResultSet rs, String seasonDesc) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             String buildingName;
             int userId;
             String image;
@@ -364,6 +397,9 @@ public class MStavbaVoteManager {
 
     private void addCC(ResultSet rs) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             int userId;
             if(rs.next()) {
                 userId = rs.getInt(3);
@@ -380,6 +416,9 @@ public class MStavbaVoteManager {
 
     private void setReward() {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm = db.getCon().prepareStatement("UPDATE " + tables.getStavbaSeasonsTable() + " SET reward = 1 WHERE active = 1");
             stm.execute();
         } catch (CommunicationsException e) {
@@ -392,6 +431,9 @@ public class MStavbaVoteManager {
 
     private void setWebNews() {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm = db.getCon().prepareStatement("UPDATE " + tables.getStavbaSeasonsTable() + " SET web_new = 1 WHERE active = 1");
             stm.execute();
         } catch (CommunicationsException e) {

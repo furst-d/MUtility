@@ -21,6 +21,9 @@ public class CraftCoinManager {
 
     public void addCC(int amount, String username, int type) {
         try {
+            if(!plugin.getDb().getCon().isValid(0)) {
+                plugin.getDb().openConnection();
+            }
             LocalDateTime myDateObj = LocalDateTime.now();
             DateTimeFormatter myFormatObj = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             String date = myDateObj.format(myFormatObj);

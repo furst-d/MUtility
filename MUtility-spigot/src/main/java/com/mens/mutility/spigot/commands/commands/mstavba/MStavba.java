@@ -162,6 +162,9 @@ public class MStavba extends CommandHelp {
 
     private void loadShowList(Player player, int page) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             showList.clear();
             PreparedStatement stm = db.getCon().prepareStatement("SELECT id, user_created, title FROM web_forum_posts WHERE parent_id = 37 AND active = 1;");
             ResultSet rs =  stm.executeQuery();
@@ -254,6 +257,9 @@ public class MStavba extends CommandHelp {
     private String[] getBuildingInfo(int id) {
         String[] info = new String[3];
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm = db.getCon().prepareStatement("SELECT user_created, title, content FROM web_forum_posts WHERE id = ?");
             stm.setInt(1, id);
             ResultSet rs =  stm.executeQuery();
@@ -274,6 +280,9 @@ public class MStavba extends CommandHelp {
     private int getMaxSeason() {
         int season_id = 0;
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm = db.getCon().prepareStatement("SELECT COALESCE(MAX(season_id), 0) FROM "+ tables.getStavbaSeasonsTable());
             ResultSet rs =  stm.executeQuery();
             if(rs.next()) {
@@ -291,6 +300,9 @@ public class MStavba extends CommandHelp {
     private int getNewBuildingId(int seasonId) {
         int buildingId = 0;
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm = db.getCon().prepareStatement("SELECT MAX(building_id) FROM "+ tables.getStavbaCompetitorsTable() + " WHERE season_id = ?");
             stm.setInt(1, seasonId);
             ResultSet rs =  stm.executeQuery();
@@ -308,6 +320,9 @@ public class MStavba extends CommandHelp {
 
     private void insertBuilding(int seasonId, int buildingId, int forumId, int userId, String title, String image) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm = db.getCon().prepareStatement("INSERT INTO "+ tables.getStavbaCompetitorsTable() + "(season_id, building_id, forum_id, user_id, building_name, image) VALUES (?, ?, ?, ?, ?, ?)");
             stm.setInt(1, seasonId);
             stm.setInt(2, buildingId);
@@ -326,6 +341,9 @@ public class MStavba extends CommandHelp {
 
     private void lockForumPost(int forumId) {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm = db.getCon().prepareStatement("UPDATE web_forum_posts SET active = 0 WHERE id = ?");
             stm.setInt(1, forumId);
             stm.execute();
@@ -341,6 +359,9 @@ public class MStavba extends CommandHelp {
         String message = "<p><h1 style=\"color:green;text-align:center\"><strong>Stavba byla zařazena do soutěže za " + months + "</strong></h1></p>";
         String date = strUt.getCurrentFormattedDate();
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm = db.getCon().prepareStatement("INSERT INTO web_forum_posts_messages (user_created, post_id, message, date_created, date_edited) VALUES (?, ?, ?, ?, ?)");
             stm.setInt(1, 11);
             stm.setInt(2, forumId);
@@ -359,6 +380,9 @@ public class MStavba extends CommandHelp {
     private String getBuildingDesc(int seasonId) {
         String desc = "";
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm = db.getCon().prepareStatement("SELECT description FROM "+ tables.getStavbaSeasonsTable() + " WHERE season_id = ?");
             stm.setInt(1, seasonId);
             ResultSet rs =  stm.executeQuery();
@@ -377,6 +401,9 @@ public class MStavba extends CommandHelp {
     private void createCompetition(int seasonId, int adminId, String startDate, String endDate, String description) {
         String hodiny = " 00:00:00";
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm = db.getCon().prepareStatement("INSERT INTO " + tables.getStavbaSeasonsTable() + " (season_id, admin_id, start_date, close_date, reward, web_new, active, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
             stm.setInt(1, seasonId);
             stm.setInt(2, adminId);
@@ -397,6 +424,9 @@ public class MStavba extends CommandHelp {
 
     private void unsetSeasonActive() {
         try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             PreparedStatement stm = db.getCon().prepareStatement("UPDATE " + tables.getStavbaSeasonsTable() + " SET active = 0");
             stm.execute();
         } catch (CommunicationsException e) {
