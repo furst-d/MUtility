@@ -992,6 +992,7 @@ public class Zalohy extends CommandHelp {
                 jb.hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, hoverInfo.toString(), true);
                 adminUserList.add(jb.getJsonSegments());
             }
+            adminUserList.getList(page).toPlayer(player);
         } catch (CommunicationsException e) {
             db.openConnection();
             loadAdminUserList(playerName, player, page);

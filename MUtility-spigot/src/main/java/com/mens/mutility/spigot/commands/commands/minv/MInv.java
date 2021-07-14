@@ -336,6 +336,7 @@ public class MInv extends CommandHelp {
                             .getJsonSegments());
                 }
             }
+            loadList.getList(page).toPlayer(player);
         } catch (CommunicationsException e) {
             db.openConnection();
             loadLoadData(player, page);
