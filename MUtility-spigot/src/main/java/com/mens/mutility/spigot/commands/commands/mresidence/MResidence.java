@@ -32,15 +32,15 @@ public class MResidence extends CommandHelp {
     /**
      * Metoda slouzici k definovani a sestaveni prikazu a jeho parametru v ramci vlastniho prikazovaho systemu
      */
-    public CommandData create() {
-        CommandData residence = new CommandData("mresidence", "mres", prefix.getResidencePrefix(true, false), "mutility.residence.help", CommandExecutors.BOTH, t -> {
+    public final CommandData create() {
+        final CommandData residence = new CommandData("mresidence", "mres", prefix.getResidencePrefix(true, false), "mutility.residence.help", CommandExecutors.BOTH, t -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
             helpList.getList(1).toPlayer((Player) t.getSender());
         });
 
         // 1. stupeň
-        CommandData helpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
-        CommandData posli = new CommandData(ArgumentTypes.DEFAULT, "posli", TabCompleterTypes.DEFAULT, "mutility.residence.send", CommandExecutors.BOTH, t -> {
+        final CommandData helpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
+        final CommandData posli = new CommandData(ArgumentTypes.DEFAULT, "posli", TabCompleterTypes.DEFAULT, "mutility.residence.send", CommandExecutors.BOTH, t -> {
             JsonBuilder jb = new JsonBuilder();
             jb.addJsonSegment(prefix.getKostkujPrefix(true, true))
                     .text(": Residence lze v případě zájmu samostatně dokoupit na našem ")
@@ -66,7 +66,7 @@ public class MResidence extends CommandHelp {
         });
 
         // 2. stupeň
-        CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.residence.help", CommandExecutors.BOTH, (t) -> {
+        final CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.residence.help", CommandExecutors.BOTH, (t) -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
             helpList.getList(Integer.parseInt(t.getArgs()[1])).toPlayer((Player) t.getSender());
         });

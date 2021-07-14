@@ -68,32 +68,32 @@ public class Navrhy extends CommandHelp {
     /**
      * Metoda slouzici k definovani a sestaveni prikazu a jeho parametru v ramci vlastniho prikazovaho systemu
      */
-    public CommandData create() {
-        CommandData navrhy = new CommandData("navrhy", prefix.getNavrhyPrefix(true, false),"mutility.navrhy.help", CommandExecutors.BOTH, t -> {
+    public final CommandData create() {
+        final CommandData navrhy = new CommandData("navrhy", prefix.getNavrhyPrefix(true, false),"mutility.navrhy.help", CommandExecutors.BOTH, t -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
             helpList.getList(1).toPlayer((Player) t.getSender());
         });
 
         // 1. stupeň
-        CommandData helpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
-        CommandData admin = new CommandData(ArgumentTypes.DEFAULT, "admin", TabCompleterTypes.DEFAULT, "mutility.navrhy.admin", CommandExecutors.PLAYER, t -> {
+        final CommandData helpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
+        final CommandData admin = new CommandData(ArgumentTypes.DEFAULT, "admin", TabCompleterTypes.DEFAULT, "mutility.navrhy.admin", CommandExecutors.PLAYER, t -> {
             loadAdminList((Player) t.getSender(), 1);
             adminList.getList(1).toPlayer((Player) t.getSender());
         });
-        CommandData show = new CommandData(ArgumentTypes.DEFAULT, "zobraz", TabCompleterTypes.DEFAULT, "mutility.navrhy.show", CommandExecutors.PLAYER, t -> loadShowList((Player)t.getSender(), 1));
-        CommandData add = new CommandData(ArgumentTypes.DEFAULT, "pridej", TabCompleterTypes.DEFAULT, "mutility.navrhy.admin");
-        CommandData accept = new CommandData(ArgumentTypes.DEFAULT, "accept", TabCompleterTypes.NONE);
-        CommandData reject = new CommandData(ArgumentTypes.DEFAULT, "reject", TabCompleterTypes.NONE);
-        CommandData returnN = new CommandData(ArgumentTypes.DEFAULT, "return", TabCompleterTypes.NONE);
-        CommandData delete = new CommandData(ArgumentTypes.DEFAULT, "delete", TabCompleterTypes.NONE);
-        CommandData manage = new CommandData(ArgumentTypes.DEFAULT, "manage", TabCompleterTypes.NONE);
+        final CommandData show = new CommandData(ArgumentTypes.DEFAULT, "zobraz", TabCompleterTypes.DEFAULT, "mutility.navrhy.show", CommandExecutors.PLAYER, t -> loadShowList((Player)t.getSender(), 1));
+        final CommandData add = new CommandData(ArgumentTypes.DEFAULT, "pridej", TabCompleterTypes.DEFAULT, "mutility.navrhy.admin");
+        final CommandData accept = new CommandData(ArgumentTypes.DEFAULT, "accept", TabCompleterTypes.NONE);
+        final CommandData reject = new CommandData(ArgumentTypes.DEFAULT, "reject", TabCompleterTypes.NONE);
+        final CommandData returnN = new CommandData(ArgumentTypes.DEFAULT, "return", TabCompleterTypes.NONE);
+        final CommandData delete = new CommandData(ArgumentTypes.DEFAULT, "delete", TabCompleterTypes.NONE);
+        final CommandData manage = new CommandData(ArgumentTypes.DEFAULT, "manage", TabCompleterTypes.NONE);
 
         // 2. stupeň
-        CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.navrhy.help", CommandExecutors.BOTH, (t) -> {
+        final CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.navrhy.help", CommandExecutors.BOTH, (t) -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
             helpList.getList(Integer.parseInt(t.getArgs()[1])).toPlayer((Player) t.getSender());
         });
-        CommandData addText = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Tvůj návrh >]", "mutility.navrhy.add", CommandExecutors.PLAYER, t -> {
+        final CommandData addText = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Tvůj návrh >]", "mutility.navrhy.add", CommandExecutors.PLAYER, t -> {
             String content = strUt.getStringFromArgs(t.getArgs(), 1);
             addNavrh(playerManager.getUserId(t.getSender().getName()), getMaxRecordId((Player)t.getSender()) + 1, content);
             t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false) + "Návrh byl přidán");
@@ -104,10 +104,10 @@ public class Navrhy extends CommandHelp {
             embedBuilder.setFooter("Hlasujte kliknutím na jednu z reakcí");
             discordManager.sendVoteEmbedMessage(discordManager.getChannelByName(plugin.getConfig().getString("Discord.Rooms.Vote")), embedBuilder.build());
         });
-        CommandData adminName = new CommandData(ArgumentTypes.STRING, TabCompleterTypes.ONLINE_PLAYERS, "mutility.navrhy.admin", CommandExecutors.PLAYER, t -> loadAdminNameList(t.getArgs()[1], (Player) t.getSender(), 1));
-        CommandData adminPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
-        CommandData showPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
-        CommandData acceptID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.navrhy.accept", CommandExecutors.PLAYER, t -> {
+        final CommandData adminName = new CommandData(ArgumentTypes.STRING, TabCompleterTypes.ONLINE_PLAYERS, "mutility.navrhy.admin", CommandExecutors.PLAYER, t -> loadAdminNameList(t.getArgs()[1], (Player) t.getSender(), 1));
+        final CommandData adminPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
+        final CommandData showPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
+        final CommandData acceptID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.navrhy.accept", CommandExecutors.PLAYER, t -> {
             int id = Integer.parseInt(t.getArgs()[1]);
             if(isNavrh(id)) {
                 acceptNavrh(id, playerManager.getUserId(t.getSender().getName()));
@@ -116,8 +116,8 @@ public class Navrhy extends CommandHelp {
             }
             t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false) + "Návrh byl schválen");
         });
-        CommandData rejectID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE);
-        CommandData returnID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.navrhy.return", CommandExecutors.PLAYER, t -> {
+        final CommandData rejectID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE);
+        final CommandData returnID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.navrhy.return", CommandExecutors.PLAYER, t -> {
             int id = Integer.parseInt(t.getArgs()[1]);
             if(isNavrh(id)) {
                 returnNavrh(id);
@@ -126,7 +126,7 @@ public class Navrhy extends CommandHelp {
             }
             t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false) + "Návrh byl vrácen mezi neprojednané");
         });
-        CommandData deleteID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.navrhy.delete", CommandExecutors.PLAYER, (t) -> {
+        final CommandData deleteID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.navrhy.delete", CommandExecutors.PLAYER, (t) -> {
             int recordId = Integer.parseInt(t.getArgs()[1]);
             if(isRecordId((Player)t.getSender(), recordId)) {
                 if(!isCompleted((Player)t.getSender(), recordId)) {
@@ -152,11 +152,11 @@ public class Navrhy extends CommandHelp {
                 t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1],true, false));
             }
         });
-        CommandData deleteConfirm = new CommandData(ArgumentTypes.DEFAULT, "confirm", TabCompleterTypes.NONE);
-        CommandData manageId = new CommandData(ArgumentTypes.POSITIVE_INTEGER, TabCompleterTypes.NONE);
+        final CommandData deleteConfirm = new CommandData(ArgumentTypes.DEFAULT, "confirm", TabCompleterTypes.NONE);
+        final CommandData manageId = new CommandData(ArgumentTypes.POSITIVE_INTEGER, TabCompleterTypes.NONE);
 
         // 3. stupeň
-        CommandData rejectReason = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Důvod zamítnutí >]", "mutility.navrhy.reject", CommandExecutors.PLAYER, t -> {
+        final CommandData rejectReason = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Důvod zamítnutí >]", "mutility.navrhy.reject", CommandExecutors.PLAYER, t -> {
             int id = Integer.parseInt(t.getArgs()[1]);
             String rejectedReason = strUt.getStringFromArgs(t.getArgs(), 2);
             if(isNavrh(id)) {
@@ -166,10 +166,10 @@ public class Navrhy extends CommandHelp {
             }
             t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false) + "Návrh byl zamítnut");
         });
-        CommandData adminPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.navrhy.admin", CommandExecutors.BOTH, (t) -> loadAdminList((Player) t.getSender(), Integer.parseInt(t.getArgs()[2])));
-        CommandData adminNamePage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
-        CommandData showPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.navrhy.show", CommandExecutors.PLAYER, (t) -> loadShowList((Player)t.getSender(), Integer.parseInt(t.getArgs()[2])));
-        CommandData deleteConfirmID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.eventy.delete", CommandExecutors.PLAYER, t -> {
+        final CommandData adminPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.navrhy.admin", CommandExecutors.BOTH, (t) -> loadAdminList((Player) t.getSender(), Integer.parseInt(t.getArgs()[2])));
+        final CommandData adminNamePage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
+        final CommandData showPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.navrhy.show", CommandExecutors.PLAYER, (t) -> loadShowList((Player)t.getSender(), Integer.parseInt(t.getArgs()[2])));
+        final CommandData deleteConfirmID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.eventy.delete", CommandExecutors.PLAYER, t -> {
             int recordId = Integer.parseInt(t.getArgs()[2]);
             if(isRecordId((Player)t.getSender(), recordId)) {
                 boolean valid = false;
@@ -194,7 +194,7 @@ public class Navrhy extends CommandHelp {
                 t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1],true, false));
             }
         });
-        CommandData manageIdText = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Tvůj návrh >]", "mutility.navrhy.manage", CommandExecutors.PLAYER, t -> {
+        final CommandData manageIdText = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Tvůj návrh >]", "mutility.navrhy.manage", CommandExecutors.PLAYER, t -> {
             int recordId = Integer.parseInt(t.getArgs()[1]);
             if(!isCompleted((Player)t.getSender(), recordId)) {
                 String content = strUt.getStringFromArgs(t.getArgs(), 2);
@@ -207,7 +207,7 @@ public class Navrhy extends CommandHelp {
         });
 
         //4. stupeň
-        CommandData adminNamePageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.navrhy.admin", CommandExecutors.BOTH, (t) -> loadAdminNameList(t.getArgs()[1], (Player) t.getSender(), Integer.parseInt(t.getArgs()[3])));
+        final CommandData adminNamePageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.navrhy.admin", CommandExecutors.BOTH, (t) -> loadAdminNameList(t.getArgs()[1], (Player) t.getSender(), Integer.parseInt(t.getArgs()[3])));
 
         navrhy.setDescription("Systém pro správu návrhů");
 

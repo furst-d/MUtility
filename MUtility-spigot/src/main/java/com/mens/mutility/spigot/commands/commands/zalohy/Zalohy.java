@@ -65,32 +65,32 @@ public class Zalohy extends CommandHelp {
     /**
      * Metoda slouzici k definovani a sestaveni prikazu a jeho parametru v ramci vlastniho prikazovaho systemu
      */
-    public CommandData create() {
-        CommandData zalohy = new CommandData("zalohy", prefix.getZalohyPrefix(true, false),"mutility.zalohy.help", CommandExecutors.BOTH, t -> {
+    public final CommandData create() {
+        final CommandData zalohy = new CommandData("zalohy", prefix.getZalohyPrefix(true, false),"mutility.zalohy.help", CommandExecutors.BOTH, t -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
             helpList.getList(1).toPlayer((Player) t.getSender());
         });
 
         // 1. stupeň
-        CommandData helpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
-        CommandData pridej = new CommandData(ArgumentTypes.DEFAULT, "pridej", TabCompleterTypes.DEFAULT, "mutility.zalohy.create");
-        CommandData zobraz = new CommandData(ArgumentTypes.DEFAULT, "zobraz", TabCompleterTypes.DEFAULT, "mutility.zalohy.manage", CommandExecutors.PLAYER, t -> loadShowList((Player)t.getSender(), 1));
-        CommandData manage = new CommandData(ArgumentTypes.DEFAULT, "manage", TabCompleterTypes.NONE);
-        CommandData delete = new CommandData(ArgumentTypes.DEFAULT, "delete", TabCompleterTypes.NONE);
-        CommandData admin = new CommandData(ArgumentTypes.DEFAULT, "admin", TabCompleterTypes.DEFAULT, "mutility.zalohy.admin", CommandExecutors.PLAYER, t -> loadAdminList((Player)t.getSender(), 1));
-        CommandData tp = new CommandData(ArgumentTypes.DEFAULT, "tp", TabCompleterTypes.NONE);
-        CommandData complete = new CommandData(ArgumentTypes.DEFAULT, "complete", TabCompleterTypes.NONE);
-        CommandData reject = new CommandData(ArgumentTypes.DEFAULT, "reject", TabCompleterTypes.NONE);
-        CommandData returnZaloha = new CommandData(ArgumentTypes.DEFAULT, "return", TabCompleterTypes.NONE);
+        final CommandData helpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
+        final CommandData pridej = new CommandData(ArgumentTypes.DEFAULT, "pridej", TabCompleterTypes.DEFAULT, "mutility.zalohy.create");
+        final CommandData zobraz = new CommandData(ArgumentTypes.DEFAULT, "zobraz", TabCompleterTypes.DEFAULT, "mutility.zalohy.manage", CommandExecutors.PLAYER, t -> loadShowList((Player)t.getSender(), 1));
+        final CommandData manage = new CommandData(ArgumentTypes.DEFAULT, "manage", TabCompleterTypes.NONE);
+        final CommandData delete = new CommandData(ArgumentTypes.DEFAULT, "delete", TabCompleterTypes.NONE);
+        final CommandData admin = new CommandData(ArgumentTypes.DEFAULT, "admin", TabCompleterTypes.DEFAULT, "mutility.zalohy.admin", CommandExecutors.PLAYER, t -> loadAdminList((Player)t.getSender(), 1));
+        final CommandData tp = new CommandData(ArgumentTypes.DEFAULT, "tp", TabCompleterTypes.NONE);
+        final CommandData complete = new CommandData(ArgumentTypes.DEFAULT, "complete", TabCompleterTypes.NONE);
+        final CommandData reject = new CommandData(ArgumentTypes.DEFAULT, "reject", TabCompleterTypes.NONE);
+        final CommandData returnZaloha = new CommandData(ArgumentTypes.DEFAULT, "return", TabCompleterTypes.NONE);
 
         // 2. stupeň
-        CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.zalohy.help", CommandExecutors.BOTH, (t) -> {
+        final CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.zalohy.help", CommandExecutors.BOTH, (t) -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
             helpList.getList(Integer.parseInt(t.getArgs()[1])).toPlayer((Player) t.getSender());
         });
-        CommandData pridejX = new CommandData(ArgumentTypes.FLOAT, TabCompleterTypes.POSX, "mutility.zalohy.create");
-        CommandData zobrazPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
-        CommandData manageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.manage", CommandExecutors.PLAYER, t -> {
+        final CommandData pridejX = new CommandData(ArgumentTypes.FLOAT, TabCompleterTypes.POSX, "mutility.zalohy.create");
+        final CommandData zobrazPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
+        final CommandData manageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.manage", CommandExecutors.PLAYER, t -> {
             int recordId = Integer.parseInt(t.getArgs()[1]);
             if(!isCompleted((Player)t.getSender(), recordId)) {
                 if(isZaloha((Player) t.getSender(), recordId, false)) {
@@ -104,7 +104,7 @@ public class Zalohy extends CommandHelp {
                         + colors.getSecondaryColor() + "Zálohu již není možné upravit");
             }
         });
-        CommandData deleteID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.delete", CommandExecutors.PLAYER, t -> {
+        final CommandData deleteID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.delete", CommandExecutors.PLAYER, t -> {
             int recordId = Integer.parseInt(t.getArgs()[1]);
             if(isZaloha((Player)t.getSender(), recordId, false)) {
                 if(!isCompleted((Player)t.getSender(), recordId)) {
@@ -130,10 +130,10 @@ public class Zalohy extends CommandHelp {
                 t.getSender().sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1],true, false));
             }
         });
-        CommandData deleteConfirm = new CommandData(ArgumentTypes.DEFAULT, "confirm", TabCompleterTypes.NONE);
-        CommandData adminPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
-        CommandData adminName = new CommandData(ArgumentTypes.STRING, TabCompleterTypes.ONLINE_PLAYERS, "mutility.zalohy.admin", CommandExecutors.PLAYER, t -> loadAdminUserList(t.getArgs()[1], (Player) t.getSender(), 1));
-        CommandData tpID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.admin", CommandExecutors.PLAYER, t -> {
+        final CommandData deleteConfirm = new CommandData(ArgumentTypes.DEFAULT, "confirm", TabCompleterTypes.NONE);
+        final CommandData adminPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
+        final CommandData adminName = new CommandData(ArgumentTypes.STRING, TabCompleterTypes.ONLINE_PLAYERS, "mutility.zalohy.admin", CommandExecutors.PLAYER, t -> loadAdminUserList(t.getArgs()[1], (Player) t.getSender(), 1));
+        final CommandData tpID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.admin", CommandExecutors.PLAYER, t -> {
             Player player = (Player) t.getSender();
             int id = Integer.parseInt(t.getArgs()[1]);
             if(isZaloha(player, id, true)) {
@@ -142,7 +142,7 @@ public class Zalohy extends CommandHelp {
                 player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(String.valueOf(id), true, false));
             }
         });
-        CommandData completeID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.admin", CommandExecutors.PLAYER, t -> {
+        final CommandData completeID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.admin", CommandExecutors.PLAYER, t -> {
             int id = Integer.parseInt(t.getArgs()[1]);
             Player player = (Player) t.getSender();
             if(isZaloha((Player)t.getSender(), id, true)) {
@@ -153,8 +153,8 @@ public class Zalohy extends CommandHelp {
                 player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(String.valueOf(id), true, false));
             }
         });
-        CommandData rejectID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE);
-        CommandData returnID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.admin", CommandExecutors.PLAYER, t -> {
+        final CommandData rejectID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE);
+        final CommandData returnID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.admin", CommandExecutors.PLAYER, t -> {
             int id = Integer.parseInt(t.getArgs()[1]);
             Player player = (Player) t.getSender();
             if(isZaloha((Player)t.getSender(), id, true)) {
@@ -167,17 +167,17 @@ public class Zalohy extends CommandHelp {
         });
 
         // 3. stupeň
-        CommandData pridejY = new CommandData(ArgumentTypes.FLOAT, TabCompleterTypes.POSY, "mutility.zalohy.create");
-        CommandData zobrazPageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.manage", CommandExecutors.PLAYER, t-> loadShowList((Player)t.getSender(), Integer.parseInt(t.getArgs()[2])));
-        CommandData setX = new CommandData(ArgumentTypes.DEFAULT, "setx", TabCompleterTypes.NONE);
-        CommandData setY = new CommandData(ArgumentTypes.DEFAULT, "sety", TabCompleterTypes.NONE);
-        CommandData setZ = new CommandData(ArgumentTypes.DEFAULT, "setz", TabCompleterTypes.NONE);
-        CommandData setWorld = new CommandData(ArgumentTypes.DEFAULT, "setworld", TabCompleterTypes.NONE);
-        CommandData setNote = new CommandData(ArgumentTypes.DEFAULT, "setnote", TabCompleterTypes.NONE);
-        CommandData setName = new CommandData(ArgumentTypes.DEFAULT, "setname", TabCompleterTypes.NONE);
-        CommandData adminPageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.admin", CommandExecutors.PLAYER, t -> loadAdminList((Player) t.getSender(), Integer.parseInt(t.getArgs()[2])));
-        CommandData adminNamePage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
-        CommandData rejectReason = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Důvod zamítnutí >]", "mutility.zalohy.admin", CommandExecutors.PLAYER, t -> {
+        final CommandData pridejY = new CommandData(ArgumentTypes.FLOAT, TabCompleterTypes.POSY, "mutility.zalohy.create");
+        final CommandData zobrazPageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.manage", CommandExecutors.PLAYER, t-> loadShowList((Player)t.getSender(), Integer.parseInt(t.getArgs()[2])));
+        final CommandData setX = new CommandData(ArgumentTypes.DEFAULT, "setx", TabCompleterTypes.NONE);
+        final CommandData setY = new CommandData(ArgumentTypes.DEFAULT, "sety", TabCompleterTypes.NONE);
+        final CommandData setZ = new CommandData(ArgumentTypes.DEFAULT, "setz", TabCompleterTypes.NONE);
+        final CommandData setWorld = new CommandData(ArgumentTypes.DEFAULT, "setworld", TabCompleterTypes.NONE);
+        final CommandData setNote = new CommandData(ArgumentTypes.DEFAULT, "setnote", TabCompleterTypes.NONE);
+        final CommandData setName = new CommandData(ArgumentTypes.DEFAULT, "setname", TabCompleterTypes.NONE);
+        final CommandData adminPageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.admin", CommandExecutors.PLAYER, t -> loadAdminList((Player) t.getSender(), Integer.parseInt(t.getArgs()[2])));
+        final CommandData adminNamePage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
+        final CommandData rejectReason = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Důvod zamítnutí >]", "mutility.zalohy.admin", CommandExecutors.PLAYER, t -> {
             int id = Integer.parseInt(t.getArgs()[1]);
             String reason = strUt.getStringFromArgs(t.getArgs(), 2);
             Player player = (Player) t.getSender();
@@ -189,7 +189,7 @@ public class Zalohy extends CommandHelp {
                 player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(String.valueOf(id), true, false));
             }
         });
-        CommandData deleteConfirmID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.delete", CommandExecutors.PLAYER, t -> {
+        final CommandData deleteConfirmID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.delete", CommandExecutors.PLAYER, t -> {
             int recordId = Integer.parseInt(t.getArgs()[2]);
             if(isZaloha((Player)t.getSender(), recordId, false)) {
                 boolean valid = false;
@@ -216,8 +216,8 @@ public class Zalohy extends CommandHelp {
         });
 
         // 4. stupeň
-        CommandData pridejZ = new CommandData(ArgumentTypes.FLOAT, TabCompleterTypes.POSZ, "mutility.zalohy.create");
-        CommandData setXX = new CommandData(ArgumentTypes.FLOAT, TabCompleterTypes.POSX, "mutility.zalohy.manage", CommandExecutors.PLAYER, t -> {
+        final CommandData pridejZ = new CommandData(ArgumentTypes.FLOAT, TabCompleterTypes.POSZ, "mutility.zalohy.create");
+        final CommandData setXX = new CommandData(ArgumentTypes.FLOAT, TabCompleterTypes.POSX, "mutility.zalohy.manage", CommandExecutors.PLAYER, t -> {
             int recordId = Integer.parseInt(t.getArgs()[1]);
             float x = Float.parseFloat(t.getArgs()[3]);
             Player player = (Player) t.getSender();
@@ -229,7 +229,7 @@ public class Zalohy extends CommandHelp {
                 player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(String.valueOf(recordId), true, false));
             }
         });
-        CommandData setYY = new CommandData(ArgumentTypes.FLOAT, TabCompleterTypes.POSY, "mutility.zalohy.manage", CommandExecutors.PLAYER, t -> {
+        final CommandData setYY = new CommandData(ArgumentTypes.FLOAT, TabCompleterTypes.POSY, "mutility.zalohy.manage", CommandExecutors.PLAYER, t -> {
             int recordId = Integer.parseInt(t.getArgs()[1]);
             float y = Float.parseFloat(t.getArgs()[3]);
             Player player = (Player) t.getSender();
@@ -241,7 +241,7 @@ public class Zalohy extends CommandHelp {
                 player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(String.valueOf(recordId), true, false));
             }
         });
-        CommandData setZZ = new CommandData(ArgumentTypes.FLOAT, TabCompleterTypes.POSZ, "mutility.zalohy.manage", CommandExecutors.PLAYER, t -> {
+        final CommandData setZZ = new CommandData(ArgumentTypes.FLOAT, TabCompleterTypes.POSZ, "mutility.zalohy.manage", CommandExecutors.PLAYER, t -> {
             int recordId = Integer.parseInt(t.getArgs()[1]);
             float z = Float.parseFloat(t.getArgs()[3]);
             Player player = (Player) t.getSender();
@@ -253,7 +253,7 @@ public class Zalohy extends CommandHelp {
                 player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(String.valueOf(recordId), true, false));
             }
         });
-        CommandData setWorldWorld = new CommandData(ArgumentTypes.STRING, TabCompleterTypes.WORLDS, "mutility.zalohy.manage", CommandExecutors.PLAYER, t -> {
+        final CommandData setWorldWorld = new CommandData(ArgumentTypes.STRING, TabCompleterTypes.WORLDS, "mutility.zalohy.manage", CommandExecutors.PLAYER, t -> {
             int recordId = Integer.parseInt(t.getArgs()[1]);
             String world = t.getArgs()[3];
             Player player = (Player) t.getSender();
@@ -269,7 +269,7 @@ public class Zalohy extends CommandHelp {
                 player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(String.valueOf(recordId), true, false));
             }
         });
-        CommandData setNoteNote = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Poznámka >]", "mutility.zalohy.manage", CommandExecutors.PLAYER, t -> {
+        final CommandData setNoteNote = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Poznámka >]", "mutility.zalohy.manage", CommandExecutors.PLAYER, t -> {
             int recordId = Integer.parseInt(t.getArgs()[1]);
             String note = strUt.getStringFromArgs(t.getArgs(), 3).replace("\"", "'");
             Player player = (Player) t.getSender();
@@ -281,7 +281,7 @@ public class Zalohy extends CommandHelp {
                 player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(String.valueOf(recordId), true, false));
             }
         });
-        CommandData setNameName = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Název stavby/staveb >]", "mutility.zalohy.manage", CommandExecutors.PLAYER, t -> {
+        final CommandData setNameName = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Název stavby/staveb >]", "mutility.zalohy.manage", CommandExecutors.PLAYER, t -> {
             int recordId = Integer.parseInt(t.getArgs()[1]);
             String buildingName = strUt.getStringFromArgs(t.getArgs(), 3);
             Player player = (Player) t.getSender();
@@ -293,13 +293,13 @@ public class Zalohy extends CommandHelp {
                 player.sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(String.valueOf(recordId), true, false));
             }
         });
-        CommandData adminNamePageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.admin", CommandExecutors.PLAYER, t -> loadAdminUserList(t.getArgs()[1], (Player) t.getSender(), Integer.parseInt(t.getArgs()[3])));
+        final CommandData adminNamePageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.admin", CommandExecutors.PLAYER, t -> loadAdminUserList(t.getArgs()[1], (Player) t.getSender(), Integer.parseInt(t.getArgs()[3])));
 
         // 5. stupeň
-        CommandData pridejWorld = new CommandData(ArgumentTypes.STRING, TabCompleterTypes.WORLDS, "mutility.zalohy.create");
+        final CommandData pridejWorld = new CommandData(ArgumentTypes.STRING, TabCompleterTypes.WORLDS, "mutility.zalohy.create");
 
         // 6. stupeň
-        CommandData pridejName = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Název stavby/staveb >]", "mutility.zalohy.create", CommandExecutors.PLAYER, t -> {
+        final CommandData pridejName = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Název stavby/staveb >]", "mutility.zalohy.create", CommandExecutors.PLAYER, t -> {
             Player player = (Player) t.getSender();
             float x = Float.parseFloat(t.getArgs()[1]);
             float y = Float.parseFloat(t.getArgs()[2]);

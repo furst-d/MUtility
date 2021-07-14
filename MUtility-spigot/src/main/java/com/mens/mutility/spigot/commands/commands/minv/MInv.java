@@ -63,39 +63,39 @@ public class MInv extends CommandHelp {
     /**
      * Metoda slouzici k definovani a sestaveni prikazu a jeho parametru v ramci vlastniho prikazovaho systemu
      */
-    public CommandData create() {
-        CommandData minv = new CommandData("minv", prefix.getInventoryPrefix(true, false),"mutility.inventory.help", CommandExecutors.BOTH, t -> {
+    public final CommandData create() {
+        final CommandData minv = new CommandData("minv", prefix.getInventoryPrefix(true, false),"mutility.inventory.help", CommandExecutors.BOTH, t -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
             helpList.getList(1).toPlayer((Player) t.getSender());
         });
 
         // 1. stupeň
-        CommandData helpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
-        CommandData uloz = new CommandData(ArgumentTypes.DEFAULT, "uloz", TabCompleterTypes.DEFAULT, "mutility.inventory.save", CommandExecutors.PLAYER, t -> {
+        final CommandData helpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
+        final CommandData uloz = new CommandData(ArgumentTypes.DEFAULT, "uloz", TabCompleterTypes.DEFAULT, "mutility.inventory.save", CommandExecutors.PLAYER, t -> {
             InventoryManager invManager = new InventoryManager();
             JsonObject inventory = invManager.getInventory((Player)t.getSender());
             saveInventory(((Player) t.getSender()), inventory, null, true);
             t.getSender().sendMessage(prefix.getEventPrefix(true, false) + "Inventář úspěšně uložen");
         });
-        CommandData nacti = new CommandData(ArgumentTypes.DEFAULT, "nacti", TabCompleterTypes.DEFAULT, "mutility.inventory.load", CommandExecutors.PLAYER, t -> loadLoadData((Player) t.getSender(), 1));
-        CommandData delete = new CommandData(ArgumentTypes.DEFAULT, "delete", TabCompleterTypes.NONE, "mutility.inventory.delete");
-        CommandData spravuj = new CommandData(ArgumentTypes.DEFAULT, "spravuj", TabCompleterTypes.DEFAULT, "mutility.inventory.manage", CommandExecutors.PLAYER, t -> loadManageListData((Player) t.getSender(), 1));
-        CommandData show = new CommandData(ArgumentTypes.DEFAULT, "show", TabCompleterTypes.NONE, "mutility.inventory.show");
+        final CommandData nacti = new CommandData(ArgumentTypes.DEFAULT, "nacti", TabCompleterTypes.DEFAULT, "mutility.inventory.load", CommandExecutors.PLAYER, t -> loadLoadData((Player) t.getSender(), 1));
+        final CommandData delete = new CommandData(ArgumentTypes.DEFAULT, "delete", TabCompleterTypes.NONE, "mutility.inventory.delete");
+        final CommandData spravuj = new CommandData(ArgumentTypes.DEFAULT, "spravuj", TabCompleterTypes.DEFAULT, "mutility.inventory.manage", CommandExecutors.PLAYER, t -> loadManageListData((Player) t.getSender(), 1));
+        final CommandData show = new CommandData(ArgumentTypes.DEFAULT, "show", TabCompleterTypes.NONE, "mutility.inventory.show");
 
         // 2. stupeň
-        CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.inventory.help", CommandExecutors.BOTH, (t) -> {
+        final CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.inventory.help", CommandExecutors.BOTH, (t) -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
             helpList.getList(Integer.parseInt(t.getArgs()[1])).toPlayer((Player) t.getSender());
         });
-        CommandData nazev = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Název inventáře >]", "mutility.inventory.save", CommandExecutors.PLAYER, t ->  {
+        final CommandData nazev = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Název inventáře >]", "mutility.inventory.save", CommandExecutors.PLAYER, t ->  {
             String inventoryName = strUt.getStringFromArgs(t.getArgs(), 1);
             InventoryManager invManager = new InventoryManager();
             JsonObject inventory = invManager.getInventory((Player)t.getSender());
             saveInventory(((Player) t.getSender()), inventory, inventoryName, false);
             t.getSender().sendMessage(prefix.getInventoryPrefix(true, false) + "Inventář " + colors.getPrimaryColor() + inventoryName + colors.getSecondaryColor() + " úspěšně uložen");
         });
-        CommandData loadPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
-        CommandData loadID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.inventory.load", CommandExecutors.PLAYER, t -> {
+        final CommandData loadPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
+        final CommandData loadID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.inventory.load", CommandExecutors.PLAYER, t -> {
             int id_user_record = Integer.parseInt(t.getArgs()[1]);
             if(isInventory((Player)t.getSender(), id_user_record)) {
                 InventoryManager invManager = new InventoryManager();
@@ -110,7 +110,7 @@ public class MInv extends CommandHelp {
                 t.getSender().sendMessage(prefix.getInventoryPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1], true, false));
             }
         });
-        CommandData deleteID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.inventory.delete", CommandExecutors.PLAYER, t -> {
+        final CommandData deleteID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.inventory.delete", CommandExecutors.PLAYER, t -> {
             int id_user_record = Integer.parseInt(t.getArgs()[1]);
             if(isInventory((Player)t.getSender(), id_user_record)) {
                     DeleteConfirmation deleteConfirmation = new DeleteConfirmation(id_user_record, (Player) t.getSender(), "/minv delete confirm");
@@ -135,9 +135,9 @@ public class MInv extends CommandHelp {
                 t.getSender().sendMessage(prefix.getInventoryPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1],true, false));
             }
         });
-        CommandData deleteConfirm = new CommandData(ArgumentTypes.DEFAULT, "confirm", TabCompleterTypes.NONE);
-        CommandData manageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.inventory.manage");
-        CommandData showId = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.inventory.show", CommandExecutors.PLAYER, t -> {
+        final CommandData deleteConfirm = new CommandData(ArgumentTypes.DEFAULT, "confirm", TabCompleterTypes.NONE);
+        final CommandData manageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.inventory.manage");
+        final CommandData showId = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.inventory.show", CommandExecutors.PLAYER, t -> {
             int id_user_record = Integer.parseInt(t.getArgs()[1]);
             InventoryManager invManager = new InventoryManager();
             Pair<String, String> invData = getInventory((Player)t.getSender(), id_user_record);
@@ -172,12 +172,12 @@ public class MInv extends CommandHelp {
 
             guiManager.openGUI((Player)t.getSender());
         });
-        CommandData managePage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
+        final CommandData managePage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
 
         // 3. stupeň
-        CommandData loadPageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.inventory.load", CommandExecutors.PLAYER, t -> loadLoadData((Player) t.getSender(), Integer.parseInt(t.getArgs()[2])));
-        CommandData setName = new CommandData(ArgumentTypes.DEFAULT, "setname", TabCompleterTypes.NONE);
-        CommandData setInv = new CommandData(ArgumentTypes.DEFAULT, "setinv", TabCompleterTypes.NONE, "mutility.inventory.manage", CommandExecutors.PLAYER, t -> {
+        final CommandData loadPageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.inventory.load", CommandExecutors.PLAYER, t -> loadLoadData((Player) t.getSender(), Integer.parseInt(t.getArgs()[2])));
+        final CommandData setName = new CommandData(ArgumentTypes.DEFAULT, "setname", TabCompleterTypes.NONE);
+        final CommandData setInv = new CommandData(ArgumentTypes.DEFAULT, "setinv", TabCompleterTypes.NONE, "mutility.inventory.manage", CommandExecutors.PLAYER, t -> {
             int id_user_record = Integer.parseInt(t.getArgs()[1]);
             if(isInventory((Player)t.getSender(), id_user_record)) {
                 InventoryManager invManager = new InventoryManager();
@@ -188,8 +188,8 @@ public class MInv extends CommandHelp {
                 t.getSender().sendMessage(prefix.getInventoryPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1], true, false));
             }
         });
-        CommandData managePageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.inventory.manage", CommandExecutors.PLAYER, t -> loadManageListData((Player) t.getSender(), Integer.parseInt(t.getArgs()[2])));
-        CommandData deleteConfirmID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.inventory.delete", CommandExecutors.PLAYER, t -> {
+        final CommandData managePageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.inventory.manage", CommandExecutors.PLAYER, t -> loadManageListData((Player) t.getSender(), Integer.parseInt(t.getArgs()[2])));
+        final CommandData deleteConfirmID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.inventory.delete", CommandExecutors.PLAYER, t -> {
             int id_user_record = Integer.parseInt(t.getArgs()[2]);
             if(isInventory((Player)t.getSender(), id_user_record)) {
                 boolean valid = false;
@@ -219,7 +219,7 @@ public class MInv extends CommandHelp {
         });
 
         // 4. stupeň
-        CommandData setNameName = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Název inventáře >]", "mutility.inventory.manage", CommandExecutors.PLAYER, t -> {
+        final CommandData setNameName = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Název inventáře >]", "mutility.inventory.manage", CommandExecutors.PLAYER, t -> {
             int id_user_record = Integer.parseInt(t.getArgs()[1]);
             String inventoryName = strUt.getStringFromArgs(t.getArgs(), 3);
             if(isInventory((Player)t.getSender(), id_user_record)) {
