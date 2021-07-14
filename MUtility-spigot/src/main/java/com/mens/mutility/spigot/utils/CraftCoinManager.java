@@ -2,7 +2,6 @@ package com.mens.mutility.spigot.utils;
 
 import com.mens.mutility.spigot.MUtilitySpigot;
 import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
-import org.bukkit.entity.Player;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

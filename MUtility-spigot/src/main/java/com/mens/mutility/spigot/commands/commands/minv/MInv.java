@@ -77,15 +77,9 @@ public class MInv extends CommandHelp {
             saveInventory(((Player) t.getSender()), inventory, null, true);
             t.getSender().sendMessage(prefix.getEventPrefix(true, false) + "Inventář úspěšně uložen");
         });
-        CommandData nacti = new CommandData(ArgumentTypes.DEFAULT, "nacti", TabCompleterTypes.DEFAULT, "mutility.inventory.load", CommandExecutors.PLAYER, t -> {
-            loadLoadData();
-            loadList.getList(1).toPlayer((Player) t.getSender());
-        });
+        CommandData nacti = new CommandData(ArgumentTypes.DEFAULT, "nacti", TabCompleterTypes.DEFAULT, "mutility.inventory.load", CommandExecutors.PLAYER, t -> loadLoadData((Player) t.getSender(), 1));
         CommandData delete = new CommandData(ArgumentTypes.DEFAULT, "delete", TabCompleterTypes.NONE, "mutility.inventory.delete");
-        CommandData spravuj = new CommandData(ArgumentTypes.DEFAULT, "spravuj", TabCompleterTypes.DEFAULT, "mutility.inventory.manage", CommandExecutors.PLAYER, t ->  {
-            loadManageListData();
-            manageList.getList(1).toPlayer((Player) t.getSender());
-        });
+        CommandData spravuj = new CommandData(ArgumentTypes.DEFAULT, "spravuj", TabCompleterTypes.DEFAULT, "mutility.inventory.manage", CommandExecutors.PLAYER, t -> loadManageListData((Player) t.getSender(), 1));
         CommandData show = new CommandData(ArgumentTypes.DEFAULT, "show", TabCompleterTypes.NONE, "mutility.inventory.show");
 
         // 2. stupeň
@@ -181,10 +175,7 @@ public class MInv extends CommandHelp {
         CommandData managePage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
 
         // 3. stupeň
-        CommandData loadPageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.inventory.load", CommandExecutors.PLAYER, t -> {
-            loadLoadData();
-            loadList.getList(Integer.parseInt(t.getArgs()[2])).toPlayer((Player) t.getSender());
-        });
+        CommandData loadPageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.inventory.load", CommandExecutors.PLAYER, t -> loadLoadData((Player) t.getSender(), Integer.parseInt(t.getArgs()[2])));
         CommandData setName = new CommandData(ArgumentTypes.DEFAULT, "setname", TabCompleterTypes.NONE);
         CommandData setInv = new CommandData(ArgumentTypes.DEFAULT, "setinv", TabCompleterTypes.NONE, "mutility.inventory.manage", CommandExecutors.PLAYER, t -> {
             int id_user_record = Integer.parseInt(t.getArgs()[1]);
@@ -197,10 +188,7 @@ public class MInv extends CommandHelp {
                 t.getSender().sendMessage(prefix.getInventoryPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1], true, false));
             }
         });
-        CommandData managePageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.inventory.manage", CommandExecutors.PLAYER, t -> {
-            loadManageListData();
-            manageList.getList(Integer.parseInt(t.getArgs()[2])).toPlayer((Player) t.getSender());
-        });
+        CommandData managePageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.inventory.manage", CommandExecutors.PLAYER, t -> loadManageListData((Player) t.getSender(), Integer.parseInt(t.getArgs()[2])));
         CommandData deleteConfirmID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.inventory.delete", CommandExecutors.PLAYER, t -> {
             int id_user_record = Integer.parseInt(t.getArgs()[2]);
             if(isInventory((Player)t.getSender(), id_user_record)) {
@@ -281,7 +269,7 @@ public class MInv extends CommandHelp {
         return minv;
     }
 
-    private void loadLoadData() {
+    private void loadLoadData(Player player, int page) {
         try {
             loadList.clear();
             PreparedStatement stm = db.getCon().prepareStatement("SELECT id_user_record, inventory_name FROM " + tables.getInventoryTable());
@@ -350,13 +338,13 @@ public class MInv extends CommandHelp {
             }
         } catch (CommunicationsException e) {
             db.openConnection();
-            loadLoadData();
+            loadLoadData(player, page);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
     }
 
-    private void loadManageListData() {
+    private void loadManageListData(Player player, int page) {
         try {
             manageList.clear();
             PreparedStatement stm = db.getCon().prepareStatement("SELECT id_user_record, inventory_name FROM " + tables.getInventoryTable());
@@ -476,9 +464,10 @@ public class MInv extends CommandHelp {
                             .getJsonSegments());
                 }
             }
+            manageList.getList(page).toPlayer(player);
         } catch (CommunicationsException e) {
             db.openConnection();
-            loadManageListData();
+            loadManageListData(player, page);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -544,7 +533,7 @@ public class MInv extends CommandHelp {
             }
         } catch (CommunicationsException e) {
             db.openConnection();
-            getQuickSaveCount(player);
+            return getQuickSaveCount(player);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -563,7 +552,7 @@ public class MInv extends CommandHelp {
             }
         } catch (CommunicationsException e) {
             db.openConnection();
-            getQuickSaveCount(player);
+            return getQuickSaveCount(player);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -582,7 +571,7 @@ public class MInv extends CommandHelp {
             }
         } catch (CommunicationsException e) {
             db.openConnection();
-            isInventory(player, id_user_record);
+            return isInventory(player, id_user_record);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -603,7 +592,7 @@ public class MInv extends CommandHelp {
             }
         } catch (CommunicationsException e) {
             db.openConnection();
-            getInventory(player, id_user_record);
+            return getInventory(player, id_user_record);
         } catch (SQLException e) {
             e.printStackTrace();
         }

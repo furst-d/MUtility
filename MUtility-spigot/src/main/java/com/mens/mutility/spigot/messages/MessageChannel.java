@@ -3,7 +3,6 @@ package com.mens.mutility.spigot.messages;
 import com.google.common.collect.Iterables;
 import com.mens.mutility.spigot.MUtilitySpigot;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 

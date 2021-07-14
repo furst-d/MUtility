@@ -12,7 +12,7 @@ import java.util.List;
 public class DiscordManager {
     private static JDA discordBot;
     private MUtilitySpigot plugin;
-    private static List<MyEmote> emotes = new ArrayList<>();
+    private static final List<MyEmote> emotes = new ArrayList<>();
 
     public static JDA getDiscordBot() {
         return discordBot;

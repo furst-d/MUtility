@@ -59,10 +59,7 @@ public class MStavba extends CommandHelp {
 
         // 1. stupeň
         CommandData helpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
-        CommandData zobraz = new CommandData(ArgumentTypes.DEFAULT, "zobraz", TabCompleterTypes.DEFAULT, "mutility.stavba.manage", CommandExecutors.PLAYER, (t) -> {
-            loadShowList();
-            showList.getList(1).toPlayer((Player) t.getSender());
-        });
+        CommandData zobraz = new CommandData(ArgumentTypes.DEFAULT, "zobraz", TabCompleterTypes.DEFAULT, "mutility.stavba.manage", CommandExecutors.PLAYER, (t) -> loadShowList((Player) t.getSender(), 1));
         CommandData vytvor = new CommandData(ArgumentTypes.DEFAULT, "vytvor", TabCompleterTypes.DEFAULT, "mutility.stavba.create");
         CommandData hlasuj = new CommandData(ArgumentTypes.DEFAULT, "hlasuj", TabCompleterTypes.DEFAULT, "mutility.stavba.vote", CommandExecutors.PLAYER, (t) -> {
             MStavbaVoteManager manager = new MStavbaVoteManager(plugin);
@@ -84,10 +81,7 @@ public class MStavba extends CommandHelp {
         CommandData reject = new CommandData(ArgumentTypes.DEFAULT, "reject", TabCompleterTypes.NONE);
 
         // 3. stupeň
-        CommandData zobrazPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.stavba.manage", CommandExecutors.PLAYER, (t) -> {
-            loadShowList();
-            showList.getList(Integer.parseInt(t.getArgs()[2])).toPlayer((Player) t.getSender());
-        });
+        CommandData zobrazPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.stavba.manage", CommandExecutors.PLAYER, (t) -> loadShowList((Player) t.getSender(), Integer.parseInt(t.getArgs()[2])));
         CommandData endDate = new CommandData(ArgumentTypes.DATE, TabCompleterTypes.DATE_PLUS_7, "mutility.stavba.create");
         CommandData acceptID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.stavba.manage", CommandExecutors.BOTH, (t) -> {
             int forumId = Integer.parseInt(t.getArgs()[2]);
@@ -166,7 +160,7 @@ public class MStavba extends CommandHelp {
         return stavba;
     }
 
-    private void loadShowList() {
+    private void loadShowList(Player player, int page) {
         try {
             showList.clear();
             PreparedStatement stm = db.getCon().prepareStatement("SELECT id, user_created, title FROM web_forum_posts WHERE parent_id = 37 AND active = 1;");
@@ -248,9 +242,10 @@ public class MStavba extends CommandHelp {
                             .color(colors.getPrimaryColorHEX())
                             .getJsonSegments());
             }
+            showList.getList(page).toPlayer(player);
         } catch (CommunicationsException e) {
             db.openConnection();
-            loadShowList();
+            loadShowList(player, page);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -269,7 +264,7 @@ public class MStavba extends CommandHelp {
             }
         } catch (CommunicationsException e) {
             db.openConnection();
-            getBuildingInfo(id);
+            return getBuildingInfo(id);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -286,7 +281,7 @@ public class MStavba extends CommandHelp {
             }
         } catch (CommunicationsException e) {
             db.openConnection();
-            getMaxSeason();
+            return getMaxSeason();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -304,7 +299,7 @@ public class MStavba extends CommandHelp {
             }
         } catch (CommunicationsException e) {
             db.openConnection();
-            getNewBuildingId(seasonId);
+            return getNewBuildingId(seasonId);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -372,7 +367,7 @@ public class MStavba extends CommandHelp {
             }
         } catch (CommunicationsException e) {
             db.openConnection();
-            getBuildingDesc(seasonId);
+            return getBuildingDesc(seasonId);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }

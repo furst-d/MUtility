@@ -32,8 +32,9 @@ public class Database {
         String USER = plugin.getConfig().getString("MYSQL.User");
         String PASSWORD = plugin.getConfig().getString("MYSQL.Password");
 
-        String URL = "jdbc:mysql://" + HOST + ":" + PORT + "/" + DATABASE + "?autoReconnect=true&useSSL=false&useUnicode=yes&characterEncoding=UTF-8&connectTimeout=10000&socketTimeout=30000";
+        String URL = "jdbc:mysql://" + HOST + ":" + PORT + "/" + DATABASE + "?autoReconnect=true&useSSL=false&useUnicode=yes&characterEncoding=UTF-8&connectTimeout=30000&socketTimeout=30000&waitTimeout=30000&interactiveTimeout=30000";
         try {
+            DriverManager.setLoginTimeout(2);
             con = DriverManager.getConnection(URL, USER, PASSWORD);
             Bukkit.getConsoleSender().sendMessage(prefix.getMutilityPrefix(false, false) + "Databaze " + colors.getConsolePrimaryColor() + "MYSQL" + colors.getConsoleSecondaryColor() + " pripojena!");
             createTablesIfNotExists();

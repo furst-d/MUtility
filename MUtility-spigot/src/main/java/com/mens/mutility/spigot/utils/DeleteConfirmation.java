@@ -23,9 +23,7 @@ public class DeleteConfirmation {
         TIME_IN_SEC = 60;
         colors = new PluginColors();
         timer = new Timer();
-        timer.setOnFinish((sec, tt) -> {
-            finished = true;
-        });
+        timer.setOnFinish((sec, tt) -> finished = true);
     }
 
     public int getId() {

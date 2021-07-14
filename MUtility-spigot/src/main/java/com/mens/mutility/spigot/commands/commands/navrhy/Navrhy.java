@@ -77,13 +77,10 @@ public class Navrhy extends CommandHelp {
         // 1. stupeň
         CommandData helpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         CommandData admin = new CommandData(ArgumentTypes.DEFAULT, "admin", TabCompleterTypes.DEFAULT, "mutility.navrhy.admin", CommandExecutors.PLAYER, t -> {
-            loadAdminList();
+            loadAdminList((Player) t.getSender(), 1);
             adminList.getList(1).toPlayer((Player) t.getSender());
         });
-        CommandData show = new CommandData(ArgumentTypes.DEFAULT, "zobraz", TabCompleterTypes.DEFAULT, "mutility.navrhy.show", CommandExecutors.PLAYER, t -> {
-            loadShowList((Player)t.getSender());
-            showList.getList(1).toPlayer((Player) t.getSender());
-        });
+        CommandData show = new CommandData(ArgumentTypes.DEFAULT, "zobraz", TabCompleterTypes.DEFAULT, "mutility.navrhy.show", CommandExecutors.PLAYER, t -> loadShowList((Player)t.getSender(), 1));
         CommandData add = new CommandData(ArgumentTypes.DEFAULT, "pridej", TabCompleterTypes.DEFAULT, "mutility.navrhy.admin");
         CommandData accept = new CommandData(ArgumentTypes.DEFAULT, "accept", TabCompleterTypes.NONE);
         CommandData reject = new CommandData(ArgumentTypes.DEFAULT, "reject", TabCompleterTypes.NONE);
@@ -107,10 +104,7 @@ public class Navrhy extends CommandHelp {
             embedBuilder.setFooter("Hlasujte kliknutím na jednu z reakcí");
             discordManager.sendVoteEmbedMessage(discordManager.getChannelByName(plugin.getConfig().getString("Discord.Rooms.Vote")), embedBuilder.build());
         });
-        CommandData adminName = new CommandData(ArgumentTypes.STRING, TabCompleterTypes.ONLINE_PLAYERS, "mutility.navrhy.admin", CommandExecutors.PLAYER, t -> {
-            loadAdminNameList(t.getArgs()[1]);
-            adminNameList.getList(1).toPlayer((Player) t.getSender());
-        });
+        CommandData adminName = new CommandData(ArgumentTypes.STRING, TabCompleterTypes.ONLINE_PLAYERS, "mutility.navrhy.admin", CommandExecutors.PLAYER, t -> loadAdminNameList(t.getArgs()[1], (Player) t.getSender(), 1));
         CommandData adminPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         CommandData showPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         CommandData acceptID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.navrhy.accept", CommandExecutors.PLAYER, t -> {
@@ -172,15 +166,9 @@ public class Navrhy extends CommandHelp {
             }
             t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false) + "Návrh byl zamítnut");
         });
-        CommandData adminPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.navrhy.admin", CommandExecutors.BOTH, (t) -> {
-            loadAdminList();
-            adminList.getList(Integer.parseInt(t.getArgs()[2])).toPlayer((Player) t.getSender());
-        });
+        CommandData adminPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.navrhy.admin", CommandExecutors.BOTH, (t) -> loadAdminList((Player) t.getSender(), Integer.parseInt(t.getArgs()[2])));
         CommandData adminNamePage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
-        CommandData showPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.navrhy.show", CommandExecutors.PLAYER, (t) -> {
-            loadShowList((Player)t.getSender());
-            showList.getList(Integer.parseInt(t.getArgs()[2])).toPlayer((Player) t.getSender());
-        });
+        CommandData showPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.navrhy.show", CommandExecutors.PLAYER, (t) -> loadShowList((Player)t.getSender(), Integer.parseInt(t.getArgs()[2])));
         CommandData deleteConfirmID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.eventy.delete", CommandExecutors.PLAYER, t -> {
             int recordId = Integer.parseInt(t.getArgs()[2]);
             if(isRecordId((Player)t.getSender(), recordId)) {
@@ -219,10 +207,7 @@ public class Navrhy extends CommandHelp {
         });
 
         //4. stupeň
-        CommandData adminNamePageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.navrhy.admin", CommandExecutors.BOTH, (t) -> {
-            loadAdminNameList(t.getArgs()[1]);
-            adminNameList.getList(Integer.parseInt(t.getArgs()[3])).toPlayer((Player) t.getSender());
-        });
+        CommandData adminNamePageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.navrhy.admin", CommandExecutors.BOTH, (t) -> loadAdminNameList(t.getArgs()[1], (Player) t.getSender(), Integer.parseInt(t.getArgs()[3])));
 
         navrhy.setDescription("Systém pro správu návrhů");
 
@@ -269,7 +254,7 @@ public class Navrhy extends CommandHelp {
         return navrhy;
     }
 
-    private void loadAdminList() {
+    private void loadAdminList(Player player, int page) {
         try {
             adminList.clear();
             PreparedStatement stm = db.getCon().prepareStatement("SELECT id, user_id, content, rejected, rejected_reason, accepted, admin_id, create_date, update_date, (SUM(accepted+rejected)) FROM " + tables.getNavrhyTable() + " GROUP BY id ORDER BY (SUM(accepted+rejected)), create_date DESC");
@@ -330,15 +315,16 @@ public class Navrhy extends CommandHelp {
                 jb.hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, hoverInfo.toString(), true);
                 adminList.add(jb.getJsonSegments());
             }
+            adminList.getList(page).toPlayer(player);
         } catch (CommunicationsException e) {
             db.openConnection();
-            loadAdminList();
+            loadAdminList(player, page);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
     }
 
-    private void loadAdminNameList(String playerName) {
+    private void loadAdminNameList(String playerName, Player player, int page) {
         try {
             adminNameList.clear();
             adminNameList.setCommand("/navrhy admin " + playerName);
@@ -404,15 +390,16 @@ public class Navrhy extends CommandHelp {
                 jb.hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, hoverInfo.toString(), true);
                 adminNameList.add(jb.getJsonSegments());
             }
+            adminNameList.getList(page).toPlayer(player);
         } catch (CommunicationsException e) {
             db.openConnection();
-            loadAdminList();
+            loadAdminNameList(playerName, player, page);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
     }
 
-    private void loadShowList(Player player) {
+    private void loadShowList(Player player, int page) {
         try {
             showList.clear();
             PreparedStatement stm = db.getCon().prepareStatement("SELECT * FROM " + tables.getNavrhyTable() + " WHERE user_id = ?");
@@ -544,9 +531,10 @@ public class Navrhy extends CommandHelp {
                 jb.hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, hoverInfo.toString(), true);
                 showList.add(jb.getJsonSegments());
             }
+            showList.getList(page).toPlayer(player);
         } catch (CommunicationsException e) {
             db.openConnection();
-            loadShowList(player);
+            loadShowList(player, page);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -581,7 +569,7 @@ public class Navrhy extends CommandHelp {
             }
         } catch (CommunicationsException e) {
             db.openConnection();
-            getMaxRecordId(player);
+            return getMaxRecordId(player);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -756,7 +744,7 @@ public class Navrhy extends CommandHelp {
             }
         } catch (CommunicationsException e) {
             db.openConnection();
-            isNavrh(id);
+            return isNavrh(id);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -799,7 +787,7 @@ public class Navrhy extends CommandHelp {
             }
         } catch (CommunicationsException e) {
             db.openConnection();
-            isCompleted(player, recordId);
+            return isCompleted(player, recordId);
         } catch (SQLException e) {
             e.printStackTrace();
         }

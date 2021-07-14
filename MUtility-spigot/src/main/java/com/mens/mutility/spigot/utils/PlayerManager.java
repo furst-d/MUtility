@@ -10,14 +10,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class PlayerManager {
-    private final MUtilitySpigot plugin;
-    private Database db;
-    private final Prefix prefix;
+    private final Database db;
 
     public PlayerManager(MUtilitySpigot plugin) {
-        this.plugin = plugin;
         db = plugin.getDb();
-        prefix = new Prefix();
+        Prefix prefix = new Prefix();
     }
 
     public int getUserId(String username) {

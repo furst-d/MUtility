@@ -1,8 +1,8 @@
 package com.mens.mutility.spigot.commands.commands.event;
 
 public class EventData {
-    private int id;
-    private String name;
+    private final int id;
+    private final String name;
     private float tpX;
     private float tpY;
     private float tpZ;

@@ -126,7 +126,7 @@ public class MStavbaVoteManager {
             }
         } catch (CommunicationsException e) {
             db.openConnection();
-            getMaxSeason();
+            return getMaxSeason();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -145,7 +145,7 @@ public class MStavbaVoteManager {
             }
         } catch (CommunicationsException e) {
             db.openConnection();
-            getPlayerVoteNumber(player, seasonId);
+            return getPlayerVoteNumber(player, seasonId);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -225,7 +225,7 @@ public class MStavbaVoteManager {
             closeDate = LocalDateTime.parse(closeDateStr, formatter);
         } catch (CommunicationsException e) {
             db.openConnection();
-            stillActive();
+            return stillActive();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -308,7 +308,7 @@ public class MStavbaVoteManager {
             }
         } catch (CommunicationsException e) {
             db.openConnection();
-            getBuildingDesc(seasonId);
+            return getBuildingDesc(seasonId);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }

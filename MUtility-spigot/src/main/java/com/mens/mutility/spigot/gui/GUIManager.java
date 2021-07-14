@@ -11,19 +11,13 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 public class GUIManager implements Listener {
-    private Inventory inventory;
-    private String inventoryName;
+    private final Inventory inventory;
     private boolean movable;
 
-    private final MUtilitySpigot plugin;
-    private final PluginColors colors;
-
     public GUIManager(MUtilitySpigot plugin, int size, String inventoryName) {
-        this.plugin = plugin;
         plugin.getPm().registerEvents(this, plugin);
-        colors = new PluginColors();
+        PluginColors colors = new PluginColors();
         inventory = Bukkit.createInventory(null, size, colors.getPrimaryColor() + inventoryName);
-        this.inventoryName = inventoryName;
         movable = false;
     }
 

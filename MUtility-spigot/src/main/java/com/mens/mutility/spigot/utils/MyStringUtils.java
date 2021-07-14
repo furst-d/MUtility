@@ -23,7 +23,7 @@ public class MyStringUtils {
 
     public double getStringWidth(String str) throws IOException, FontFormatException {
         FontRenderContext frc = new FontRenderContext(new AffineTransform(), true, true);
-        InputStream is = PageList2.class.getResourceAsStream("/minecraft_font.ttf");
+        InputStream is = PageList.class.getResourceAsStream("/minecraft_font.ttf");
         Font font = Font.createFont(Font.TRUETYPE_FONT, is);
         return font.getStringBounds(str,  frc).getWidth();
     }

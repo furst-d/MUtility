@@ -80,10 +80,7 @@ public class Event extends CommandHelp {
         CommandData helpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         CommandData spust = new CommandData(ArgumentTypes.DEFAULT, "spust", TabCompleterTypes.DEFAULT, "mutility.eventy.otazky.create");
         CommandData vytvor = new CommandData(ArgumentTypes.DEFAULT, "vytvor", TabCompleterTypes.DEFAULT, "mutility.eventy.create");
-        CommandData spravuj = new CommandData(ArgumentTypes.DEFAULT, "spravuj", TabCompleterTypes.DEFAULT, "mutility.eventy.manage", CommandExecutors.PLAYER, t -> {
-            loadManageListData();
-            manageList.getList(1).toPlayer((Player) t.getSender());
-        });
+        CommandData spravuj = new CommandData(ArgumentTypes.DEFAULT, "spravuj", TabCompleterTypes.DEFAULT, "mutility.eventy.manage", CommandExecutors.PLAYER, t -> loadManageListData((Player) t.getSender(), 1));
         CommandData message = new CommandData(ArgumentTypes.DEFAULT, "message", TabCompleterTypes.NONE);
         CommandData fakeMessage = new CommandData(ArgumentTypes.DEFAULT, "fakemessage", TabCompleterTypes.NONE);
         CommandData tp = new CommandData(ArgumentTypes.DEFAULT, "tp", TabCompleterTypes.NONE);
@@ -101,11 +98,7 @@ public class Event extends CommandHelp {
             String name = strUt.getStringFromArgs(t.getArgs(), 1);
             createEvent(name, (Player) t.getSender());
         });
-        CommandData manageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.eventy.manage", CommandExecutors.PLAYER, t -> {
-            loadManageIDListData(t.getArgs()[1]);
-            manageIDList.getList(1).toPlayer((Player) t.getSender());
-
-        });
+        CommandData manageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.eventy.manage", CommandExecutors.PLAYER, t -> loadManageIDListData(t.getArgs()[1], (Player) t.getSender(), 1));
         CommandData page = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         CommandData messageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.eventy.message", CommandExecutors.PLAYER, t -> {
             int id = Integer.parseInt(t.getArgs()[1]);
@@ -225,10 +218,7 @@ public class Event extends CommandHelp {
         CommandData setForbidden = new CommandData(ArgumentTypes.DEFAULT, "setforbidden", TabCompleterTypes.NONE);
         CommandData setObjective = new CommandData(ArgumentTypes.DEFAULT, "setobjective", TabCompleterTypes.NONE);
         CommandData setNote = new CommandData(ArgumentTypes.DEFAULT, "setnote", TabCompleterTypes.NONE);
-        CommandData pageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.eventy.manage", CommandExecutors.BOTH, t -> {
-            loadManageListData();
-            manageList.getList(Integer.parseInt(t.getArgs()[2])).toPlayer((Player) t.getSender());
-        });
+        CommandData pageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.eventy.manage", CommandExecutors.BOTH, t -> loadManageListData((Player) t.getSender(), Integer.parseInt(t.getArgs()[2])));
         CommandData deleteConfirmID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.eventy.delete", CommandExecutors.PLAYER, t -> {
             int id = Integer.parseInt(t.getArgs()[2]);
             if(isEvent(id)) {
@@ -468,7 +458,7 @@ public class Event extends CommandHelp {
         return event;
     }
 
-    private void loadManageListData() {
+    private void loadManageListData(Player player, int page) {
         try {
             manageList.clear();
             PreparedStatement stm = db.getCon().prepareStatement("SELECT id, event_name, tpX, tpY, tpZ, world, server, objective, note FROM " + tables.getEventsTable());
@@ -642,15 +632,16 @@ public class Event extends CommandHelp {
                         .getJsonSegments());
                 index++;
             }
+            manageList.getList(page).toPlayer(player);
         } catch (CommunicationsException e) {
             db.openConnection();
-            loadManageListData();
+            loadManageListData(player, page);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
     }
 
-    private void loadManageIDListData(String idStr) {
+    private void loadManageIDListData(String idStr, Player player, int page) {
         manageIDList.clear();
         try {
             int id = Integer.parseInt(idStr);
@@ -807,9 +798,10 @@ public class Event extends CommandHelp {
                         .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, "/event fakemessage " + id)
                         .getJsonSegments());
             }
+            manageIDList.getList(page).toPlayer(player);
         } catch (CommunicationsException e) {
             db.openConnection();
-            loadManageIDListData(idStr);
+            loadManageIDListData(idStr, player, page);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -868,7 +860,7 @@ public class Event extends CommandHelp {
             }
         } catch (CommunicationsException e) {
             db.openConnection();
-            getEventIdFromName(name);
+            return getEventIdFromName(name);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -886,7 +878,7 @@ public class Event extends CommandHelp {
             }
         } catch (CommunicationsException e) {
             db.openConnection();
-            isEvent(id);
+            return isEvent(id);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -936,7 +928,7 @@ public class Event extends CommandHelp {
             );
         } catch (CommunicationsException e) {
             db.openConnection();
-            getEventMessageData(id);
+            return getEventMessageData(id);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -963,7 +955,7 @@ public class Event extends CommandHelp {
             }
         } catch (CommunicationsException e) {
             db.openConnection();
-            getEventData(id);
+            return getEventData(id);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
