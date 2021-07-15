@@ -16,7 +16,6 @@ import net.md_5.bungee.api.scheduler.ScheduledTask;
 import net.md_5.bungee.chat.ComponentSerializer;
 import net.md_5.bungee.event.EventHandler;
 
-import javax.swing.text.html.parser.Entity;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -56,50 +55,70 @@ public class MessageChannelListener implements Listener {
                     double x = stream.readDouble();
                     double y = stream.readDouble();
                     double z = stream.readDouble();
-                    if(world.equals("overworld")) {
-                        String targetStr = "";
-                        if ((plugin.getConfiguration().getInt("Servers.OverWorld 1.From.X") < x) && (x < plugin.getConfiguration().getInt("Servers.OverWorld 1.To.X"))) {
-                            if ((plugin.getConfiguration().getInt("Servers.OverWorld 1.From.Z") < z) && (z < plugin.getConfiguration().getInt("Servers.OverWorld 1.To.Z"))) {
-                                targetStr = plugin.getConfiguration().getString("Servers.OverWorld 1.Name");
+                    switch (world) {
+                        case "overworld": {
+                            String targetStr = "";
+                            if ((plugin.getConfiguration().getInt("Servers.OverWorld 1.From.X") < x) && (x < plugin.getConfiguration().getInt("Servers.OverWorld 1.To.X"))) {
+                                if ((plugin.getConfiguration().getInt("Servers.OverWorld 1.From.Z") < z) && (z < plugin.getConfiguration().getInt("Servers.OverWorld 1.To.Z"))) {
+                                    targetStr = plugin.getConfiguration().getString("Servers.OverWorld 1.Name");
+                                }
+                            } else if ((plugin.getConfiguration().getInt("Servers.OverWorld 2.From.X") < x) && (x < plugin.getConfiguration().getInt("Servers.OverWorld 2.To.X"))) {
+                                if ((plugin.getConfiguration().getInt("Servers.OverWorld 2.From.Z") < z) && (z < plugin.getConfiguration().getInt("Servers.OverWorld 2.To.Z"))) {
+                                    targetStr = plugin.getConfiguration().getString("Servers.OverWorld 2.Name");
+                                }
+                            } else if ((plugin.getConfiguration().getInt("Servers.OverWorld 3.From.X") < x) && (x < plugin.getConfiguration().getInt("Servers.OverWorld 3.To.X"))) {
+                                if ((plugin.getConfiguration().getInt("Servers.OverWorld 3.From.Z") < z) && (z < plugin.getConfiguration().getInt("Servers.OverWorld 3.To.Z"))) {
+                                    targetStr = plugin.getConfiguration().getString("Servers.OverWorld 3.Name");
+                                }
+                            } else if ((plugin.getConfiguration().getInt("Servers.OverWorld 4.From.X") < x) && (x < plugin.getConfiguration().getInt("Servers.OverWorld 4.To.X"))) {
+                                if ((plugin.getConfiguration().getInt("Servers.OverWorld 4.From.Z") < z) && (z < plugin.getConfiguration().getInt("Servers.OverWorld 4.To.Z"))) {
+                                    targetStr = plugin.getConfiguration().getString("Servers.OverWorld 4.Name");
+                                }
                             }
-                        } else if ((plugin.getConfiguration().getInt("Servers.OverWorld 2.From.X") < x) && (x < plugin.getConfiguration().getInt("Servers.OverWorld 2.To.X"))) {
-                            if ((plugin.getConfiguration().getInt("Servers.OverWorld 2.From.Z") < z) && (z < plugin.getConfiguration().getInt("Servers.OverWorld 2.To.Z"))) {
-                                targetStr = plugin.getConfiguration().getString("Servers.OverWorld 2.Name");
-                            }
-                        } else if ((plugin.getConfiguration().getInt("Servers.OverWorld 3.From.X") < x) && (x < plugin.getConfiguration().getInt("Servers.OverWorld 3.To.X"))) {
-                            if ((plugin.getConfiguration().getInt("Servers.OverWorld 3.From.Z") < z) && (z < plugin.getConfiguration().getInt("Servers.OverWorld 3.To.Z"))) {
-                                targetStr = plugin.getConfiguration().getString("Servers.OverWorld 3.Name");
-                            }
-                        } else if ((plugin.getConfiguration().getInt("Servers.OverWorld 4.From.X") < x) && (x < plugin.getConfiguration().getInt("Servers.OverWorld 4.To.X"))) {
-                            if ((plugin.getConfiguration().getInt("Servers.OverWorld 4.From.Z") < z) && (z < plugin.getConfiguration().getInt("Servers.OverWorld 4.To.Z"))) {
-                                targetStr = plugin.getConfiguration().getString("Servers.OverWorld 4.Name");
-                            }
+                            PortalRequest portalRequest = new PortalRequest(
+                                    player,
+                                    x,
+                                    y,
+                                    z,
+                                    "world",
+                                    ProxyServer.getInstance().getServerInfo(targetStr));
+                            player.connect(portalRequest.getServer(), (result, error) -> {
+                                if (result) {
+                                    portalRequest.startTimer(20);
+                                }
+                            });
+                            break;
                         }
-                        PortalRequest portalRequest = new PortalRequest(
-                                player,
-                                x,
-                                y,
-                                z,
-                                "world",
-                                ProxyServer.getInstance().getServerInfo(targetStr));
-                        player.connect(portalRequest.getServer(), (result, error) -> {
-                            if(result) {
-                                portalRequest.startTimer(20);
-                            }
-                        });
-                    } else if(world.equals("nether")) {
-                        PortalRequest portalRequest = new PortalRequest(
-                                player,
-                                x,
-                                y,
-                                z,
-                                "world_nether",
-                                ProxyServer.getInstance().getServerInfo("nether"));
-                        player.connect(portalRequest.getServer(), (result, error) -> {
-                            if(result) {
-                                portalRequest.startTimer(20);
-                            }
-                        });
+                        case "nether": {
+                            PortalRequest portalRequest = new PortalRequest(
+                                    player,
+                                    x,
+                                    y,
+                                    z,
+                                    "world_nether",
+                                    ProxyServer.getInstance().getServerInfo("nether"));
+                            player.connect(portalRequest.getServer(), (result, error) -> {
+                                if (result) {
+                                    portalRequest.startTimer(20);
+                                }
+                            });
+                            break;
+                        }
+                        case "end": {
+                            PortalRequest portalRequest = new PortalRequest(
+                                    player,
+                                    x,
+                                    y,
+                                    z,
+                                    "world_the_end",
+                                    ProxyServer.getInstance().getServerInfo("end"));
+                            player.connect(portalRequest.getServer(), (result, error) -> {
+                                if (result) {
+                                    portalRequest.startTimer(20);
+                                }
+                            });
+                            break;
+                        }
                     }
                     break;
 

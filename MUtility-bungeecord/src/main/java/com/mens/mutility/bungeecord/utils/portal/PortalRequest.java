@@ -65,10 +65,16 @@ public class PortalRequest {
                 if(onlinePlayer.getName().equals(getPlayer().getName())) {
                     messageChannel.sendTeleportRequest(server, player.getName(), x, y, z, world);
                     String subChannel = "mens:send-to-";
-                    if(world.equals("world")) {
-                        subChannel += "overworld";
-                    } else if(world.equals("world_nether")) {
-                        subChannel += "nether";
+                    switch (world) {
+                        case "world":
+                            subChannel += "overworld";
+                            break;
+                        case "world_nether":
+                            subChannel += "nether";
+                            break;
+                        case "world_the_end":
+                            subChannel += "end";
+                            break;
                     }
                     messageChannel.sendPortalInfoToServer(player, subChannel, server, x, y, z);
                     st.cancel();

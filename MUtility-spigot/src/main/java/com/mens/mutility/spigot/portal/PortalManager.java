@@ -1,10 +1,9 @@
 package com.mens.mutility.spigot.portal;
 
-import net.minecraft.server.v1_16_R3.BlockPosition;
+import net.minecraft.server.v1_16_R3.*;
 import net.minecraft.server.v1_16_R3.BlockUtil.Rectangle;
-import net.minecraft.server.v1_16_R3.EnumDirection;
-import net.minecraft.server.v1_16_R3.PortalTravelAgent;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
@@ -44,6 +43,14 @@ public class PortalManager {
         return portalLocation;
     }
 
+    public Location getEndPlatformLocation() {
+        Location loc = portalLocation;
+        loc.setX(100);
+        loc.setY(49);
+        loc.setZ(0);
+        return loc;
+    }
+
     public void setPortalRect(Optional<Rectangle> portalRect) {
         this.portalRect = portalRect;
     }
@@ -59,10 +66,29 @@ public class PortalManager {
             if(!portalRect.isPresent()) {
                 portalRect = portalAgent.createPortal(new BlockPosition(searchLocation.getX(), searchLocation.getY(), searchLocation.getZ()), EnumDirection.EnumAxis.Z, ((CraftPlayer) player).getHandle(), createRadius);
             }
-            System.out.println("Zvysuji radius na: " + createRadius);
             createRadius += 16;
         }
         setPortalRect(portalRect);
+    }
+
+    public boolean createEndPlatform() {
+        for (int y = 0; y < 4; y++) {
+            for (int z = 0; z < 5; z++) {
+                for (int x = 0; x < 5; x++) {
+                    if(y == 0) {
+                        searchLocation.getBlock().setType(Material.OBSIDIAN);
+                    } else {
+                        searchLocation.getBlock().setType(Material.AIR);
+                    }
+                    searchLocation.setX(searchLocation.getX() + 1);
+                }
+                searchLocation.setX(searchLocation.getX() - 5);
+                searchLocation.setZ(searchLocation.getZ() + 1);
+            }
+            searchLocation.setZ(searchLocation.getZ() - 5);
+            searchLocation.setY(searchLocation.getY() + 1);
+        }
+        return true;
     }
 
     public boolean isPrepared() {

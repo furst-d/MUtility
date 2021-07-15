@@ -69,6 +69,19 @@ public class MessageChannelListener implements PluginMessageListener {
                         telPlayerOw.teleport(pm.getPortalLocation());
                     }
                     break;
+                case "mens:send-to-end":
+                    Player telPlayerEnd = Bukkit.getPlayer(stream.readUTF());
+                    assert telPlayerEnd != null;
+                    loc = player.getLocation();
+                    loc.setX(98);
+                    loc.setY(48);
+                    loc.setZ(-2);
+                    loc.setWorld(WorldCreator.name("world_the_end").createWorld());
+                    pm = new PortalManager(player, loc);
+                    if(pm.createEndPlatform()) {
+                        telPlayerEnd.teleport(pm.getEndPlatformLocation());
+                    }
+                    break;
                 case "mens:permissionRequest":
                     String permission = stream.readUTF();
                     String returnChannel = stream.readUTF();
