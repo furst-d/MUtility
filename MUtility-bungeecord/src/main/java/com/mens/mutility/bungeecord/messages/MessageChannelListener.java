@@ -58,21 +58,26 @@ public class MessageChannelListener implements Listener {
                     switch (world) {
                         case "overworld": {
                             String targetStr = "";
+                            boolean loadPlayerData = false;
                             if ((plugin.getConfiguration().getInt("Servers.OverWorld 1.From.X") < x) && (x < plugin.getConfiguration().getInt("Servers.OverWorld 1.To.X"))) {
                                 if ((plugin.getConfiguration().getInt("Servers.OverWorld 1.From.Z") < z) && (z < plugin.getConfiguration().getInt("Servers.OverWorld 1.To.Z"))) {
                                     targetStr = plugin.getConfiguration().getString("Servers.OverWorld 1.Name");
+                                    loadPlayerData = plugin.getConfiguration().getBoolean("Servers.Overworld 1.LoadPlayerData");
                                 }
                             } else if ((plugin.getConfiguration().getInt("Servers.OverWorld 2.From.X") < x) && (x < plugin.getConfiguration().getInt("Servers.OverWorld 2.To.X"))) {
                                 if ((plugin.getConfiguration().getInt("Servers.OverWorld 2.From.Z") < z) && (z < plugin.getConfiguration().getInt("Servers.OverWorld 2.To.Z"))) {
                                     targetStr = plugin.getConfiguration().getString("Servers.OverWorld 2.Name");
+                                    loadPlayerData = plugin.getConfiguration().getBoolean("Servers.Overworld 2.LoadPlayerData");
                                 }
                             } else if ((plugin.getConfiguration().getInt("Servers.OverWorld 3.From.X") < x) && (x < plugin.getConfiguration().getInt("Servers.OverWorld 3.To.X"))) {
                                 if ((plugin.getConfiguration().getInt("Servers.OverWorld 3.From.Z") < z) && (z < plugin.getConfiguration().getInt("Servers.OverWorld 3.To.Z"))) {
                                     targetStr = plugin.getConfiguration().getString("Servers.OverWorld 3.Name");
+                                    loadPlayerData = plugin.getConfiguration().getBoolean("Servers.Overworld 3.LoadPlayerData");
                                 }
                             } else if ((plugin.getConfiguration().getInt("Servers.OverWorld 4.From.X") < x) && (x < plugin.getConfiguration().getInt("Servers.OverWorld 4.To.X"))) {
                                 if ((plugin.getConfiguration().getInt("Servers.OverWorld 4.From.Z") < z) && (z < plugin.getConfiguration().getInt("Servers.OverWorld 4.To.Z"))) {
                                     targetStr = plugin.getConfiguration().getString("Servers.OverWorld 4.Name");
+                                    loadPlayerData = plugin.getConfiguration().getBoolean("Servers.Overworld 4.LoadPlayerData");
                                 }
                             }
                             PortalRequest portalRequest = new PortalRequest(
@@ -81,7 +86,8 @@ public class MessageChannelListener implements Listener {
                                     y,
                                     z,
                                     "world",
-                                    ProxyServer.getInstance().getServerInfo(targetStr));
+                                    ProxyServer.getInstance().getServerInfo(targetStr),
+                                    loadPlayerData);
                             player.connect(portalRequest.getServer(), (result, error) -> {
                                 if (result) {
                                     portalRequest.startTimer(20);
@@ -96,7 +102,8 @@ public class MessageChannelListener implements Listener {
                                     y,
                                     z,
                                     "world_nether",
-                                    ProxyServer.getInstance().getServerInfo("nether"));
+                                    ProxyServer.getInstance().getServerInfo(plugin.getConfiguration().getString("Servers.Nether.Name")),
+                                    plugin.getConfiguration().getBoolean("Servers.Nether.LoadPlayerData"));
                             player.connect(portalRequest.getServer(), (result, error) -> {
                                 if (result) {
                                     portalRequest.startTimer(20);
@@ -111,7 +118,8 @@ public class MessageChannelListener implements Listener {
                                     y,
                                     z,
                                     "world_the_end",
-                                    ProxyServer.getInstance().getServerInfo("end"));
+                                    ProxyServer.getInstance().getServerInfo(plugin.getConfiguration().getString("Servers.End.Name")),
+                                    plugin.getConfiguration().getBoolean("Servers.End.LoadPlayerData"));
                             player.connect(portalRequest.getServer(), (result, error) -> {
                                 if (result) {
                                     portalRequest.startTimer(20);

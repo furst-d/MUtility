@@ -15,18 +15,20 @@ public class PortalRequest {
     private final double z;
     private final String world;
     private final ServerInfo server;
+    private final boolean loadTeleportData;
     private final MUtilityBungeeCord plugin;
     private ScheduledTask st;
     private int seconds;
     private final MessageChannel messageChannel;
 
-    public PortalRequest(ProxiedPlayer player, double x, double y, double z, String world, ServerInfo server) {
+    public PortalRequest(ProxiedPlayer player, double x, double y, double z, String world, ServerInfo server, boolean loadTeleportData) {
         this.player = player;
         this.x = x;
         this.y = y;
         this.z = z;
         this.world = world;
         this.server = server;
+        this.loadTeleportData = loadTeleportData;
         plugin = MUtilityBungeeCord.getInstance();
         seconds = 0;
         messageChannel = new MessageChannel();
@@ -63,7 +65,6 @@ public class PortalRequest {
             }
             for (ProxiedPlayer onlinePlayer : getServer().getPlayers()) {
                 if(onlinePlayer.getName().equals(getPlayer().getName())) {
-                    messageChannel.sendTeleportRequest(server, player.getName(), x, y, z, world);
                     String subChannel = "mens:send-to-";
                     switch (world) {
                         case "world":
@@ -76,7 +77,7 @@ public class PortalRequest {
                             subChannel += "end";
                             break;
                     }
-                    messageChannel.sendPortalInfoToServer(player, subChannel, server, x, y, z);
+                    messageChannel.sendPortalInfoToServer(player, subChannel, server, x, y, z, loadTeleportData);
                     st.cancel();
                 }
             }

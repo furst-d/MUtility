@@ -10,6 +10,7 @@
 Servers:
   OverWorld 1:
     Name: 'server1'
+    LoadPlayerData: true
     From:
       X: -100000
       Z: 0
@@ -33,6 +34,7 @@ Servers:
 
   OverWorld 2:
     Name: 'server2'
+    LoadPlayerData: true
     From:
       X: -100000
       Z: -100000
@@ -56,6 +58,7 @@ Servers:
 
   OverWorld 3:
     Name: 'server3'
+    LoadPlayerData: true
     From:
       X: 0
       Z: 0
@@ -79,6 +82,7 @@ Servers:
 
   OverWorld 4:
     Name: 'server4'
+    LoadPlayerData: true
     From:
       X: 0
       Z: -100000
@@ -100,8 +104,25 @@ Servers:
           x: 100000
           Z: 0
 
+  Lobby:
+    Name: 'lobby'
+    LoadPlayerData: true
+    Center:
+      X: 0
+      Z: 0
+    Radius: 1000
+
   Nether:
     Name: 'nether'
+    LoadPlayerData: true
+    Center:
+      X: 0
+      Z: 0
+    Radius: 25000
+
+  End:
+    Name: 'end'
+    LoadPlayerData: true
     Center:
       X: 0
       Z: 0
@@ -109,6 +130,7 @@ Servers:
 
   Event:
     Name: 'event'
+    LoadPlayerData: false
     Center:
       X: 0
       Z: 0

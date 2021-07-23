@@ -48,7 +48,7 @@ public class DatabaseTables {
         return getTable("zalohy");
     }
 
-    public String getInventoryTeleportTable() {
-        return getTable("inventory_teleport");
+    public String getTeleportDataTable() {
+        return getTable("teleport_data");
     }
 }

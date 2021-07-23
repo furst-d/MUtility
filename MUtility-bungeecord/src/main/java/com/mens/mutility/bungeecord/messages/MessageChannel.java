@@ -40,13 +40,14 @@ public class MessageChannel {
         server.sendData("mens:mutility", stream.toByteArray());
     }
 
-    public void sendPortalInfoToServer(ProxiedPlayer player, String subchannel, ServerInfo server, double x, double y, double z)
+    public void sendPortalInfoToServer(ProxiedPlayer player, String subchannel, ServerInfo server, double x, double y, double z, boolean loadInventory)
     {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         DataOutputStream output = new DataOutputStream(stream);
         try {
             output.writeUTF(subchannel);
             output.writeUTF(player.getName());
+            output.writeBoolean(loadInventory);
             output.writeDouble(x);
             output.writeDouble(y);
             output.writeDouble(z);

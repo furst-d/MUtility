@@ -1,14 +1,15 @@
 package com.mens.mutility.spigot.messages;
 
 import com.google.common.collect.Iterables;
+import com.google.gson.JsonObject;
 import com.mens.mutility.spigot.MUtilitySpigot;
+import com.mens.mutility.spigot.inventory.InventoryManager;
+import com.mens.mutility.spigot.inventory.TeleportData;
+import com.mens.mutility.spigot.inventory.TeleportDataManager;
 import com.mens.mutility.spigot.portal.PortalManager;
 import com.mens.mutility.spigot.utils.Checker;
 import com.mens.mutility.spigot.utils.ServerInfo;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.WorldCreator;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 
@@ -24,6 +25,8 @@ import java.io.IOException;
 public class MessageChannelListener implements PluginMessageListener {
 
     private final MUtilitySpigot plugin;
+    private final TeleportDataManager teleportDataManager;
+    private final InventoryManager inventoryManager;
 
     /**
      * Konstruktor tridy
@@ -31,6 +34,8 @@ public class MessageChannelListener implements PluginMessageListener {
      */
     public MessageChannelListener(MUtilitySpigot plugin) {
         this.plugin = plugin;
+        teleportDataManager = new TeleportDataManager(plugin);
+        inventoryManager = new InventoryManager();
     }
 
     @Override
@@ -43,10 +48,24 @@ public class MessageChannelListener implements PluginMessageListener {
                     Player telPlayerNe = Bukkit.getPlayer(stream.readUTF());
                     assert telPlayerNe != null;
                     Location loc = player.getLocation();
-                    loc.setX(stream.readDouble());
-                    loc.setY(stream.readDouble());
-                    loc.setZ(stream.readDouble());
-                    loc.setWorld(WorldCreator.name("world_nether").createWorld());
+                    boolean loadInventoryNe = stream.readBoolean();
+                    double xNe = stream.readDouble();
+                    double yNe = stream.readDouble();
+                    double zNe = stream.readDouble();
+                    String worldNe = "world_nether";
+                    loc.setX(xNe);
+                    loc.setY(yNe);
+                    loc.setZ(zNe);
+                    if(loadInventoryNe) {
+                        TeleportData inventoryInfo = teleportDataManager.loadNewestPlayerInventory(telPlayerNe);
+                        int inventoryId = inventoryInfo.getId();
+                        JsonObject inventory = inventoryManager.toJsonObject(inventoryInfo.getInventory());
+                        String server = plugin.getCurrentServer();
+                        teleportDataManager.updateInventory(inventoryId, xNe, yNe, zNe, worldNe, server);
+                        inventoryManager.loadInventory(telPlayerNe, inventory);
+                        telPlayerNe.setGameMode(GameMode.valueOf(inventoryInfo.getGamemode()));
+                    }
+                    loc.setWorld(WorldCreator.name(worldNe).createWorld());
                     PortalManager pm = new PortalManager(player, loc);
                     pm.findPortal();
                     pm.createPortal();
@@ -58,10 +77,24 @@ public class MessageChannelListener implements PluginMessageListener {
                     Player telPlayerOw = Bukkit.getPlayer(stream.readUTF());
                     assert telPlayerOw != null;
                     loc = player.getLocation();
-                    loc.setX(stream.readDouble());
-                    loc.setY(stream.readDouble());
-                    loc.setZ(stream.readDouble());
-                    loc.setWorld(WorldCreator.name("world").createWorld());
+                    boolean loadInventoryOw = stream.readBoolean();
+                    double xOw = stream.readDouble();
+                    double yOw = stream.readDouble();
+                    double zOw = stream.readDouble();
+                    String worldOw = "world";
+                    loc.setX(xOw);
+                    loc.setY(yOw);
+                    loc.setZ(zOw);
+                    if(loadInventoryOw) {
+                        TeleportData inventoryInfo = teleportDataManager.loadNewestPlayerInventory(telPlayerOw);
+                        int inventoryId = inventoryInfo.getId();
+                        JsonObject inventory = inventoryManager.toJsonObject(inventoryInfo.getInventory());
+                        String server = plugin.getCurrentServer();
+                        teleportDataManager.updateInventory(inventoryId, xOw, yOw, zOw, worldOw, server);
+                        inventoryManager.loadInventory(telPlayerOw, inventory);
+                        telPlayerOw.setGameMode(GameMode.valueOf(inventoryInfo.getGamemode()));
+                    }
+                    loc.setWorld(WorldCreator.name(worldOw).createWorld());
                     pm = new PortalManager(player, loc);
                     pm.findPortal();
                     pm.createPortal();
@@ -73,10 +106,24 @@ public class MessageChannelListener implements PluginMessageListener {
                     Player telPlayerEnd = Bukkit.getPlayer(stream.readUTF());
                     assert telPlayerEnd != null;
                     loc = player.getLocation();
-                    loc.setX(98);
-                    loc.setY(48);
-                    loc.setZ(-2);
-                    loc.setWorld(WorldCreator.name("world_the_end").createWorld());
+                    boolean loadInventoryEnd = stream.readBoolean();
+                    double xEnd = 98;
+                    double yEnd = 48;
+                    double zEnd = -2;
+                    String worldEnd = "world_the_end";
+                    loc.setX(xEnd);
+                    loc.setY(yEnd);
+                    loc.setZ(zEnd);
+                    if(loadInventoryEnd) {
+                        TeleportData inventoryInfo = teleportDataManager.loadNewestPlayerInventory(telPlayerEnd);
+                        int inventoryId = inventoryInfo.getId();
+                        JsonObject inventory = inventoryManager.toJsonObject(inventoryInfo.getInventory());
+                        String server = plugin.getCurrentServer();
+                        teleportDataManager.updateInventory(inventoryId, xEnd, yEnd, zEnd, worldEnd, server);
+                        inventoryManager.loadInventory(telPlayerEnd, inventory);
+                        telPlayerEnd.setGameMode(GameMode.valueOf(inventoryInfo.getGamemode()));
+                    }
+                    loc.setWorld(WorldCreator.name(worldEnd).createWorld());
                     pm = new PortalManager(player, loc);
                     if(pm.createEndPlatform()) {
                         telPlayerEnd.teleport(pm.getEndPlatformLocation());
@@ -103,11 +150,11 @@ public class MessageChannelListener implements PluginMessageListener {
                     String[] servers = stream.readUTF().split(";");
                     String serverName = stream.readUTF();
                     plugin.getServers().clear();
-                    for(String server : servers) {
-                        if(server.equals(serverName)) {
-                            plugin.getServers().add(new ServerInfo(server, true));
+                    for(String serverLoc : servers) {
+                        if(serverLoc.equals(serverName)) {
+                            plugin.getServers().add(new ServerInfo(serverLoc, true));
                         } else {
-                            plugin.getServers().add(new ServerInfo(server, false));
+                            plugin.getServers().add(new ServerInfo(serverLoc, false));
                         }
                     }
                     break;
