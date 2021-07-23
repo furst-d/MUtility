@@ -39,7 +39,7 @@ public class Zalohy extends CommandHelp {
     private final PageList adminList;
     private final PageList adminUserList;
     private final Checker checker;
-    private final List<DeleteConfirmation> deleteConfirmationList;
+    private final List<Confirmation> deleteConfirmationList;
 
     public Zalohy(MUtilitySpigot plugin) {
         this.plugin = plugin;
@@ -108,7 +108,7 @@ public class Zalohy extends CommandHelp {
             int recordId = Integer.parseInt(t.getArgs()[1]);
             if(isZaloha((Player)t.getSender(), recordId, false)) {
                 if(!isCompleted((Player)t.getSender(), recordId)) {
-                    DeleteConfirmation deleteConfirmation = new DeleteConfirmation(recordId, (Player) t.getSender(), "/zalohy delete confirm");
+                    Confirmation deleteConfirmation = new Confirmation(recordId, (Player) t.getSender(), "/zalohy delete confirm");
                     deleteConfirmation.setMessage(new JsonBuilder()
                             .addJsonSegment(prefix.getNavrhyPrefix(true, true))
                             .text(": Opravdu si přejete odstranit tuto zálohu?")
@@ -209,7 +209,7 @@ public class Zalohy extends CommandHelp {
                     t.getSender().sendMessage(prefix.getZalohyPrefix(true, false)
                             + "Potvrzení o smazání zálohy není platné!");
                 }
-                deleteConfirmationList.removeIf(DeleteConfirmation::isFinished);
+                deleteConfirmationList.removeIf(Confirmation::isFinished);
             } else {
                 t.getSender().sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1],true, false));
             }

@@ -16,7 +16,7 @@ import com.mens.mutility.spigot.database.Database;
 import com.mens.mutility.spigot.database.DatabaseTables;
 import com.mens.mutility.spigot.messages.MessageChannel;
 import com.mens.mutility.spigot.utils.Checker;
-import com.mens.mutility.spigot.utils.DeleteConfirmation;
+import com.mens.mutility.spigot.utils.Confirmation;
 import com.mens.mutility.spigot.utils.MyStringUtils;
 import com.mens.mutility.spigot.utils.PageList;
 import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
@@ -41,7 +41,7 @@ public class Event extends CommandHelp {
     private final PageList manageIDList;
     private final MessageChannel messageChannel;
     private final Database db;
-    private final List<DeleteConfirmation> deleteConfirmationList;
+    private final List<Confirmation> deleteConfirmationList;
     private final Questions questions;
     private final EventFinder finder;
     private final EventFinder graveyard;
@@ -133,7 +133,7 @@ public class Event extends CommandHelp {
             if(isEvent(id)) {
                 EventData data = getEventData(id);
                 if(data != null) {
-                    DeleteConfirmation deleteConfirmation = new DeleteConfirmation(id, (Player) t.getSender(), "/event delete confirm");
+                    Confirmation deleteConfirmation = new Confirmation(id, (Player) t.getSender(), "/event delete confirm");
                     deleteConfirmation.setMessage(new JsonBuilder()
                             .addJsonSegment(prefix.getEventPrefix(true, true))
                             .text(": Opravdu si přejete odstranit event ")
@@ -243,7 +243,7 @@ public class Event extends CommandHelp {
                         t.getSender().sendMessage(prefix.getEventPrefix(true, false)
                                 + "Potvrzení o smazání eventu není platné!");
                     }
-                    deleteConfirmationList.removeIf(DeleteConfirmation::isFinished);
+                    deleteConfirmationList.removeIf(Confirmation::isFinished);
                 }
             } else {
                 t.getSender().sendMessage(prefix.getEventPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1],true, false));

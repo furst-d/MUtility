@@ -5,7 +5,7 @@ import com.mens.mutility.spigot.chat.json.JsonBuilder;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.entity.Player;
 
-public class DeleteConfirmation {
+public class Confirmation {
     private final int id;
     private final Player player;
     private final Timer timer;
@@ -15,7 +15,7 @@ public class DeleteConfirmation {
     private final PluginColors colors;
     private final String command;
 
-    public DeleteConfirmation(int id, Player player, String command) {
+    public Confirmation(int id, Player player, String command) {
         this.id = id;
         this.player = player;
         this.command = command + " " + id;
@@ -63,7 +63,7 @@ public class DeleteConfirmation {
                 .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT,
                         new JsonBuilder(">> Klikni pro ")
                                 .color(colors.getSecondaryColorHEX())
-                                .text("Potvrzení smazání")
+                                .text("Potvrzení akce")
                                 .color(ChatColor.DARK_RED)
                                 .text(".\nNa potvrzení máte ")
                                 .color(colors.getSecondaryColorHEX())
@@ -73,7 +73,7 @@ public class DeleteConfirmation {
                                 .color(colors.getSecondaryColorHEX())
                                 .toString(), true)
                 .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, command)
-               .text(" pro potvrzení smazání.")
+               .text(" pro potvrzení akce.")
                .color(colors.getSecondaryColorHEX())
                .toPlayer(player);
     }

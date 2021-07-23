@@ -43,7 +43,7 @@ public class MInv extends CommandHelp {
     private final PluginColors colors;
     private final MyStringUtils strUt;
     private final Errors errors;
-    private final List<DeleteConfirmation> deleteConfirmationList;
+    private final List<Confirmation> deleteConfirmationList;
 
     public MInv(MUtilitySpigot plugin) {
         this.plugin = plugin;
@@ -113,7 +113,7 @@ public class MInv extends CommandHelp {
         final CommandData deleteID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.inventory.delete", CommandExecutors.PLAYER, t -> {
             int id_user_record = Integer.parseInt(t.getArgs()[1]);
             if(isInventory((Player)t.getSender(), id_user_record)) {
-                    DeleteConfirmation deleteConfirmation = new DeleteConfirmation(id_user_record, (Player) t.getSender(), "/minv delete confirm");
+                    Confirmation deleteConfirmation = new Confirmation(id_user_record, (Player) t.getSender(), "/minv delete confirm");
                     deleteConfirmation.setMessage(new JsonBuilder()
                             .addJsonSegment(prefix.getInventoryPrefix(true, true))
                             .text(": Opravdu si přejete odstranit inventář ")
@@ -212,7 +212,7 @@ public class MInv extends CommandHelp {
                     t.getSender().sendMessage(prefix.getInventoryPrefix(true, false)
                             + "Potvrzení o smazání inventáře není platné!");
                 }
-                deleteConfirmationList.removeIf(DeleteConfirmation::isFinished);
+                deleteConfirmationList.removeIf(Confirmation::isFinished);
             } else {
                 t.getSender().sendMessage(prefix.getInventoryPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1],true, false));
             }

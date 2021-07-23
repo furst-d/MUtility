@@ -13,7 +13,7 @@ import com.mens.mutility.spigot.commands.system.enums.TabCompleterTypes;
 import com.mens.mutility.spigot.database.Database;
 import com.mens.mutility.spigot.database.DatabaseTables;
 import com.mens.mutility.spigot.discord.DiscordManager;
-import com.mens.mutility.spigot.utils.DeleteConfirmation;
+import com.mens.mutility.spigot.utils.Confirmation;
 import com.mens.mutility.spigot.utils.MyStringUtils;
 import com.mens.mutility.spigot.utils.PageList;
 import com.mens.mutility.spigot.utils.PlayerManager;
@@ -42,7 +42,7 @@ public class Navrhy extends CommandHelp {
     private final PlayerManager playerManager;
     private final MyStringUtils strUt;
     private final Errors errors;
-    private final List<DeleteConfirmation> deleteConfirmationList;
+    private final List<Confirmation> deleteConfirmationList;
     private final DiscordManager discordManager;
 
     public Navrhy(MUtilitySpigot plugin) {
@@ -130,7 +130,7 @@ public class Navrhy extends CommandHelp {
             int recordId = Integer.parseInt(t.getArgs()[1]);
             if(isRecordId((Player)t.getSender(), recordId)) {
                 if(!isCompleted((Player)t.getSender(), recordId)) {
-                    DeleteConfirmation deleteConfirmation = new DeleteConfirmation(recordId, (Player) t.getSender(), "/navrhy delete confirm");
+                    Confirmation deleteConfirmation = new Confirmation(recordId, (Player) t.getSender(), "/navrhy delete confirm");
                     deleteConfirmation.setMessage(new JsonBuilder()
                             .addJsonSegment(prefix.getZalohyPrefix(true, true))
                             .text(": Opravdu si přejete odstranit tento návrh?")
@@ -189,7 +189,7 @@ public class Navrhy extends CommandHelp {
                     t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false)
                             + "Potvrzení o smazání návrhu není platné!");
                 }
-                deleteConfirmationList.removeIf(DeleteConfirmation::isFinished);
+                deleteConfirmationList.removeIf(Confirmation::isFinished);
             } else {
                 t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1],true, false));
             }
