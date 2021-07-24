@@ -15,6 +15,7 @@ import com.mens.mutility.spigot.commands.system.CommandData;
 import com.mens.mutility.spigot.commands.system.CommandListener;
 import com.mens.mutility.spigot.database.Database;
 import com.mens.mutility.spigot.discord.DiscordManager;
+import com.mens.mutility.spigot.eventhandlers.OnLeavingEnd;
 import com.mens.mutility.spigot.eventhandlers.OnEntityPortalEvent;
 import com.mens.mutility.spigot.eventhandlers.OnPlayerJoinEvent;
 import com.mens.mutility.spigot.eventhandlers.OnPlayerPortalEvent;
@@ -121,6 +122,7 @@ public final class MUtilitySpigot extends JavaPlugin {
         pm.registerEvents(new OnPlayerJoinEvent(this), this);
         pm.registerEvents(new OnPlayerInteractEvent(this), this);
         pm.registerEvents(new OnBlockBreakEvent(this), this);
+        pm.registerEvents(new OnLeavingEnd(this), this);
         pm.registerEvents(new com.mens.mutility.spigot.commands.commands.mstavba.eventhandlers.OnPlayerJoinEvent(this), this);
     }
 

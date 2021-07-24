@@ -1,4 +1,4 @@
-package com.mens.mutility.bungeecord.utils.portal;
+package com.mens.mutility.bungeecord.requests;
 
 import com.mens.mutility.bungeecord.MUtilityBungeeCord;
 import com.mens.mutility.bungeecord.messages.MessageChannel;

@@ -4,6 +4,7 @@ import net.minecraft.server.v1_16_R3.*;
 import net.minecraft.server.v1_16_R3.BlockUtil.Rectangle;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.WorldCreator;
 import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
@@ -45,9 +46,10 @@ public class PortalManager {
 
     public Location getEndPlatformLocation() {
         Location loc = portalLocation;
-        loc.setX(100);
+        loc.setX(100.5);
         loc.setY(49);
-        loc.setZ(0);
+        loc.setZ(0.5);
+        loc.setWorld(WorldCreator.name("world_the_end").createWorld());
         return loc;
     }
 

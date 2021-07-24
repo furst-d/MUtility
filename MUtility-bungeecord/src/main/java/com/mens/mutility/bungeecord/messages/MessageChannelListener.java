@@ -5,8 +5,9 @@ import com.mens.mutility.bungeecord.chat.PluginColors;
 import com.mens.mutility.bungeecord.chat.Prefix;
 import com.mens.mutility.bungeecord.chat.json.JsonBuilder;
 import com.mens.mutility.bungeecord.commands.anketa.Anketa;
-import com.mens.mutility.bungeecord.utils.portal.PortalRequest;
-import com.mens.mutility.bungeecord.utils.teleport.TeleportRequest;
+import com.mens.mutility.bungeecord.requests.PortalRequest;
+import com.mens.mutility.bungeecord.requests.TeleportDataRequest;
+import com.mens.mutility.bungeecord.requests.TeleportRequest;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -62,22 +63,22 @@ public class MessageChannelListener implements Listener {
                             if ((plugin.getConfiguration().getInt("Servers.OverWorld 1.From.X") < x) && (x < plugin.getConfiguration().getInt("Servers.OverWorld 1.To.X"))) {
                                 if ((plugin.getConfiguration().getInt("Servers.OverWorld 1.From.Z") < z) && (z < plugin.getConfiguration().getInt("Servers.OverWorld 1.To.Z"))) {
                                     targetStr = plugin.getConfiguration().getString("Servers.OverWorld 1.Name");
-                                    loadPlayerData = plugin.getConfiguration().getBoolean("Servers.Overworld 1.LoadPlayerData");
+                                    loadPlayerData = plugin.getConfiguration().getBoolean("Servers.OverWorld 1.LoadPlayerData");
                                 }
                             } else if ((plugin.getConfiguration().getInt("Servers.OverWorld 2.From.X") < x) && (x < plugin.getConfiguration().getInt("Servers.OverWorld 2.To.X"))) {
                                 if ((plugin.getConfiguration().getInt("Servers.OverWorld 2.From.Z") < z) && (z < plugin.getConfiguration().getInt("Servers.OverWorld 2.To.Z"))) {
                                     targetStr = plugin.getConfiguration().getString("Servers.OverWorld 2.Name");
-                                    loadPlayerData = plugin.getConfiguration().getBoolean("Servers.Overworld 2.LoadPlayerData");
+                                    loadPlayerData = plugin.getConfiguration().getBoolean("Servers.OverWorld 2.LoadPlayerData");
                                 }
                             } else if ((plugin.getConfiguration().getInt("Servers.OverWorld 3.From.X") < x) && (x < plugin.getConfiguration().getInt("Servers.OverWorld 3.To.X"))) {
                                 if ((plugin.getConfiguration().getInt("Servers.OverWorld 3.From.Z") < z) && (z < plugin.getConfiguration().getInt("Servers.OverWorld 3.To.Z"))) {
                                     targetStr = plugin.getConfiguration().getString("Servers.OverWorld 3.Name");
-                                    loadPlayerData = plugin.getConfiguration().getBoolean("Servers.Overworld 3.LoadPlayerData");
+                                    loadPlayerData = plugin.getConfiguration().getBoolean("Servers.OverWorld 3.LoadPlayerData");
                                 }
                             } else if ((plugin.getConfiguration().getInt("Servers.OverWorld 4.From.X") < x) && (x < plugin.getConfiguration().getInt("Servers.OverWorld 4.To.X"))) {
                                 if ((plugin.getConfiguration().getInt("Servers.OverWorld 4.From.Z") < z) && (z < plugin.getConfiguration().getInt("Servers.OverWorld 4.To.Z"))) {
                                     targetStr = plugin.getConfiguration().getString("Servers.OverWorld 4.Name");
-                                    loadPlayerData = plugin.getConfiguration().getBoolean("Servers.Overworld 4.LoadPlayerData");
+                                    loadPlayerData = plugin.getConfiguration().getBoolean("Servers.OverWorld 4.LoadPlayerData");
                                 }
                             }
                             PortalRequest portalRequest = new PortalRequest(
@@ -123,6 +124,17 @@ public class MessageChannelListener implements Listener {
                             player.connect(portalRequest.getServer(), (result, error) -> {
                                 if (result) {
                                     portalRequest.startTimer(20);
+                                }
+                            });
+                            break;
+                        }
+                        case "lobby": {
+                            TeleportDataRequest telDataRequest = new TeleportDataRequest(
+                                    player,
+                                    ProxyServer.getInstance().getServerInfo(plugin.getConfiguration().getString("Servers.Lobby.Name")));
+                            player.connect(telDataRequest.getServer(), (result, error) -> {
+                                if (result) {
+                                    telDataRequest.startTimer(20);
                                 }
                             });
                             break;
@@ -201,7 +213,8 @@ public class MessageChannelListener implements Listener {
                             stream.readFloat(),
                             stream.readFloat(),
                             stream.readUTF(),
-                            ProxyServer.getInstance().getServerInfo(stream.readUTF()));
+                            ProxyServer.getInstance().getServerInfo(stream.readUTF()),
+                            stream.readBoolean());
                     player.connect(teleportRequest.getServer(), (result, error) -> {
                         if(result) {
                             teleportRequest.startTimer(10000);

@@ -156,7 +156,7 @@ public class MessageChannel implements Listener {
         }
     }
 
-    public void sendTeleportRequest(Player player, float x, float y, float z, String world, String server) {
+    public void sendTeleportRequest(Player player, float x, float y, float z, String world, String server, boolean loadTeleportData) {
         stream = new ByteArrayOutputStream();
         output = new DataOutputStream(stream);
         try {
@@ -167,6 +167,7 @@ public class MessageChannel implements Listener {
             output.writeFloat(z);
             output.writeUTF(world);
             output.writeUTF(server);
+            output.writeBoolean(loadTeleportData);
         } catch (IOException e) {
             e.printStackTrace();
         }

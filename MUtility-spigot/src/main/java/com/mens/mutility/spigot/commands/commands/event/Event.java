@@ -121,7 +121,7 @@ public class Event extends CommandHelp {
             if(isEvent(id)) {
                 EventData data = getEventData(id);
                 if(data != null) {
-                    messageChannel.sendTeleportRequest((Player)t.getSender(), data.getTpX(), data.getTpY(), data.getTpZ(), data.getWorld(), data.getServer());
+                    messageChannel.sendTeleportRequest((Player)t.getSender(), data.getTpX(), data.getTpY(), data.getTpZ(), data.getWorld(), data.getServer(), false);
                     t.getSender().sendMessage(prefix.getEventPrefix(true, false) + "Teleportuji na event " + colors.getPrimaryColor() + data.getName());
                 }
             } else {
@@ -1013,7 +1013,7 @@ public class Event extends CommandHelp {
             if(!db.getCon().isValid(0)) {
                 db.openConnection();
             }
-            PreparedStatement stm = db.getCon().prepareStatement("DELETE FROM " + tables.getEventsTable() + "events WHERE id=" + id + "");
+            PreparedStatement stm = db.getCon().prepareStatement("DELETE FROM " + tables.getEventsTable() + " WHERE id=" + id + "");
             stm.execute();
         } catch (CommunicationsException e) {
             db.openConnection();

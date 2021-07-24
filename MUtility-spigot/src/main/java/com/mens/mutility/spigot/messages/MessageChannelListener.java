@@ -1,10 +1,7 @@
 package com.mens.mutility.spigot.messages;
 
 import com.google.common.collect.Iterables;
-import com.google.gson.JsonObject;
 import com.mens.mutility.spigot.MUtilitySpigot;
-import com.mens.mutility.spigot.inventory.InventoryManager;
-import com.mens.mutility.spigot.inventory.TeleportData;
 import com.mens.mutility.spigot.inventory.TeleportDataManager;
 import com.mens.mutility.spigot.portal.PortalManager;
 import com.mens.mutility.spigot.utils.Checker;
@@ -17,6 +14,7 @@ import javax.annotation.Nonnull;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.util.Objects;
 
 
 /**
@@ -26,7 +24,6 @@ public class MessageChannelListener implements PluginMessageListener {
 
     private final MUtilitySpigot plugin;
     private final TeleportDataManager teleportDataManager;
-    private final InventoryManager inventoryManager;
 
     /**
      * Konstruktor tridy
@@ -35,7 +32,6 @@ public class MessageChannelListener implements PluginMessageListener {
     public MessageChannelListener(MUtilitySpigot plugin) {
         this.plugin = plugin;
         teleportDataManager = new TeleportDataManager(plugin);
-        inventoryManager = new InventoryManager();
     }
 
     @Override
@@ -48,7 +44,7 @@ public class MessageChannelListener implements PluginMessageListener {
                     Player telPlayerNe = Bukkit.getPlayer(stream.readUTF());
                     assert telPlayerNe != null;
                     Location loc = player.getLocation();
-                    boolean loadInventoryNe = stream.readBoolean();
+                    boolean loadDataNe = stream.readBoolean();
                     double xNe = stream.readDouble();
                     double yNe = stream.readDouble();
                     double zNe = stream.readDouble();
@@ -56,16 +52,10 @@ public class MessageChannelListener implements PluginMessageListener {
                     loc.setX(xNe);
                     loc.setY(yNe);
                     loc.setZ(zNe);
-                    if(loadInventoryNe) {
-                        TeleportData inventoryInfo = teleportDataManager.loadNewestPlayerInventory(telPlayerNe);
-                        int inventoryId = inventoryInfo.getId();
-                        JsonObject inventory = inventoryManager.toJsonObject(inventoryInfo.getInventory());
-                        String server = plugin.getCurrentServer();
-                        teleportDataManager.updateInventory(inventoryId, xNe, yNe, zNe, worldNe, server);
-                        inventoryManager.loadInventory(telPlayerNe, inventory);
-                        telPlayerNe.setGameMode(GameMode.valueOf(inventoryInfo.getGamemode()));
-                    }
                     loc.setWorld(WorldCreator.name(worldNe).createWorld());
+                    if(loadDataNe) {
+                        teleportDataManager.applyData(telPlayerNe, teleportDataManager.loadNewestPlayerData(telPlayerNe), xNe, yNe, zNe, worldNe);
+                    }
                     PortalManager pm = new PortalManager(player, loc);
                     pm.findPortal();
                     pm.createPortal();
@@ -77,7 +67,7 @@ public class MessageChannelListener implements PluginMessageListener {
                     Player telPlayerOw = Bukkit.getPlayer(stream.readUTF());
                     assert telPlayerOw != null;
                     loc = player.getLocation();
-                    boolean loadInventoryOw = stream.readBoolean();
+                    boolean loadDataOw = stream.readBoolean();
                     double xOw = stream.readDouble();
                     double yOw = stream.readDouble();
                     double zOw = stream.readDouble();
@@ -85,16 +75,10 @@ public class MessageChannelListener implements PluginMessageListener {
                     loc.setX(xOw);
                     loc.setY(yOw);
                     loc.setZ(zOw);
-                    if(loadInventoryOw) {
-                        TeleportData inventoryInfo = teleportDataManager.loadNewestPlayerInventory(telPlayerOw);
-                        int inventoryId = inventoryInfo.getId();
-                        JsonObject inventory = inventoryManager.toJsonObject(inventoryInfo.getInventory());
-                        String server = plugin.getCurrentServer();
-                        teleportDataManager.updateInventory(inventoryId, xOw, yOw, zOw, worldOw, server);
-                        inventoryManager.loadInventory(telPlayerOw, inventory);
-                        telPlayerOw.setGameMode(GameMode.valueOf(inventoryInfo.getGamemode()));
-                    }
                     loc.setWorld(WorldCreator.name(worldOw).createWorld());
+                    if(loadDataOw) {
+                        teleportDataManager.applyData(telPlayerOw, teleportDataManager.loadNewestPlayerData(telPlayerOw), xOw, yOw, zOw, worldOw);
+                    }
                     pm = new PortalManager(player, loc);
                     pm.findPortal();
                     pm.createPortal();
@@ -106,7 +90,7 @@ public class MessageChannelListener implements PluginMessageListener {
                     Player telPlayerEnd = Bukkit.getPlayer(stream.readUTF());
                     assert telPlayerEnd != null;
                     loc = player.getLocation();
-                    boolean loadInventoryEnd = stream.readBoolean();
+                    boolean loadDataEnd = stream.readBoolean();
                     double xEnd = 98;
                     double yEnd = 48;
                     double zEnd = -2;
@@ -114,16 +98,10 @@ public class MessageChannelListener implements PluginMessageListener {
                     loc.setX(xEnd);
                     loc.setY(yEnd);
                     loc.setZ(zEnd);
-                    if(loadInventoryEnd) {
-                        TeleportData inventoryInfo = teleportDataManager.loadNewestPlayerInventory(telPlayerEnd);
-                        int inventoryId = inventoryInfo.getId();
-                        JsonObject inventory = inventoryManager.toJsonObject(inventoryInfo.getInventory());
-                        String server = plugin.getCurrentServer();
-                        teleportDataManager.updateInventory(inventoryId, xEnd, yEnd, zEnd, worldEnd, server);
-                        inventoryManager.loadInventory(telPlayerEnd, inventory);
-                        telPlayerEnd.setGameMode(GameMode.valueOf(inventoryInfo.getGamemode()));
-                    }
                     loc.setWorld(WorldCreator.name(worldEnd).createWorld());
+                    if(loadDataEnd) {
+                        teleportDataManager.applyData(telPlayerEnd, teleportDataManager.loadNewestPlayerData(telPlayerEnd), xEnd, yEnd, zEnd, worldEnd);
+                    }
                     pm = new PortalManager(player, loc);
                     if(pm.createEndPlatform()) {
                         telPlayerEnd.teleport(pm.getEndPlatformLocation());
@@ -164,9 +142,19 @@ public class MessageChannelListener implements PluginMessageListener {
                     double x = stream.readDouble();
                     double y = stream.readDouble();
                     double z = stream.readDouble();
+                    boolean loadDataTel = stream.readBoolean();
                     World world = WorldCreator.name(stream.readUTF()).createWorld();
                     Location location = new Location(world, x, y, z);
+                    if(loadDataTel) {
+                        assert world != null;
+                        teleportDataManager.applyData(telPlayer, teleportDataManager.loadNewestPlayerData(telPlayer), x, y, z, world.getName());
+                    }
                     telPlayer.teleport(location);
+                    break;
+                case "mens:teleport-data-request":
+                    Player telDataPlayer = Bukkit.getPlayer(stream.readUTF());
+                    assert telDataPlayer != null;
+                    teleportDataManager.applyData(telDataPlayer, teleportDataManager.loadNewestPlayerData(telDataPlayer), player.getLocation().getX(), player.getLocation().getY(), player.getLocation().getZ(), Objects.requireNonNull(player.getLocation().getWorld()).getName());
                     break;
             }
 
