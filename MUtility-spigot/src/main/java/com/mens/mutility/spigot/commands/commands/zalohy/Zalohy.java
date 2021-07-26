@@ -340,8 +340,8 @@ public class Zalohy extends CommandHelp {
         admin.setDescription("Zobrazí seznam všech hráčů, kteří si zažádali o zálohu a jejich statistiky.\nSeznam staveb jednotlivého hráče lze specifikovat dalším parametrem");
         admin.setSyntax("/zalohy " + admin.getSubcommand() + "\n/zalohy " + admin.getSubcommand() + " [<Jméno hráče>]");
 
-        pridej.setDescription("Vytvoření nové žádosti na přesun staveb");
-        pridej.setSyntax("/zalohy " + pridej.getSubcommand() + " [<X>] [<Y>] [<Z>] [<Název stavby/staveb>] na zadaných souřadnicích");
+        pridej.setDescription("Vytvoření nové žádosti na přesun staveb na zadaných souřadnicích");
+        pridej.setSyntax("/zalohy " + pridej.getSubcommand() + " [<X>] [<Y>] [<Z>] [<Název stavby/staveb>]");
 
         zobraz.setDescription("Zobrazí uživateli jeho žádosti na přesun staveb");
         zobraz.setSyntax("/zalohy " + zobraz.getSubcommand());

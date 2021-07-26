@@ -4,7 +4,7 @@ import net.md_5.bungee.api.ChatColor;
 
 public class PluginColors {
     String primaryColor = "#1eb0ff";
-    String secondaryColor = "#aaaaaa";
+    String secondaryColor = "#B5C2C5";
     String thirdColor = "#55FFFF";
     String disableColor = "#637C7E";
     ChatColor consolePrimaryColor = ChatColor.DARK_AQUA;
