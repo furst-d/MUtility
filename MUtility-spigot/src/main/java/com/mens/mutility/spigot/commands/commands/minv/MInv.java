@@ -139,38 +139,42 @@ public class MInv extends CommandHelp {
         final CommandData manageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.inventory.manage");
         final CommandData showId = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.inventory.show", CommandExecutors.PLAYER, t -> {
             int id_user_record = Integer.parseInt(t.getArgs()[1]);
-            InventoryManager invManager = new InventoryManager();
-            Pair<String, String> invData = getInventory((Player)t.getSender(), id_user_record);
-            InventoryPair invPair = invManager.getInventoryAsItemStack(invManager.toJsonObject(invData.getValue()));
-            GUIManager guiManager = new GUIManager(plugin, 45, colors.getPrimaryColor()  + "§l" + invData.getKey());
+            if(isInventory((Player) t.getSender(), id_user_record)) {
+                InventoryManager invManager = new InventoryManager();
+                Pair<String, String> invData = getInventory((Player)t.getSender(), id_user_record);
+                InventoryPair invPair = invManager.getInventoryAsItemStack(invManager.toJsonObject(invData.getValue()));
+                GUIManager guiManager = new GUIManager(plugin, 45, colors.getPrimaryColor()  + "§l" + invData.getKey());
 
-            for (int i = 0; i < invPair.getItems().size(); i++) {
-                ItemStack item = invPair.getItems().get(i);
-                ItemMeta meta = item.getItemMeta();
-                if(item.getType() != Material.AIR) {
-                    List<String> lore = new ArrayList<>();
-                    lore.add(colors.getPrimaryColor() + "Ilustrační item");
-                    assert meta != null;
-                    meta.setLore(lore);
-                    item.setItemMeta(meta);
+                for (int i = 0; i < invPair.getItems().size(); i++) {
+                    ItemStack item = invPair.getItems().get(i);
+                    ItemMeta meta = item.getItemMeta();
+                    if(item.getType() != Material.AIR) {
+                        List<String> lore = new ArrayList<>();
+                        lore.add(colors.getPrimaryColor() + "Ilustrační item");
+                        assert meta != null;
+                        meta.setLore(lore);
+                        item.setItemMeta(meta);
+                    }
+                    guiManager.addItem(item, i);
                 }
-                guiManager.addItem(item, i);
-            }
 
-            for (int i = 0; i < invPair.getArmor().size(); i++) {
-                ItemStack item = invPair.getArmor().get(i);
-                ItemMeta meta = item.getItemMeta();
-                if(item.getType() != Material.AIR) {
-                    List<String> lore = new ArrayList<>();
-                    lore.add(colors.getPrimaryColor() + "Ilustrační item");
-                    assert meta != null;
-                    meta.setLore(lore);
-                    item.setItemMeta(meta);
+                for (int i = 0; i < invPair.getArmor().size(); i++) {
+                    ItemStack item = invPair.getArmor().get(i);
+                    ItemMeta meta = item.getItemMeta();
+                    if(item.getType() != Material.AIR) {
+                        List<String> lore = new ArrayList<>();
+                        lore.add(colors.getPrimaryColor() + "Ilustrační item");
+                        assert meta != null;
+                        meta.setLore(lore);
+                        item.setItemMeta(meta);
+                    }
+                    guiManager.addItem(item, i + 36);
                 }
-                guiManager.addItem(item, i + 36);
-            }
 
-            guiManager.openGUI((Player)t.getSender());
+                guiManager.openGUI((Player)t.getSender());
+            } else {
+                t.getSender().sendMessage(prefix.getInventoryPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1], true, false));
+            }
         });
         final CommandData managePage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
 
@@ -214,7 +218,7 @@ public class MInv extends CommandHelp {
                 }
                 deleteConfirmationList.removeIf(Confirmation::isFinished);
             } else {
-                t.getSender().sendMessage(prefix.getInventoryPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1],true, false));
+                t.getSender().sendMessage(prefix.getInventoryPrefix(true, false) + errors.errWrongArgument(t.getArgs()[2],true, false));
             }
         });
 

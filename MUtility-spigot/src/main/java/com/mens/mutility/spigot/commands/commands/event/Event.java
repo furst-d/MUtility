@@ -246,7 +246,7 @@ public class Event extends CommandHelp {
                     deleteConfirmationList.removeIf(Confirmation::isFinished);
                 }
             } else {
-                t.getSender().sendMessage(prefix.getEventPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1],true, false));
+                t.getSender().sendMessage(prefix.getEventPrefix(true, false) + errors.errWrongArgument(t.getArgs()[2],true, false));
             }
         });
 

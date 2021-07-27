@@ -211,7 +211,7 @@ public class Zalohy extends CommandHelp {
                 }
                 deleteConfirmationList.removeIf(Confirmation::isFinished);
             } else {
-                t.getSender().sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1],true, false));
+                t.getSender().sendMessage(prefix.getZalohyPrefix(true, false) + errors.errWrongArgument(t.getArgs()[2],true, false));
             }
         });
 
@@ -870,7 +870,7 @@ public class Zalohy extends CommandHelp {
             }
             adminUserList.clear();
             adminUserList.setCommand("/zalohy admin " + playerName);
-            adminUserList.setTitleJson(prefix.getZalohyPrefix(true, true).replace("]", " - " + playerName));
+            adminUserList.setTitleJson(prefix.getZalohyPrefix(true, true).replace("]", " - " + playerName + "]"));
             PreparedStatement stm = db.getCon().prepareStatement("SELECT id, building_name, note, rejected, rejected_reason, completed, admin_id, world, posX, posY, posZ, create_date, update_date, (SUM(completed+rejected)) FROM " + tables.getZalohyTable() + " WHERE user_id = ? GROUP BY id ORDER BY (SUM(completed+rejected)), create_date DESC");
             stm.setInt(1, playerManager.getUserId(playerName));
             ResultSet rs =  stm.executeQuery();

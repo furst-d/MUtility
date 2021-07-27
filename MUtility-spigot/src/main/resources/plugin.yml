@@ -23,6 +23,8 @@ commands:
     description: Zalohy
   navrhy:
     description: Navrhy
+  tpdata:
+    description: Teleportacni data
 permissions:
   mutility.help:
     default: op
@@ -156,6 +158,19 @@ permissions:
   mutility.navrhy.manage:
     default: op
     description: Uprava navrhu
+  mutility.tpdata.help:
+    default: op
+    description: Napoveda k tpdata
+  mutility.tpdata.show:
+    default: op
+    description: Zobrazeni teleportacnich dat
+  mutility.tpdata.rb.inv:
+    default: op
+    description: Rollback inventare
+  mutility.tpdata.rb.all:
+    default: op
+    description: Rollback vsech dat
+
 
 
 

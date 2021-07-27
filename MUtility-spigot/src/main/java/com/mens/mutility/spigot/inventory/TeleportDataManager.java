@@ -116,6 +116,40 @@ public class TeleportDataManager {
             stm = db.getCon().prepareStatement("SELECT id, inventory, gamemode, exp, level, hunger, health, fly, effects FROM " + tables.getTeleportDataTable() + " WHERE user_id = ?  AND completed = 0 ORDER BY created_date DESC LIMIT 1");
             stm.setInt(1, playerManager.getUserId(player.getName()));
             ResultSet rs =  stm.executeQuery();
+            return getData(rs);
+        } catch (CommunicationsException e) {
+            db.openConnection();
+            loadNewestPlayerData(player);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return null;
+    }
+
+    public TeleportData loadDataById(int id) {
+        try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
+            PreparedStatement stm;
+            stm = db.getCon().prepareStatement("SELECT id, inventory, gamemode, exp, level, hunger, health, fly, effects FROM " + tables.getTeleportDataTable() + " WHERE id = ?");
+            stm.setInt(1, id);
+            ResultSet rs =  stm.executeQuery();
+            return getData(rs);
+        } catch (CommunicationsException e) {
+            db.openConnection();
+            loadDataById(id);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return null;
+    }
+
+    private TeleportData getData(ResultSet rs) {
+        try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
             int health;
             boolean fly;
             Collection<PotionEffect> effects;
@@ -146,7 +180,7 @@ public class TeleportDataManager {
             }
         } catch (CommunicationsException e) {
             db.openConnection();
-            loadNewestPlayerData(player);
+            getData(rs);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }

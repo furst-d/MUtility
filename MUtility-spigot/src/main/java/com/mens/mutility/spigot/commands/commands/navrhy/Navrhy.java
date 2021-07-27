@@ -191,7 +191,7 @@ public class Navrhy extends CommandHelp {
                 }
                 deleteConfirmationList.removeIf(Confirmation::isFinished);
             } else {
-                t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1],true, false));
+                t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false) + errors.errWrongArgument(t.getArgs()[2],true, false));
             }
         });
         final CommandData manageIdText = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Tvůj návrh >]", "mutility.navrhy.manage", CommandExecutors.PLAYER, t -> {
@@ -334,7 +334,7 @@ public class Navrhy extends CommandHelp {
             }
             adminNameList.clear();
             adminNameList.setCommand("/navrhy admin " + playerName);
-            adminNameList.setTitleJson(prefix.getNavrhyPrefix(true, true).replace("]", " - " + playerName));
+            adminNameList.setTitleJson(prefix.getNavrhyPrefix(true, true).replace("]", " - " + playerName + "]"));
             PreparedStatement stm = db.getCon().prepareStatement("SELECT id, content, rejected, rejected_reason, accepted, admin_id, create_date, update_date, (SUM(accepted+rejected)) FROM " + tables.getNavrhyTable() + " WHERE user_id = ? GROUP BY id ORDER BY (SUM(accepted+rejected)), create_date DESC");
             stm.setInt(1, playerManager.getUserId(playerName));
             ResultSet rs =  stm.executeQuery();

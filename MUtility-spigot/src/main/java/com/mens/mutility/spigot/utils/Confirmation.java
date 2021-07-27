@@ -61,7 +61,7 @@ public class Confirmation {
                .text("➥Zde")
                .color(colors.getPrimaryColorHEX())
                 .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT,
-                        new JsonBuilder(">> Klikni pro ")
+                        new JsonBuilder(">> Klikněte pro ")
                                 .color(colors.getSecondaryColorHEX())
                                 .text("Potvrzení akce")
                                 .color(ChatColor.DARK_RED)

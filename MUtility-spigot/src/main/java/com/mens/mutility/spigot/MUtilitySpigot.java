@@ -10,6 +10,7 @@ import com.mens.mutility.spigot.commands.commands.mstavba.MStavba;
 import com.mens.mutility.spigot.commands.commands.event.Event;
 import com.mens.mutility.spigot.commands.commands.mutility.MUtility;
 import com.mens.mutility.spigot.commands.commands.navrhy.Navrhy;
+import com.mens.mutility.spigot.commands.commands.tpdata.Tpdata;
 import com.mens.mutility.spigot.commands.commands.zalohy.Zalohy;
 import com.mens.mutility.spigot.commands.system.CommandData;
 import com.mens.mutility.spigot.commands.system.CommandListener;
@@ -100,6 +101,7 @@ public final class MUtilitySpigot extends JavaPlugin {
         commands.add(new Anketa(this).create());
         commands.add(new Zalohy(this).create());
         commands.add(new Navrhy(this).create());
+        commands.add(new Tpdata(this).create());
 
         CommandListener commandListener = new CommandListener(this);
         Objects.requireNonNull(getCommand("mutility")).setExecutor(commandListener);
@@ -111,6 +113,7 @@ public final class MUtilitySpigot extends JavaPlugin {
         Objects.requireNonNull(getCommand("anketa")).setExecutor(commandListener);
         Objects.requireNonNull(getCommand("zalohy")).setExecutor(commandListener);
         Objects.requireNonNull(getCommand("navrhy")).setExecutor(commandListener);
+        Objects.requireNonNull(getCommand("tpdata")).setExecutor(commandListener);
     }
 
     /**
