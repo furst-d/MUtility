@@ -26,11 +26,11 @@ public class TeleportDataManager {
     private final PlayerManager playerManager;
     private final MyStringUtils strUt;
 
-    public TeleportDataManager(MUtilitySpigot plugin) {
-        this.plugin = plugin;
+    public TeleportDataManager() {
+        plugin = MUtilitySpigot.getInstance();
         db = plugin.getDb();
-        tables = new DatabaseTables(plugin);
-        playerManager = new PlayerManager(plugin);
+        tables = new DatabaseTables();
+        playerManager = new PlayerManager();
         strUt = new MyStringUtils();
     }
 

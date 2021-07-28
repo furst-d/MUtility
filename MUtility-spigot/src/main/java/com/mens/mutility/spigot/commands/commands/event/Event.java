@@ -58,13 +58,13 @@ public class Event extends CommandHelp {
         helpList = new PageList(10, prefix.getEventPrefix(true, true).replace("]", " - nápověda]"), "/event");
         manageList = new PageList(10, prefix.getEventPrefix(true, true).replace("]", " - seznam]"), "/event spravuj");
         manageIDList = new PageList(20, prefix.getEventPrefix(true, true).replace("]", " - úprava]"), "/event spravuj");
-        messageChannel = new MessageChannel(plugin);
+        messageChannel = new MessageChannel();
         deleteConfirmationList = new ArrayList<>();
         questions = new Questions(plugin);
         finder = new EventFinder(plugin, "Hledacka");
         graveyard = new EventFinder(plugin, "Hrbitov");
         checker = new Checker(plugin);
-        tables = new DatabaseTables(plugin);
+        tables = new DatabaseTables();
     }
 
     /**

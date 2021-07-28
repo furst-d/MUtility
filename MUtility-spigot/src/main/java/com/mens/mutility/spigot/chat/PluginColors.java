@@ -1,44 +1,46 @@
 package com.mens.mutility.spigot.chat;
 
+import com.mens.mutility.spigot.MUtilitySpigot;
 import net.md_5.bungee.api.ChatColor;
 
+import java.util.Objects;
+
 public class PluginColors {
-    String primaryColor = "#1eb0ff";
-    String secondaryColor = "#B5C2C5";
-    String thirdColor = "#55FFFF";
-    String disableColor = "#637C7E";
-    ChatColor consolePrimaryColor = ChatColor.DARK_AQUA;
-    ChatColor consoleSecondaryColor = ChatColor.GRAY;
+    private final MUtilitySpigot plugin;
+
+    public PluginColors() {
+        plugin = MUtilitySpigot.getInstance();
+    }
 
     public ChatColor getPrimaryColor() {
-        return ChatColor.of(primaryColor);
+        return ChatColor.of(Objects.requireNonNull(plugin.getConfig().getString("Colors.Chat.Primary")));
     }
 
     public ChatColor getSecondaryColor() {
-        return ChatColor.of(secondaryColor);
+        return ChatColor.of(Objects.requireNonNull(plugin.getConfig().getString("Colors.Chat.Secondary")));
     }
 
     public String getPrimaryColorHEX() {
-        return primaryColor;
+        return plugin.getConfig().getString("Colors.Chat.Primary");
     }
 
     public String getSecondaryColorHEX() {
-        return secondaryColor;
+        return plugin.getConfig().getString("Colors.Chat.Secondary");
     }
 
     public String getThirdColorHEX() {
-        return thirdColor;
+        return plugin.getConfig().getString("Colors.Chat.Third");
     }
 
     public String getDisableColorHEX() {
-        return disableColor;
+        return plugin.getConfig().getString("Colors.Chat.Disable");
     }
 
     public ChatColor getConsolePrimaryColor() {
-        return consolePrimaryColor;
+        return ChatColor.getByChar(Objects.requireNonNull(plugin.getConfig().getString("Colors.Console.Primary")).charAt(0));
     }
 
     public ChatColor getConsoleSecondaryColor() {
-        return consoleSecondaryColor;
+        return ChatColor.getByChar(Objects.requireNonNull(plugin.getConfig().getString("Colors.Console.Secondary")).charAt(0));
     }
 }

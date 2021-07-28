@@ -37,3 +37,13 @@ Discord:
   Emotes:
     Accepted: 864514259258310657
     Rejected: 864514280925560832
+
+Colors:
+  Chat:
+    Primary: '#1eb0ff'
+    Secondary: '#B5C2C5'
+    Third: '#55FFFF'
+    Disable: '#637C7E'
+  Console:
+    Primary: '3'
+    Secondary: '7'

@@ -22,7 +22,7 @@ public class Anketa extends CommandHelp {
     public Anketa(MUtilitySpigot plugin) {
         this.plugin = plugin;
         prefix = new Prefix();
-        channel = new MessageChannel(plugin);
+        channel = new MessageChannel();
         strUt = new MyStringUtils();
         helpList = new PageList(10, prefix.getAnketaPrefix(true, true).replace("]", " - nápověda]"), "/anketa");
     }

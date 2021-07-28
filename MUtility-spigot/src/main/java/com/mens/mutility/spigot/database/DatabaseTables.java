@@ -1,19 +1,16 @@
 package com.mens.mutility.spigot.database;
 
-import com.mens.mutility.spigot.MUtilitySpigot;
 import com.mens.mutility.spigot.chat.Prefix;
 
 public class DatabaseTables {
-    private final MUtilitySpigot plugin;
     private final Prefix prefix;
 
-    public DatabaseTables(MUtilitySpigot plugin) {
-        this.plugin = plugin;
+    public DatabaseTables() {
         prefix = new Prefix();
     }
 
     private String getTable(String tableName) {
-        return prefix.getTablePrefix(plugin) + tableName;
+        return prefix.getTablePrefix() + tableName;
     }
 
     public String getEventsTable() {

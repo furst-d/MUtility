@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Objects;
 
 public final class MUtilitySpigot extends JavaPlugin {
+    private static MUtilitySpigot instance;
     private List<CommandData> commands;
     private List<ServerInfo> servers;
     private Database db;
@@ -46,6 +47,7 @@ public final class MUtilitySpigot extends JavaPlugin {
      */
     @Override
     public void onEnable() {
+        setInstance(this);
         getLogger().info("Plugin spusten!");
         pm = Bukkit.getPluginManager();
         db = new Database(this);
@@ -68,8 +70,12 @@ public final class MUtilitySpigot extends JavaPlugin {
         getLogger().info("Plugin vypnut!");
     }
 
-    public MUtilitySpigot getInstance() {
-        return this;
+    public static MUtilitySpigot getInstance() {
+        return instance;
+    }
+
+    public static void setInstance(MUtilitySpigot instance) {
+        MUtilitySpigot.instance = instance;
     }
 
     public PluginManager getPm() {

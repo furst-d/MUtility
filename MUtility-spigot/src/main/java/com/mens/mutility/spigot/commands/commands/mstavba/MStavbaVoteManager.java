@@ -36,9 +36,9 @@ public class MStavbaVoteManager {
     public MStavbaVoteManager(MUtilitySpigot plugin) {
         this.plugin = plugin;
         db = plugin.getDb();
-        tables = new DatabaseTables(plugin);
+        tables = new DatabaseTables();
         seasonId = getMaxSeason();
-        playerManager = new PlayerManager(plugin);
+        playerManager = new PlayerManager();
         strUt = new MyStringUtils();
         prefix = new Prefix();
         colors = new PluginColors();

@@ -12,9 +12,8 @@ import java.sql.SQLException;
 public class PlayerManager {
     private final Database db;
 
-    public PlayerManager(MUtilitySpigot plugin) {
-        db = plugin.getDb();
-        Prefix prefix = new Prefix();
+    public PlayerManager() {
+        db = MUtilitySpigot.getInstance().getDb();
     }
 
     public int getUserId(String username) {

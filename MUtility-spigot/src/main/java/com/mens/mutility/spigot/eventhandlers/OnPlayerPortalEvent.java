@@ -22,8 +22,8 @@ public class OnPlayerPortalEvent implements Listener {
 
     public OnPlayerPortalEvent(MUtilitySpigot plugin) {
         this.plugin = plugin;
-        messageChannel = new MessageChannel(plugin);
-        teleportDataManager = new TeleportDataManager(plugin);
+        messageChannel = new MessageChannel();
+        teleportDataManager = new TeleportDataManager();
         conectingPlayers = new ArrayList<>();
     }
 

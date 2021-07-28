@@ -53,8 +53,8 @@ public class Zalohy extends CommandHelp {
         adminList.setEmptyMessage(" Nejsou vytvořené žádné zálohy!");
         adminUserList = new PageList(10, null, null);
         adminUserList.setEmptyMessage(" Hráč nemá vytvořené žádné zálohy!");
-        tables = new DatabaseTables(plugin);
-        playerManager = new PlayerManager(plugin);
+        tables = new DatabaseTables();
+        playerManager = new PlayerManager();
         colors = new PluginColors();
         strUt = new MyStringUtils();
         errors = new Errors();

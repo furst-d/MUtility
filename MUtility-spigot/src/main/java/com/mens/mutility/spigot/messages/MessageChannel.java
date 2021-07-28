@@ -20,10 +20,9 @@ public class MessageChannel implements Listener {
 
     /**
      * Konstruktor tridy
-     * @param plugin Odkaz na main tridu
      */
-    public MessageChannel(MUtilitySpigot plugin) {
-        this.plugin = plugin;
+    public MessageChannel() {
+        plugin = MUtilitySpigot.getInstance();
     }
 
     public void sendServer(Player player, String server) {

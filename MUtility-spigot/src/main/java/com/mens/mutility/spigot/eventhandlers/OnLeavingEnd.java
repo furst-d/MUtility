@@ -27,8 +27,8 @@ public class OnLeavingEnd implements Listener {
 
     public OnLeavingEnd(MUtilitySpigot plugin) {
         this.plugin = plugin;
-        messageChannel = new MessageChannel(plugin);
-        teleportDataManager = new TeleportDataManager(plugin);
+        messageChannel = new MessageChannel();
+        teleportDataManager = new TeleportDataManager();
         conectingPlayers = new ArrayList<>();
         players = new LinkedList<>();
     }

@@ -33,12 +33,12 @@ public class TeleportData {
     private final InventoryManager inventoryManager;
 
     public TeleportData(MUtilitySpigot plugin) {
-        playerManager = new PlayerManager(plugin);
+        playerManager = new PlayerManager();
         inventoryManager = new InventoryManager();
     }
 
     public TeleportData(MUtilitySpigot plugin, Player player, double x, double y, double z, String world) {
-        playerManager = new PlayerManager(plugin);
+        playerManager = new PlayerManager();
         inventoryManager = new InventoryManager();
         userId = playerManager.getUserId(player.getName());
         inventory = inventoryManager.getInventory(player).toString();

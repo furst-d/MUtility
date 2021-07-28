@@ -43,8 +43,8 @@ public class MStavba extends CommandHelp {
         helpList = new PageList(10, prefix.getStavbaPrefix(true, true).replace("]", " - nápověda]"), "/mstavba");
         showList = new PageList(10, prefix.getStavbaPrefix(true, true).replace("]", " - seznam]"), "/mstavba zobraz");
         colors = new PluginColors();
-        tables = new DatabaseTables(plugin);
-        playerManager = new PlayerManager(plugin);
+        tables = new DatabaseTables();
+        playerManager = new PlayerManager();
         strUt = new MyStringUtils();
     }
 

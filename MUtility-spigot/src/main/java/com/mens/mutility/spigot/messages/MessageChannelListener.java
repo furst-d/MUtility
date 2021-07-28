@@ -31,7 +31,7 @@ public class MessageChannelListener implements PluginMessageListener {
      */
     public MessageChannelListener(MUtilitySpigot plugin) {
         this.plugin = plugin;
-        teleportDataManager = new TeleportDataManager(plugin);
+        teleportDataManager = new TeleportDataManager();
     }
 
     @Override
@@ -120,7 +120,7 @@ public class MessageChannelListener implements PluginMessageListener {
                     if(!permPlayers.toString().equalsIgnoreCase("")) {
                         permPlayers.substring(0, permPlayers.length() - 1);
                     }
-                    MessageChannel messageChannel = new MessageChannel(plugin);
+                    MessageChannel messageChannel = new MessageChannel();
                     player = Iterables.getFirst(Bukkit.getOnlinePlayers(), null);
                     messageChannel.sendToBungeeCord(player, returnChannel, permPlayers.toString());
                     break;

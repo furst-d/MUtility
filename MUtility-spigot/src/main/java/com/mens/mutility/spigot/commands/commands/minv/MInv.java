@@ -52,8 +52,8 @@ public class MInv extends CommandHelp {
         loadList = new PageList(10, prefix.getInventoryPrefix(true, true).replace("]", " - seznam]"), "/minv nacti");
         manageList = new PageList(10, prefix.getInventoryPrefix(true, true).replace("]", " - úprava]"), "/minv spravuj");
         db = plugin.getDb();
-        tables = new DatabaseTables(plugin);
-        playerManager = new PlayerManager(plugin);
+        tables = new DatabaseTables();
+        playerManager = new PlayerManager();
         colors = new PluginColors();
         strUt = new MyStringUtils();
         errors = new Errors();

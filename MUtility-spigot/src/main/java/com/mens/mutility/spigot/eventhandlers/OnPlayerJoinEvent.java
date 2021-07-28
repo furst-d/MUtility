@@ -15,7 +15,7 @@ public class OnPlayerJoinEvent implements Listener {
 
     public OnPlayerJoinEvent(MUtilitySpigot plugin) {
         this.plugin = plugin;
-        messageChannel = new MessageChannel(plugin);
+        messageChannel = new MessageChannel();
     }
 
     @EventHandler

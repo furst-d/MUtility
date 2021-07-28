@@ -4,7 +4,11 @@ import com.mens.mutility.spigot.MUtilitySpigot;
 
 public class Prefix {
     private String prefixName;
-    PluginColors colors = new PluginColors();
+    PluginColors colors;
+
+    public Prefix() {
+        colors = new PluginColors();
+    }
 
     public String getPrefixName() {
         return prefixName;
@@ -89,7 +93,7 @@ public class Prefix {
         return getPrefix(hexColor, json);
     }
 
-    public String getTablePrefix(MUtilitySpigot plugin) {
-        return plugin.getConfig().getString("MYSQL.Table prefix");
+    public String getTablePrefix() {
+        return MUtilitySpigot.getInstance().getConfig().getString("MYSQL.Table prefix");
     }
 }

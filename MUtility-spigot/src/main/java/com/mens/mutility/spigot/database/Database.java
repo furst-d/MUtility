@@ -8,7 +8,7 @@ import org.bukkit.Bukkit;
 import java.sql.*;
 
 public class Database {
-    private Connection con;
+    private static Connection con;
     private final MUtilitySpigot plugin;
     private final Prefix prefix;
     private final PluginColors colors;
@@ -18,7 +18,7 @@ public class Database {
         this.plugin = plugin;
         prefix = new Prefix();
         colors = new PluginColors();
-        tables = new DatabaseTables(plugin);
+        tables = new DatabaseTables();
     }
 
     public Connection getCon() {

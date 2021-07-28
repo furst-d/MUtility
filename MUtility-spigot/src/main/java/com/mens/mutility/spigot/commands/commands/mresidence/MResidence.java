@@ -25,7 +25,7 @@ public class MResidence extends CommandHelp {
         this.plugin = plugin;
         prefix = new Prefix();
         helpList = new PageList(10, prefix.getResidencePrefix(true, true).replace("]", " - nápověda]"), "/mresidence");
-        messageChannel = new MessageChannel(plugin);
+        messageChannel = new MessageChannel();
         colors = new PluginColors();
     }
 

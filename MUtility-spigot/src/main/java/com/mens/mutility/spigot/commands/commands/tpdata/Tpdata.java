@@ -58,8 +58,8 @@ public class Tpdata extends CommandHelp {
         showNameList = new PageList(10, null, null);
         colors = new PluginColors();
         db = plugin.getDb();
-        tables = new DatabaseTables(plugin);
-        playerManager = new PlayerManager(plugin);
+        tables = new DatabaseTables();
+        playerManager = new PlayerManager();
         errors = new Errors();
         invConfirmationList = new ArrayList<>();
         allConfirmationList = new ArrayList<>();
@@ -196,7 +196,7 @@ public class Tpdata extends CommandHelp {
                         if(!invConfirmationList.get(i).isFinished()) {
                             valid = true;
                             invConfirmationList.get(i).setFinished(true);
-                            TeleportDataManager teleportDataManager = new TeleportDataManager(plugin);
+                            TeleportDataManager teleportDataManager = new TeleportDataManager();
                             TeleportData data = teleportDataManager.loadDataById(id);
                             Player player = Bukkit.getPlayer(playerManager.getUsername(data.getUserId()));
                             if(player != null) {
@@ -229,7 +229,7 @@ public class Tpdata extends CommandHelp {
                         if(!allConfirmationList.get(i).isFinished()) {
                             valid = true;
                             allConfirmationList.get(i).setFinished(true);
-                            TeleportDataManager teleportDataManager = new TeleportDataManager(plugin);
+                            TeleportDataManager teleportDataManager = new TeleportDataManager();
                             TeleportData data = teleportDataManager.loadDataById(id);
                             Player player = Bukkit.getPlayer(playerManager.getUsername(data.getUserId()));
                             if(player != null) {

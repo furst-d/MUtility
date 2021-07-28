@@ -57,8 +57,8 @@ public class Navrhy extends CommandHelp {
         showList.setEmptyMessage(" Nemáš vytvořené žádné návrhy!\n Pro přidání návrhu použij /navrhy pridej [<Tvůj návrh>]");
         db = plugin.getDb();
         colors = new PluginColors();
-        tables = new DatabaseTables(plugin);
-        playerManager = new PlayerManager(plugin);
+        tables = new DatabaseTables();
+        playerManager = new PlayerManager();
         strUt = new MyStringUtils();
         errors = new Errors();
         deleteConfirmationList = new ArrayList<>();
