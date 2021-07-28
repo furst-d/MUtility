@@ -110,7 +110,7 @@ public class Zalohy extends CommandHelp {
                 if(!isCompleted((Player)t.getSender(), recordId)) {
                     Confirmation deleteConfirmation = new Confirmation(recordId, (Player) t.getSender(), "/zalohy delete confirm");
                     deleteConfirmation.setMessage(new JsonBuilder()
-                            .addJsonSegment(prefix.getNavrhyPrefix(true, true))
+                            .addJsonSegment(prefix.getZalohyPrefix(true, true))
                             .text(": Opravdu si přejete odstranit tuto zálohu?")
                             .color(colors.getSecondaryColorHEX()));
                     if(deleteConfirmationList.stream().noneMatch(x -> (x.getId() == recordId
@@ -271,7 +271,7 @@ public class Zalohy extends CommandHelp {
         });
         final CommandData setNoteNote = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Poznámka >]", "mutility.zalohy.manage", CommandExecutors.PLAYER, t -> {
             int recordId = Integer.parseInt(t.getArgs()[1]);
-            String note = strUt.getStringFromArgs(t.getArgs(), 3).replace("\"", "'");
+            String note = strUt.getStringFromArgs(t.getArgs(), 3);
             Player player = (Player) t.getSender();
             if(isZaloha(player, recordId, false)) {
                 setNote(player, recordId, note);
@@ -305,7 +305,7 @@ public class Zalohy extends CommandHelp {
             float y = Float.parseFloat(t.getArgs()[2]);
             float z = Float.parseFloat(t.getArgs()[3]);
             String world = t.getArgs()[4];
-            String buildingName = strUt.getStringFromArgs(t.getArgs(), 5).replace("\"", "'");
+            String buildingName = strUt.getStringFromArgs(t.getArgs(), 5);
             int recordId = getMaxRecordId((Player)t.getSender()) + 1;
             if(checker.checkWorld(world)) {
                 insertZaloha((Player)t.getSender(), recordId, buildingName, x, y, z, world);

@@ -18,7 +18,7 @@ public class MyStringUtils {
                 str.append(" ");
             }
         }
-        return str.toString();
+        return str.toString().replace("\"", "'");
     }
 
     public double getStringWidth(String str) throws IOException, FontFormatException {

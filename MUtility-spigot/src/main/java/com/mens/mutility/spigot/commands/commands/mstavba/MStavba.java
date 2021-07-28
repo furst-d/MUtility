@@ -195,7 +195,7 @@ public class MStavba extends CommandHelp {
             while(rs.next()) {
                 forumId = rs.getInt(1);
                 userId = rs.getInt(2);
-                title = rs.getString(3);
+                title = rs.getString(3).replace("\"", "'");
                     showList.add(new JsonBuilder()
                             .text("[")
                             .color(colors.getSecondaryColorHEX())
@@ -265,8 +265,8 @@ public class MStavba extends CommandHelp {
             ResultSet rs =  stm.executeQuery();
             while(rs.next()) {
                 info[0] = rs.getString(1);
-                info[1] = rs.getString(2);
-                info[2] = rs.getString(3);
+                info[1] = rs.getString(2).replace("\"", "'");
+                info[2] = rs.getString(3).replace("\"", "'");
             }
         } catch (CommunicationsException e) {
             db.openConnection();
