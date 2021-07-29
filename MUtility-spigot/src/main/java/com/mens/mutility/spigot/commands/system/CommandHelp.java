@@ -49,7 +49,7 @@ public abstract class CommandHelp {
                         .text(commandData.getCommandName())
                         .color(colors.getPrimaryColorHEX())
                         .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, hoverSubcommand, true)
-                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, "/" + commandData.getCommandName())
+                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, "/" + commandData.getCommandName() + " help")
                         .getJsonSegments());
             }
         }

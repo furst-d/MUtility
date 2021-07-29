@@ -69,12 +69,16 @@ public class Navrhy extends CommandHelp {
      * Metoda slouzici k definovani a sestaveni prikazu a jeho parametru v ramci vlastniho prikazovaho systemu
      */
     public final CommandData create() {
-        final CommandData navrhy = new CommandData("navrhy", prefix.getNavrhyPrefix(true, false),"mutility.navrhy.help", CommandExecutors.BOTH, t -> {
+        final CommandData navrhy = new CommandData("navrhy", prefix.getNavrhyPrefix(true, false),"mutility.navrhy.help", CommandExecutors.PLAYER, t -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
             helpList.getList(1).toPlayer((Player) t.getSender());
         });
 
         // 1. stupeň
+        final CommandData help = new CommandData(ArgumentTypes.DEFAULT, "help", TabCompleterTypes.DEFAULT, "mutility.navrhy.help", CommandExecutors.PLAYER, (t) -> {
+            helpList = getCommandHelp(plugin, t.getSender(), helpList);
+            helpList.getList(1).toPlayer((Player) t.getSender());
+        });
         final CommandData helpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         final CommandData admin = new CommandData(ArgumentTypes.DEFAULT, "admin", TabCompleterTypes.DEFAULT, "mutility.navrhy.admin", CommandExecutors.PLAYER, t -> {
             loadAdminList((Player) t.getSender(), 1);
@@ -89,7 +93,8 @@ public class Navrhy extends CommandHelp {
         final CommandData manage = new CommandData(ArgumentTypes.DEFAULT, "manage", TabCompleterTypes.NONE);
 
         // 2. stupeň
-        final CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.navrhy.help", CommandExecutors.BOTH, (t) -> {
+        final CommandData helpHelpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
+        final CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.navrhy.help", CommandExecutors.PLAYER, (t) -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
             helpList.getList(Integer.parseInt(t.getArgs()[1])).toPlayer((Player) t.getSender());
         });
@@ -156,6 +161,10 @@ public class Navrhy extends CommandHelp {
         final CommandData manageId = new CommandData(ArgumentTypes.POSITIVE_INTEGER, TabCompleterTypes.NONE);
 
         // 3. stupeň
+        final CommandData helpHelpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.navrhy.help", CommandExecutors.PLAYER, (t) -> {
+            helpList = getCommandHelp(plugin, t.getSender(), helpList);
+            helpList.getList(Integer.parseInt(t.getArgs()[2])).toPlayer((Player) t.getSender());
+        });
         final CommandData rejectReason = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Důvod zamítnutí >]", "mutility.navrhy.reject", CommandExecutors.PLAYER, t -> {
             int id = Integer.parseInt(t.getArgs()[1]);
             String rejectedReason = strUt.getStringFromArgs(t.getArgs(), 2);
@@ -166,7 +175,7 @@ public class Navrhy extends CommandHelp {
             }
             t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false) + "Návrh byl zamítnut");
         });
-        final CommandData adminPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.navrhy.admin", CommandExecutors.BOTH, (t) -> loadAdminList((Player) t.getSender(), Integer.parseInt(t.getArgs()[2])));
+        final CommandData adminPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.navrhy.admin", CommandExecutors.PLAYER, (t) -> loadAdminList((Player) t.getSender(), Integer.parseInt(t.getArgs()[2])));
         final CommandData adminNamePage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         final CommandData showPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.navrhy.show", CommandExecutors.PLAYER, (t) -> loadShowList((Player)t.getSender(), Integer.parseInt(t.getArgs()[2])));
         final CommandData deleteConfirmID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.eventy.delete", CommandExecutors.PLAYER, t -> {
@@ -207,9 +216,12 @@ public class Navrhy extends CommandHelp {
         });
 
         //4. stupeň
-        final CommandData adminNamePageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.navrhy.admin", CommandExecutors.BOTH, (t) -> loadAdminNameList(t.getArgs()[1], (Player) t.getSender(), Integer.parseInt(t.getArgs()[3])));
+        final CommandData adminNamePageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.navrhy.admin", CommandExecutors.PLAYER, (t) -> loadAdminNameList(t.getArgs()[1], (Player) t.getSender(), Integer.parseInt(t.getArgs()[3])));
 
         navrhy.setDescription("Systém pro správu návrhů");
+
+        help.setDescription("Nápověda k příkazu");
+        help.setSyntax("/navrhy " + help.getSubcommand());
 
         add.setDescription("Přidání nového návrhu");
         add.setSyntax("/navrhy " + show.getSubcommand() + " [<Tvůj návrh>]");
@@ -220,6 +232,7 @@ public class Navrhy extends CommandHelp {
         admin.setDescription("Zobrazí seznam všech návrhů a jejich správu.\nPřidáním jména hráče za příkaz si můžete vyfiltrovat návrhy daného hráče");
         admin.setSyntax("/navrhy " + admin.getSubcommand() + "\n/navrhy " + admin.getSubcommand() + " [<Jméno hráče>]");
 
+        navrhy.link(help);
         navrhy.link(helpPage);
         navrhy.link(add);
         navrhy.link(show);
@@ -230,6 +243,7 @@ public class Navrhy extends CommandHelp {
         navrhy.link(delete);
         navrhy.link(manage);
 
+        help.link(helpHelpPage);
         helpPage.link(helpPageID);
         add.link(addText);
         admin.link(adminPage);
@@ -242,6 +256,7 @@ public class Navrhy extends CommandHelp {
         delete.link(deleteConfirm);
         manage.link(manageId);
 
+        helpHelpPage.link(helpHelpPageID);
         adminName.link(adminNamePage);
         showPage.link(showPageID);
         adminPage.link(adminPageID);

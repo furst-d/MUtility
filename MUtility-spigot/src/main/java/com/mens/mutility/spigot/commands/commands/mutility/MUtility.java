@@ -28,7 +28,7 @@ public class MUtility extends CommandHelp {
      * Metoda slouzici k definovani a sestaveni prikazu a jeho parametru v ramci vlastniho prikazovaho systemu
      */
     public final CommandData create() {
-        final CommandData mutility = new CommandData("mutility", prefix.getMutilityPrefix(true, false),"mutility.help", CommandExecutors.BOTH, t -> {
+        final CommandData mutility = new CommandData("mutility", prefix.getMutilityPrefix(true, false),"mutility.help", CommandExecutors.PLAYER, t -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
             helpList.getList(1).toPlayer((Player) t.getSender());
         });
@@ -42,22 +42,24 @@ public class MUtility extends CommandHelp {
             plugin.getJoinEffects().reload();
             plugin.reloadConfig();
             Bukkit.getConsoleSender().sendMessage(prefix.getMutilityPrefix(false, false) + "Configy načteny");
-            t.getSender().sendMessage(prefix.getMutilityPrefix(true, false) + "Configy načteny");
+            if(t.getSender() instanceof Player) {
+                t.getSender().sendMessage(prefix.getMutilityPrefix(true, false) + "Configy načteny");
+            }
         });
-        final CommandData pluginHelp = new CommandData(ArgumentTypes.DEFAULT, "help", TabCompleterTypes.DEFAULT, "mutility.help", CommandExecutors.BOTH, (t) -> {
+        final CommandData pluginHelp = new CommandData(ArgumentTypes.DEFAULT, "help", TabCompleterTypes.DEFAULT, "mutility.help", CommandExecutors.PLAYER, (t) -> {
             pluginHelpList = getMainHelp(plugin, t.getSender(), pluginHelpList);
             pluginHelpList.getList(1).toPlayer((Player) t.getSender());
         });
 
         // 2. stupeň
-        final CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.help", CommandExecutors.BOTH, (t) -> {
+        final CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.help", CommandExecutors.PLAYER, (t) -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
             helpList.getList(Integer.parseInt(t.getArgs()[1])).toPlayer((Player) t.getSender());
         });
         final CommandData pluginHelpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
 
         // 3. stupeň
-        final CommandData pluginHelpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.help", CommandExecutors.BOTH, (t) -> {
+        final CommandData pluginHelpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.help", CommandExecutors.PLAYER, (t) -> {
             pluginHelpList = getMainHelp(plugin, t.getSender(), pluginHelpList);
             pluginHelpList.getList(Integer.parseInt(t.getArgs()[2])).toPlayer((Player) t.getSender());
         });

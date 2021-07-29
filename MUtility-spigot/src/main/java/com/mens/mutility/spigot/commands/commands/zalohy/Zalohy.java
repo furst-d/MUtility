@@ -66,12 +66,16 @@ public class Zalohy extends CommandHelp {
      * Metoda slouzici k definovani a sestaveni prikazu a jeho parametru v ramci vlastniho prikazovaho systemu
      */
     public final CommandData create() {
-        final CommandData zalohy = new CommandData("zalohy", prefix.getZalohyPrefix(true, false),"mutility.zalohy.help", CommandExecutors.BOTH, t -> {
+        final CommandData zalohy = new CommandData("zalohy", prefix.getZalohyPrefix(true, false),"mutility.zalohy.help", CommandExecutors.PLAYER, t -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
             helpList.getList(1).toPlayer((Player) t.getSender());
         });
 
         // 1. stupeň
+        final CommandData help = new CommandData(ArgumentTypes.DEFAULT, "help", TabCompleterTypes.DEFAULT, "mutility.zalohy.help", CommandExecutors.PLAYER, (t) -> {
+            helpList = getCommandHelp(plugin, t.getSender(), helpList);
+            helpList.getList(1).toPlayer((Player) t.getSender());
+        });
         final CommandData helpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         final CommandData pridej = new CommandData(ArgumentTypes.DEFAULT, "pridej", TabCompleterTypes.DEFAULT, "mutility.zalohy.create");
         final CommandData zobraz = new CommandData(ArgumentTypes.DEFAULT, "zobraz", TabCompleterTypes.DEFAULT, "mutility.zalohy.manage", CommandExecutors.PLAYER, t -> loadShowList((Player)t.getSender(), 1));
@@ -84,7 +88,8 @@ public class Zalohy extends CommandHelp {
         final CommandData returnZaloha = new CommandData(ArgumentTypes.DEFAULT, "return", TabCompleterTypes.NONE);
 
         // 2. stupeň
-        final CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.zalohy.help", CommandExecutors.BOTH, (t) -> {
+        final CommandData helpHelpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
+        final CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.zalohy.help", CommandExecutors.PLAYER, (t) -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
             helpList.getList(Integer.parseInt(t.getArgs()[1])).toPlayer((Player) t.getSender());
         });
@@ -167,6 +172,10 @@ public class Zalohy extends CommandHelp {
         });
 
         // 3. stupeň
+        final CommandData helpHelpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.zalohy.help", CommandExecutors.PLAYER, (t) -> {
+            helpList = getCommandHelp(plugin, t.getSender(), helpList);
+            helpList.getList(Integer.parseInt(t.getArgs()[2])).toPlayer((Player) t.getSender());
+        });
         final CommandData pridejY = new CommandData(ArgumentTypes.FLOAT, TabCompleterTypes.POSY, "mutility.zalohy.create");
         final CommandData zobrazPageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.manage", CommandExecutors.PLAYER, t-> loadShowList((Player)t.getSender(), Integer.parseInt(t.getArgs()[2])));
         final CommandData setX = new CommandData(ArgumentTypes.DEFAULT, "setx", TabCompleterTypes.NONE);
@@ -337,6 +346,9 @@ public class Zalohy extends CommandHelp {
 
         zalohy.setDescription("Systém pro správu záloh");
 
+        help.setDescription("Nápověda k příkazu");
+        help.setSyntax("/zalohy " + help.getSubcommand());
+
         admin.setDescription("Zobrazí seznam všech hráčů, kteří si zažádali o zálohu a jejich statistiky.\nSeznam staveb jednotlivého hráče lze specifikovat dalším parametrem");
         admin.setSyntax("/zalohy " + admin.getSubcommand() + "\n/zalohy " + admin.getSubcommand() + " [<Jméno hráče>]");
 
@@ -346,6 +358,7 @@ public class Zalohy extends CommandHelp {
         zobraz.setDescription("Zobrazí uživateli jeho žádosti na přesun staveb");
         zobraz.setSyntax("/zalohy " + zobraz.getSubcommand());
 
+        zalohy.link(help);
         zalohy.link(helpPage);
         zalohy.link(pridej);
         zalohy.link(zobraz);
@@ -357,6 +370,7 @@ public class Zalohy extends CommandHelp {
         zalohy.link(reject);
         zalohy.link(returnZaloha);
 
+        help.link(helpHelpPage);
         helpPage.link(helpPageID);
         pridej.link(pridejX);
         zobraz.link(zobrazPage);
@@ -370,6 +384,7 @@ public class Zalohy extends CommandHelp {
         reject.link(rejectID);
         returnZaloha.link(returnID);
 
+        helpHelpPage.link(helpHelpPageID);
         pridejX.link(pridejY);
         zobrazPage.link(zobrazPageID);
         manageID.link(setX);

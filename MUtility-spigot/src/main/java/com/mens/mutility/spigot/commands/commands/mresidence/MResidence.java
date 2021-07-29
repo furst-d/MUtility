@@ -34,13 +34,6 @@ public class MResidence extends CommandHelp {
      */
     public final CommandData create() {
         final CommandData residence = new CommandData("mresidence", "mres", prefix.getResidencePrefix(true, false), "mutility.residence.help", CommandExecutors.BOTH, t -> {
-            helpList = getCommandHelp(plugin, t.getSender(), helpList);
-            helpList.getList(1).toPlayer((Player) t.getSender());
-        });
-
-        // 1. stupeň
-        final CommandData helpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
-        final CommandData posli = new CommandData(ArgumentTypes.DEFAULT, "posli", TabCompleterTypes.DEFAULT, "mutility.residence.send", CommandExecutors.BOTH, t -> {
             JsonBuilder jb = new JsonBuilder();
             jb.addJsonSegment(prefix.getKostkujPrefix(true, true))
                     .text(": Residence lze v případě zájmu samostatně dokoupit na našem ")
@@ -65,21 +58,38 @@ public class MResidence extends CommandHelp {
             messageChannel.broadcastJson(jb.toString());
         });
 
+        // 1. stupeň
+        final CommandData help = new CommandData(ArgumentTypes.DEFAULT, "help", TabCompleterTypes.DEFAULT, "mutility.residence.help", CommandExecutors.PLAYER, (t) -> {
+            helpList = getCommandHelp(plugin, t.getSender(), helpList);
+            helpList.getList(1).toPlayer((Player) t.getSender());
+        });
+        final CommandData helpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
+
         // 2. stupeň
-        final CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.residence.help", CommandExecutors.BOTH, (t) -> {
+        final CommandData helpHelpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
+        final CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.residence.help", CommandExecutors.PLAYER, (t) -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
             helpList.getList(Integer.parseInt(t.getArgs()[1])).toPlayer((Player) t.getSender());
         });
 
+        // 3. stupeň
+        final CommandData helpHelpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.residence.help", CommandExecutors.PLAYER, (t) -> {
+            helpList = getCommandHelp(plugin, t.getSender(), helpList);
+            helpList.getList(Integer.parseInt(t.getArgs()[2])).toPlayer((Player) t.getSender());
+        });
+
         residence.setDescription("Informační zpráva ohledně residencí");
 
-        posli.setDescription("Poslání informační zprávy o residencí do chatu");
-        posli.setSyntax("/mres " + posli.getSubcommand() + "\n/mresidence " + posli.getSubcommand());
+        help.setDescription("Nápověda k příkazu");
+        help.setSyntax("/mresidence " + help.getSubcommand() + "\n/mres " + help.getSubcommand());
 
+        residence.link(help);
         residence.link(helpPage);
-        residence.link(posli);
 
+        help.link(helpHelpPage);
         helpPage.link(helpPageID);
+
+        helpHelpPage.link(helpHelpPageID);
 
         return residence;
     }

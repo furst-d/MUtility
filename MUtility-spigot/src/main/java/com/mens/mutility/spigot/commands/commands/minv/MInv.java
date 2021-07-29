@@ -64,12 +64,16 @@ public class MInv extends CommandHelp {
      * Metoda slouzici k definovani a sestaveni prikazu a jeho parametru v ramci vlastniho prikazovaho systemu
      */
     public final CommandData create() {
-        final CommandData minv = new CommandData("minv", prefix.getInventoryPrefix(true, false),"mutility.inventory.help", CommandExecutors.BOTH, t -> {
+        final CommandData minv = new CommandData("minv", prefix.getInventoryPrefix(true, false),"mutility.inventory.help", CommandExecutors.PLAYER, t -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
             helpList.getList(1).toPlayer((Player) t.getSender());
         });
 
         // 1. stupeň
+        final CommandData help = new CommandData(ArgumentTypes.DEFAULT, "help", TabCompleterTypes.DEFAULT, "mutility.inventory.help", CommandExecutors.PLAYER, (t) -> {
+            helpList = getCommandHelp(plugin, t.getSender(), helpList);
+            helpList.getList(1).toPlayer((Player) t.getSender());
+        });
         final CommandData helpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         final CommandData uloz = new CommandData(ArgumentTypes.DEFAULT, "uloz", TabCompleterTypes.DEFAULT, "mutility.inventory.save", CommandExecutors.PLAYER, t -> {
             InventoryManager invManager = new InventoryManager();
@@ -83,7 +87,8 @@ public class MInv extends CommandHelp {
         final CommandData show = new CommandData(ArgumentTypes.DEFAULT, "show", TabCompleterTypes.NONE, "mutility.inventory.show");
 
         // 2. stupeň
-        final CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.inventory.help", CommandExecutors.BOTH, (t) -> {
+        final CommandData helpHelpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
+        final CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.inventory.help", CommandExecutors.PLAYER, (t) -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
             helpList.getList(Integer.parseInt(t.getArgs()[1])).toPlayer((Player) t.getSender());
         });
@@ -179,6 +184,10 @@ public class MInv extends CommandHelp {
         final CommandData managePage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
 
         // 3. stupeň
+        final CommandData helpHelpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.inventory.help", CommandExecutors.PLAYER, (t) -> {
+            helpList = getCommandHelp(plugin, t.getSender(), helpList);
+            helpList.getList(Integer.parseInt(t.getArgs()[2])).toPlayer((Player) t.getSender());
+        });
         final CommandData loadPageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.inventory.load", CommandExecutors.PLAYER, t -> loadLoadData((Player) t.getSender(), Integer.parseInt(t.getArgs()[2])));
         final CommandData setName = new CommandData(ArgumentTypes.DEFAULT, "setname", TabCompleterTypes.NONE);
         final CommandData setInv = new CommandData(ArgumentTypes.DEFAULT, "setinv", TabCompleterTypes.NONE, "mutility.inventory.manage", CommandExecutors.PLAYER, t -> {
@@ -234,7 +243,11 @@ public class MInv extends CommandHelp {
                 t.getSender().sendMessage(prefix.getInventoryPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1], true, false));
             }
         });
+
         minv.setDescription("Systém pro ukládání a obnovování inventářů");
+
+        help.setDescription("Nápověda k příkazu");
+        help.setSyntax("/minv " + help.getSubcommand());
 
         uloz.setDescription("Uložení inventáře\nInventář lze uložit buď rychlým uložením, kdy se přepíše poslední rychlé uložení, nebo uložením se zadáním jména inventáře, kdy bude inventář uložen natrvalo.");
         uloz.setSyntax("/minv " + uloz.getSubcommand() + "\n/minv " + uloz.getSubcommand() + " [<Název inventáře>]");
@@ -245,6 +258,7 @@ public class MInv extends CommandHelp {
         spravuj.setDescription("Správa vytvořených inventářů");
         spravuj.setSyntax("/minv " + spravuj.getSubcommand());
 
+        minv.link(help);
         minv.link(helpPage);
         minv.link(uloz);
         minv.link(nacti);
@@ -252,6 +266,7 @@ public class MInv extends CommandHelp {
         minv.link(spravuj);
         minv.link(show);
 
+        help.link(helpHelpPage);
         helpPage.link(helpPageID);
         uloz.link(nazev);
         nacti.link(loadPage);
@@ -262,6 +277,7 @@ public class MInv extends CommandHelp {
         spravuj.link(managePage);
         show.link(showId);
 
+        helpHelpPage.link(helpHelpPageID);
         loadPage.link(loadPageID);
         manageID.link(setName);
         manageID.link(setInv);

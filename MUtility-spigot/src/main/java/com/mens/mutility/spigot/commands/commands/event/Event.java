@@ -71,12 +71,16 @@ public class Event extends CommandHelp {
      * Metoda slouzici k definovani a sestaveni prikazu a jeho parametru v ramci vlastniho prikazovaho systemu
      */
     public final CommandData create() {
-        final CommandData event = new CommandData("event", prefix.getEventPrefix(true, false), "mutility.eventy.help", CommandExecutors.BOTH, t -> {
+        final CommandData event = new CommandData("event", prefix.getEventPrefix(true, false), "mutility.eventy.help", CommandExecutors.PLAYER, t -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
             helpList.getList(1).toPlayer((Player) t.getSender());
         });
 
         // 1. stupeň
+        final CommandData help = new CommandData(ArgumentTypes.DEFAULT, "help", TabCompleterTypes.DEFAULT, "mutility.eventy.help", CommandExecutors.PLAYER, (t) -> {
+            helpList = getCommandHelp(plugin, t.getSender(), helpList);
+            helpList.getList(1).toPlayer((Player) t.getSender());
+        });
         final CommandData helpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         final CommandData spust = new CommandData(ArgumentTypes.DEFAULT, "spust", TabCompleterTypes.DEFAULT, "mutility.eventy.otazky.create");
         final CommandData vytvor = new CommandData(ArgumentTypes.DEFAULT, "vytvor", TabCompleterTypes.DEFAULT, "mutility.eventy.create");
@@ -87,7 +91,8 @@ public class Event extends CommandHelp {
         final CommandData delete = new CommandData(ArgumentTypes.DEFAULT, "delete", TabCompleterTypes.NONE);
 
         // 2. stupeň
-        final CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.eventy.help", CommandExecutors.BOTH, (t) -> {
+        final CommandData helpHelpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
+        final CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.eventy.help", CommandExecutors.PLAYER, (t) -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
             helpList.getList(Integer.parseInt(t.getArgs()[1])).toPlayer((Player) t.getSender());
         });
@@ -160,6 +165,10 @@ public class Event extends CommandHelp {
         final CommandData deleteConfirm = new CommandData(ArgumentTypes.DEFAULT, "confirm", TabCompleterTypes.NONE);
 
         // 3. stupeň
+        final CommandData helpHelpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.eventy.help", CommandExecutors.PLAYER, (t) -> {
+            helpList = getCommandHelp(plugin, t.getSender(), helpList);
+            helpList.getList(Integer.parseInt(t.getArgs()[2])).toPlayer((Player) t.getSender());
+        });
         final CommandData ano = new CommandData(ArgumentTypes.DEFAULT, "ano", TabCompleterTypes.DEFAULT, "mutility.eventy.otazky.create");
         final CommandData ne = new CommandData(ArgumentTypes.DEFAULT, "ne", TabCompleterTypes.DEFAULT, "mutility.eventy.otazky.create");
         final CommandData resetEvent = new CommandData(ArgumentTypes.DEFAULT, "resetevent", TabCompleterTypes.DEFAULT, "mutility.eventy.otazky.reset", CommandExecutors.BOTH, t -> {
@@ -218,7 +227,7 @@ public class Event extends CommandHelp {
         final CommandData setForbidden = new CommandData(ArgumentTypes.DEFAULT, "setforbidden", TabCompleterTypes.NONE);
         final CommandData setObjective = new CommandData(ArgumentTypes.DEFAULT, "setobjective", TabCompleterTypes.NONE);
         final CommandData setNote = new CommandData(ArgumentTypes.DEFAULT, "setnote", TabCompleterTypes.NONE);
-        final CommandData pageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.eventy.manage", CommandExecutors.BOTH, t -> loadManageListData((Player) t.getSender(), Integer.parseInt(t.getArgs()[2])));
+        final CommandData pageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.eventy.manage", CommandExecutors.PLAYER, t -> loadManageListData((Player) t.getSender(), Integer.parseInt(t.getArgs()[2])));
         final CommandData deleteConfirmID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.eventy.delete", CommandExecutors.PLAYER, t -> {
             int id = Integer.parseInt(t.getArgs()[2]);
             if(isEvent(id)) {
@@ -381,6 +390,9 @@ public class Event extends CommandHelp {
 
         event.setDescription("Systém pro správu eventů");
 
+        help.setDescription("Nápověda k příkazu");
+        help.setSyntax("/event " + help.getSubcommand());
+
         spust.setDescription("Obsluha naprogramovaných eventů");
         spust.setSyntax("/event " + spust.getSubcommand() + " [<Název eventu>] [<Další parametry>]");
 
@@ -390,6 +402,7 @@ public class Event extends CommandHelp {
         spravuj.setDescription("Seznam a správa jednotlivých eventů");
         spravuj.setSyntax("/event " + spravuj.getSubcommand());
 
+        event.link(help);
         event.link(helpPage);
         event.link(spust);
         event.link(vytvor);
@@ -399,6 +412,7 @@ public class Event extends CommandHelp {
         event.link(tp);
         event.link(delete);
 
+        help.link(helpHelpPage);
         helpPage.link(helpPageID);
         spust.link(otazky);
         spust.link(hledacka);
@@ -412,6 +426,7 @@ public class Event extends CommandHelp {
         delete.link(deleteID);
         delete.link(deleteConfirm);
 
+        helpHelpPage.link(helpHelpPageID);
         otazky.link(ano);
         otazky.link(ne);
         otazky.link(resetEvent);

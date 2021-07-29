@@ -58,6 +58,10 @@ public class MStavba extends CommandHelp {
         });
 
         // 1. stupeň
+        final CommandData help = new CommandData(ArgumentTypes.DEFAULT, "help", TabCompleterTypes.DEFAULT, "mutility.stavba.help", CommandExecutors.PLAYER, (t) -> {
+            helpList = getCommandHelp(plugin, t.getSender(), helpList);
+            helpList.getList(1).toPlayer((Player) t.getSender());
+        });
         final CommandData helpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         final CommandData zobraz = new CommandData(ArgumentTypes.DEFAULT, "zobraz", TabCompleterTypes.DEFAULT, "mutility.stavba.manage", CommandExecutors.PLAYER, (t) -> loadShowList((Player) t.getSender(), 1));
         final CommandData vytvor = new CommandData(ArgumentTypes.DEFAULT, "vytvor", TabCompleterTypes.DEFAULT, "mutility.stavba.create");
@@ -71,7 +75,8 @@ public class MStavba extends CommandHelp {
         });
 
         // 2. stupeň
-        final CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.stavba.help", CommandExecutors.BOTH, (t) -> {
+        final CommandData helpHelpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
+        final CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.stavba.help", CommandExecutors.PLAYER, (t) -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
             helpList.getList(Integer.parseInt(t.getArgs()[1])).toPlayer((Player) t.getSender());
         });
@@ -81,9 +86,13 @@ public class MStavba extends CommandHelp {
         final CommandData reject = new CommandData(ArgumentTypes.DEFAULT, "reject", TabCompleterTypes.NONE);
 
         // 3. stupeň
+        final CommandData helpHelpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.stavba.help", CommandExecutors.PLAYER, (t) -> {
+            helpList = getCommandHelp(plugin, t.getSender(), helpList);
+            helpList.getList(Integer.parseInt(t.getArgs()[2])).toPlayer((Player) t.getSender());
+        });
         final CommandData zobrazPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.stavba.manage", CommandExecutors.PLAYER, (t) -> loadShowList((Player) t.getSender(), Integer.parseInt(t.getArgs()[2])));
         final CommandData endDate = new CommandData(ArgumentTypes.DATE, TabCompleterTypes.DATE_PLUS_7, "mutility.stavba.create");
-        final CommandData acceptID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.stavba.manage", CommandExecutors.BOTH, (t) -> {
+        final CommandData acceptID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.stavba.manage", CommandExecutors.PLAYER, (t) -> {
             int forumId = Integer.parseInt(t.getArgs()[2]);
             String[] buildingInfo = getBuildingInfo(forumId);
             int userId = Integer.parseInt(buildingInfo[0]);
@@ -107,7 +116,7 @@ public class MStavba extends CommandHelp {
             insertAcceptComment(forumId, getBuildingDesc(seasonId));
             t.getSender().sendMessage(prefix.getStavbaPrefix(true, false) + "Stavba " + colors.getPrimaryColor() + title + colors.getSecondaryColor() + " byla přihlášena");
         });
-        final CommandData rejectID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.stavba.manage", CommandExecutors.BOTH, (t) -> {
+        final CommandData rejectID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.stavba.manage", CommandExecutors.PLAYER, (t) -> {
             int forumId = Integer.parseInt(t.getArgs()[2]);
             lockForumPost(forumId);
             t.getSender().sendMessage(prefix.getStavbaPrefix(true, false) + "Stavba " + colors.getPrimaryColor() + getBuildingInfo(forumId)[1] + colors.getSecondaryColor() + " byla zamítnuta");
@@ -130,6 +139,9 @@ public class MStavba extends CommandHelp {
 
         stavba.setDescription("Systém pro Stavbu měsíce");
 
+        help.setDescription("Nápověda k příkazu");
+        help.setSyntax("/mstavba " + help.getSubcommand());
+
         vytvor.setDescription("Vytvoření nové ankety pro hlasování");
         vytvor.setSyntax("/mstavba " + vytvor.getSubcommand() + " [<Od>] [<Do>] [<Popis období>]");
 
@@ -139,17 +151,20 @@ public class MStavba extends CommandHelp {
         hlasuj.setDescription("Pokud je soutěž aktivní a hráč ještě nehlasoval, vygeneruje hlasovací odkaz pro hlasování");
         hlasuj.setSyntax("/mstavba " + hlasuj.getSubcommand());
 
+        stavba.link(help);
         stavba.link(helpPage);
         stavba.link(zobraz);
         stavba.link(vytvor);
         stavba.link(hlasuj);
 
+        help.link(helpHelpPage);
         helpPage.link(helpPageID);
         zobraz.link(zobrazPage);
         zobraz.link(accept);
         zobraz.link(reject);
         vytvor.link(startDate);
 
+        helpHelpPage.link(helpHelpPageID);
         zobraz.link(zobrazPageID);
         accept.link(acceptID);
         reject.link(rejectID);

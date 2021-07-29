@@ -69,18 +69,23 @@ public class Tpdata extends CommandHelp {
      * Metoda slouzici k definovani a sestaveni prikazu a jeho parametru v ramci vlastniho prikazovaho systemu
      */
     public final CommandData create() {
-        final CommandData tpData = new CommandData("tpdata", prefix.getTpDataPrefix(true, false), "mutility.tpdata.help", CommandExecutors.BOTH, t -> {
+        final CommandData tpData = new CommandData("tpdata", prefix.getTpDataPrefix(true, false), "mutility.tpdata.help", CommandExecutors.PLAYER, t -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
             helpList.getList(1).toPlayer((Player) t.getSender());
         });
 
         // 1. stupeň
+        final CommandData help = new CommandData(ArgumentTypes.DEFAULT, "help", TabCompleterTypes.DEFAULT, "mutility.tpdata.help", CommandExecutors.PLAYER, (t) -> {
+            helpList = getCommandHelp(plugin, t.getSender(), helpList);
+            helpList.getList(1).toPlayer((Player) t.getSender());
+        });
         final CommandData helpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         final CommandData show = new CommandData(ArgumentTypes.DEFAULT, "zobraz", TabCompleterTypes.DEFAULT, "mutility.tpdata.show", CommandExecutors.PLAYER, t -> loadShowList((Player)t.getSender(), 1));
         final CommandData rb = new CommandData(ArgumentTypes.DEFAULT, "rb", TabCompleterTypes.NONE);
 
         // 2. stupeň
-        final CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.tpdata.help", CommandExecutors.BOTH, (t) -> {
+        final CommandData helpHelpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
+        final CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.tpdata.help", CommandExecutors.PLAYER, (t) -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
             helpList.getList(Integer.parseInt(t.getArgs()[1])).toPlayer((Player) t.getSender());
         });
@@ -91,6 +96,10 @@ public class Tpdata extends CommandHelp {
         final CommandData showPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
 
         // 3. stupeň
+        final CommandData helpHelpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.tpdata.help", CommandExecutors.PLAYER, (t) -> {
+            helpList = getCommandHelp(plugin, t.getSender(), helpList);
+            helpList.getList(Integer.parseInt(t.getArgs()[2])).toPlayer((Player) t.getSender());
+        });
         final CommandData rbInvId = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.tpdata.rb.inv", CommandExecutors.PLAYER, (t) -> {
             int id = Integer.parseInt(t.getArgs()[2]);
             if(isData(id)) {
@@ -255,13 +264,18 @@ public class Tpdata extends CommandHelp {
 
         tpData.setDescription("Systém teleportačních dat pro správu v případě nastání chyby při teleportaci");
 
+        help.setDescription("Nápověda k příkazu");
+        help.setSyntax("/tpdata " + help.getSubcommand());
+
         show.setDescription("Zobrazení seznamu teleportací za posledních 30 dní.\nSeznam lze filtrovat dle hráče přidáním jména hráče za příkaz");
         show.setSyntax("/tpdata " + show.getSubcommand() + "\n/tpdata " + show.getSubcommand() + " [<Jméno hráče>]");
 
+        tpData.link(help);
         tpData.link(helpPage);
         tpData.link(show);
         tpData.link(rb);
 
+        help.link(helpHelpPage);
         helpPage.link(helpPageID);
         show.link(showPage);
         show.link(showName);
@@ -269,6 +283,7 @@ public class Tpdata extends CommandHelp {
         rb.link(rbAll);
         rb.link(rbPreview);
 
+        helpHelpPage.link(helpHelpPageID);
         rbInv.link(rbInvId);
         rbAll.link(rbAllId);
         rbInv.link(rbInvConfirm);
