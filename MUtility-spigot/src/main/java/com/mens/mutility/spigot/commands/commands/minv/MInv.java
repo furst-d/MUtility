@@ -64,7 +64,7 @@ public class MInv extends CommandHelp {
      * Metoda slouzici k definovani a sestaveni prikazu a jeho parametru v ramci vlastniho prikazovaho systemu
      */
     public final CommandData create() {
-        final CommandData minv = new CommandData("minv", prefix.getInventoryPrefix(true, false),"mutility.inventory.help", CommandExecutors.PLAYER, t -> {
+        final CommandData minv = new CommandData("minv", "M-Inventory","mutility.inventory.help", CommandExecutors.PLAYER, t -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
             helpList.getList(1).toPlayer((Player) t.getSender());
         });

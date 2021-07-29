@@ -33,7 +33,7 @@ public class MResidence extends CommandHelp {
      * Metoda slouzici k definovani a sestaveni prikazu a jeho parametru v ramci vlastniho prikazovaho systemu
      */
     public final CommandData create() {
-        final CommandData residence = new CommandData("mresidence", "mres", prefix.getResidencePrefix(true, false), "mutility.residence.help", CommandExecutors.BOTH, t -> {
+        final CommandData residence = new CommandData("mresidence", "mres", "M-Residence", "mutility.residence.help", CommandExecutors.BOTH, t -> {
             JsonBuilder jb = new JsonBuilder();
             jb.addJsonSegment(prefix.getKostkujPrefix(true, true))
                     .text(": Residence lze v případě zájmu samostatně dokoupit na našem ")

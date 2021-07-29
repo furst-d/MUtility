@@ -71,7 +71,7 @@ public class Event extends CommandHelp {
      * Metoda slouzici k definovani a sestaveni prikazu a jeho parametru v ramci vlastniho prikazovaho systemu
      */
     public final CommandData create() {
-        final CommandData event = new CommandData("event", prefix.getEventPrefix(true, false), "mutility.eventy.help", CommandExecutors.PLAYER, t -> {
+        final CommandData event = new CommandData("event", "Event", "mutility.eventy.help", CommandExecutors.PLAYER, t -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
             helpList.getList(1).toPlayer((Player) t.getSender());
         });
@@ -173,13 +173,23 @@ public class Event extends CommandHelp {
         final CommandData ne = new CommandData(ArgumentTypes.DEFAULT, "ne", TabCompleterTypes.DEFAULT, "mutility.eventy.otazky.create");
         final CommandData resetEvent = new CommandData(ArgumentTypes.DEFAULT, "resetevent", TabCompleterTypes.DEFAULT, "mutility.eventy.otazky.reset", CommandExecutors.BOTH, t -> {
             questions.resetEvent();
-            t.getSender().sendMessage(prefix.getEventPrefix(true, false)
-                    + colors.getSecondaryColor() + "Event byl zresetován!");
+            if(t.getSender() instanceof Player) {
+                t.getSender().sendMessage(prefix.getEventPrefix(true, false)
+                        + colors.getSecondaryColor() + "Event byl zresetován!");
+            } else {
+                t.getSender().sendMessage(prefix.getEventPrefix(false, false)
+                        + colors.getConsoleSecondaryColor() + "Event byl zresetován!");
+            }
         });
         final CommandData resetKolo = new CommandData(ArgumentTypes.DEFAULT, "resetkolo", TabCompleterTypes.DEFAULT, "mutility.eventy.otazky.reset", CommandExecutors.BOTH, t -> {
             questions.resetKolo();
-            t.getSender().sendMessage(prefix.getEventPrefix(true, false)
-                    + colors.getSecondaryColor() + "Kolo bylo zresetováno!");
+            if(t.getSender() instanceof Player) {
+                t.getSender().sendMessage(prefix.getEventPrefix(true, false)
+                        + colors.getSecondaryColor() + "Kolo bylo zresetováno!");
+            } else {
+                t.getSender().sendMessage(prefix.getEventPrefix(false, false)
+                        + colors.getConsoleSecondaryColor() + "Kolo bylo zresetováno!");
+            }
         });
         final CommandData vote = new CommandData(ArgumentTypes.DEFAULT, "vote", TabCompleterTypes.NONE);
         final CommandData startHledacka = new CommandData(ArgumentTypes.DEFAULT, "start", TabCompleterTypes.DEFAULT, "mutility.eventy.hledacka.create", CommandExecutors.BOTH, t -> {
@@ -190,7 +200,11 @@ public class Event extends CommandHelp {
                 finder.getBossbar().set("Hledacka");
                 finder.start(-1);
             }
-            t.getSender().sendMessage(prefix.getEventPrefix(true, false) + "Event " + colors.getPrimaryColor() + "Hledačka" + colors.getSecondaryColor() + " byl spuštěn");
+            if(t.getSender() instanceof Player) {
+                t.getSender().sendMessage(prefix.getEventPrefix(true, false) + "Event " + colors.getPrimaryColor() + "Hledačka" + colors.getSecondaryColor() + " byl spuštěn");
+            } else {
+                t.getSender().sendMessage(prefix.getEventPrefix(false, false) + "Event " + colors.getConsolePrimaryColor() + "Hledačka" + colors.getConsoleSecondaryColor() + " byl spuštěn");
+            }
         });
         final CommandData stopHledacka = new CommandData(ArgumentTypes.DEFAULT, "stop", TabCompleterTypes.DEFAULT, "mutility.eventy.hledacka.create", CommandExecutors.BOTH, t -> {
             plugin.getEvents().getData().set("Hledacka.Enable", false);
@@ -198,7 +212,11 @@ public class Event extends CommandHelp {
             finder.getBossbar().setEnabled(false);
             finder.getBossbar().set("Hledacka");
             finder.stop();
-            t.getSender().sendMessage(prefix.getEventPrefix(true, false) + "Event " + colors.getPrimaryColor() + "Hledačka" + colors.getSecondaryColor() + " byl vypnut");
+            if(t.getSender() instanceof Player) {
+                t.getSender().sendMessage(prefix.getEventPrefix(true, false) + "Event " + colors.getPrimaryColor() + "Hledačka" + colors.getSecondaryColor() + " byl vypnut");
+            } else {
+                t.getSender().sendMessage(prefix.getEventPrefix(false, false) + "Event " + colors.getConsolePrimaryColor() + "Hledačka" + colors.getConsoleSecondaryColor() + " byl vypnut");
+            }
         });
         final CommandData setBlockHledacka = new CommandData(ArgumentTypes.DEFAULT, "block", TabCompleterTypes.DEFAULT, "mutility.eventy.hledacka.create");
         final CommandData setFogHledacka = new CommandData(ArgumentTypes.DEFAULT, "mlha", TabCompleterTypes.DEFAULT, "mutility.eventy.hledacka.create");
@@ -210,7 +228,11 @@ public class Event extends CommandHelp {
                 graveyard.getBossbar().set("Hrbitov");
                 graveyard.start(-1);
             }
-            t.getSender().sendMessage(prefix.getEventPrefix(true, false) + "Event " + colors.getPrimaryColor() + "Hřbitov" + colors.getSecondaryColor() + " byl spuštěn");
+            if(t.getSender() instanceof Player) {
+                t.getSender().sendMessage(prefix.getEventPrefix(true, false) + "Event " + colors.getPrimaryColor() + "Hřbitov" + colors.getSecondaryColor() + " byl spuštěn");
+            } else {
+                t.getSender().sendMessage(prefix.getEventPrefix(false, false) + "Event " + colors.getConsolePrimaryColor() + "Hřbitov" + colors.getConsoleSecondaryColor() + " byl spuštěn");
+            }
         });
         final CommandData stopHrbitov = new CommandData(ArgumentTypes.DEFAULT, "stop", TabCompleterTypes.DEFAULT, "mutility.eventy.hrbitov.create", CommandExecutors.BOTH, t -> {
             plugin.getEvents().getData().set("Hrbitov.Enable", false);
@@ -218,7 +240,11 @@ public class Event extends CommandHelp {
             graveyard.getBossbar().setEnabled(false);
             graveyard.getBossbar().set("Hrbitov");
             graveyard.stop();
-            t.getSender().sendMessage(prefix.getEventPrefix(true, false) + "Event " + colors.getPrimaryColor() + "Hřbitov" + colors.getSecondaryColor() + " byl vypnut");
+            if(t.getSender() instanceof Player) {
+                t.getSender().sendMessage(prefix.getEventPrefix(true, false) + "Event " + colors.getPrimaryColor() + "Hřbitov" + colors.getSecondaryColor() + " byl vypnut");
+            } else {
+                t.getSender().sendMessage(prefix.getEventPrefix(false, false) + "Event " + colors.getConsolePrimaryColor() + "Hřbitov" + colors.getConsoleSecondaryColor() + " byl vypnut");
+            }
         });
         final CommandData setBlockHrbitov = new CommandData(ArgumentTypes.DEFAULT, "blok", TabCompleterTypes.DEFAULT, "mutility.eventy.hrbitov.create");
         final CommandData setFogHrbitov = new CommandData(ArgumentTypes.DEFAULT, "mlha", TabCompleterTypes.DEFAULT, "mutility.eventy.hrbitov.create");
@@ -289,36 +315,60 @@ public class Event extends CommandHelp {
         final CommandData fogHledackaTrue = new CommandData(ArgumentTypes.DEFAULT,"ano", TabCompleterTypes.DEFAULT, "mutility.eventy.hledacka.create", CommandExecutors.BOTH, t -> {
             plugin.getEvents().getData().set("Hledacka.Fog", true);
             plugin.getEvents().saveData();
-            t.getSender().sendMessage(prefix.getEventPrefix(true, false) + "Event " + colors.getPrimaryColor() + "Hledačka " + colors.getSecondaryColor() + "- mlha byla " + ChatColor.GREEN + "zapnuta");
+            if(t.getSender() instanceof Player) {
+                t.getSender().sendMessage(prefix.getEventPrefix(true, false) + "Event " + colors.getPrimaryColor() + "Hledačka " + colors.getSecondaryColor() + "- mlha byla " + ChatColor.GREEN + "zapnuta");
+            } else {
+                t.getSender().sendMessage(prefix.getEventPrefix(false, false) + "Event " + colors.getConsolePrimaryColor() + "Hledačka " + colors.getConsoleSecondaryColor() + "- mlha byla " + ChatColor.GREEN + "zapnuta");
+            }
         });
         final CommandData fogHledackaFalse = new CommandData(ArgumentTypes.DEFAULT,"ne", TabCompleterTypes.DEFAULT, "mutility.eventy.hledacka.create", CommandExecutors.BOTH, t -> {
             plugin.getEvents().getData().set("Hledacka.Fog", false);
             plugin.getEvents().saveData();
-            t.getSender().sendMessage(prefix.getEventPrefix(true, false) + "Event " + colors.getPrimaryColor() + "Hledačka " + colors.getSecondaryColor() + "- mlha byla " + ChatColor.DARK_RED + "vypnuta");
+            if(t.getSender() instanceof Player) {
+                t.getSender().sendMessage(prefix.getEventPrefix(true, false) + "Event " + colors.getPrimaryColor() + "Hledačka " + colors.getSecondaryColor() + "- mlha byla " + ChatColor.DARK_RED + "vypnuta");
+            } else {
+                t.getSender().sendMessage(prefix.getEventPrefix(false, false) + "Event " + colors.getConsolePrimaryColor() + "Hledačka " + colors.getConsoleSecondaryColor() + "- mlha byla " + ChatColor.DARK_RED + "vypnuta");
+            }
         });
         final CommandData blockHrbitov = new CommandData(ArgumentTypes.STRING, TabCompleterTypes.BLOCKS, "mutility.eventy.hrbitov.create", CommandExecutors.PLAYER, t -> {
             String block = t.getArgs()[3];
             if(checker.checkBlock(block)) {
                 plugin.getEvents().getData().set("Hrbitov.Block", block);
                 plugin.getEvents().saveData();
-                t.getSender().sendMessage(prefix.getEventPrefix(true, false) + "Event " + colors.getPrimaryColor() + "Hřbitov " + colors.getSecondaryColor() + "- blok byl změněn na " + colors.getPrimaryColor() + block);
+                if(t.getSender() instanceof Player) {
+                    t.getSender().sendMessage(prefix.getEventPrefix(true, false) + "Event " + colors.getPrimaryColor() + "Hřbitov " + colors.getSecondaryColor() + "- blok byl změněn na " + colors.getPrimaryColor() + block);
+                } else {
+                    t.getSender().sendMessage(prefix.getEventPrefix(false, false) + "Event " + colors.getConsolePrimaryColor() + "Hřbitov " + colors.getConsoleSecondaryColor() + "- blok byl změněn na " + colors.getConsolePrimaryColor() + block);
+                }
             } else {
-                t.getSender().sendMessage(prefix.getEventPrefix(true, false) + errors.errWrongArgument(block,true, false));
+                if(t.getSender() instanceof Player) {
+                    t.getSender().sendMessage(prefix.getEventPrefix(true, false) + errors.errWrongArgument(block,true, false));
+                } else {
+                    t.getSender().sendMessage(prefix.getEventPrefix(false, false) + errors.errWrongArgument(block,false, false));
+                }
             }
         });
         final CommandData fogHrbitovTrue = new CommandData(ArgumentTypes.DEFAULT,"ano", TabCompleterTypes.DEFAULT, "mutility.eventy.hrbitov.create", CommandExecutors.BOTH, t -> {
             plugin.getEvents().getData().set("Hrbitov.Fog", true);
             plugin.getEvents().saveData();
-            t.getSender().sendMessage(prefix.getEventPrefix(true, false) + "Event " + colors.getPrimaryColor() + "Hřbitov " + colors.getSecondaryColor() + "- mlha byla " + ChatColor.GREEN + "zapnuta");
+            if(t.getSender() instanceof Player) {
+                t.getSender().sendMessage(prefix.getEventPrefix(true, false) + "Event " + colors.getPrimaryColor() + "Hřbitov " + colors.getSecondaryColor() + "- mlha byla " + ChatColor.GREEN + "zapnuta");
+            } else {
+                t.getSender().sendMessage(prefix.getEventPrefix(false, false) + "Event " + colors.getConsolePrimaryColor() + "Hřbitov " + colors.getConsoleSecondaryColor() + "- mlha byla " + ChatColor.GREEN + "zapnuta");
+            }
         });
         final CommandData fogHrbitovFalse = new CommandData(ArgumentTypes.DEFAULT,"ne", TabCompleterTypes.DEFAULT, "mutility.eventy.hrbitov.create", CommandExecutors.BOTH, t -> {
             plugin.getEvents().getData().set("Hrbitov.Fog", false);
             plugin.getEvents().saveData();
-            t.getSender().sendMessage(prefix.getEventPrefix(true, false) + "Event " + colors.getPrimaryColor() + "Hřbitov " + colors.getSecondaryColor() + "- mlha byla " + ChatColor.DARK_RED + "vypnuta");
+            if(t.getSender() instanceof Player) {
+                t.getSender().sendMessage(prefix.getEventPrefix(true, false) + "Event " + colors.getPrimaryColor() + "Hřbitov " + colors.getSecondaryColor() + "- mlha byla " + ChatColor.DARK_RED + "vypnuta");
+            } else {
+                t.getSender().sendMessage(prefix.getEventPrefix(false, false) + "Event " + colors.getConsolePrimaryColor() + "Hřbitov " + colors.getConsoleSecondaryColor() + "- mlha byla " + ChatColor.DARK_RED + "vypnuta");
+            }
         });
         final CommandData setTPX = new CommandData(ArgumentTypes.FLOAT, TabCompleterTypes.POSX, "mutility.eventy.manage");
 
-        final CommandData objective = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Cíl eventu >]", "mutility.eventy.manage", CommandExecutors.BOTH, t -> {
+        final CommandData objective = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Cíl eventu >]", "mutility.eventy.manage", CommandExecutors.PLAYER, t -> {
             int id = Integer.parseInt(t.getArgs()[1]);
             if(isEvent(id)) {
                 EventData data = getEventData(id);
@@ -330,7 +380,7 @@ public class Event extends CommandHelp {
                 t.getSender().sendMessage(prefix.getEventPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1],true, false));
             }
         });
-        final CommandData note = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Poznámka >]", "mutility.eventy.manage", CommandExecutors.BOTH, t -> {
+        final CommandData note = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Poznámka >]", "mutility.eventy.manage", CommandExecutors.PLAYER, t -> {
             int id = Integer.parseInt(t.getArgs()[1]);
             if(isEvent(id)) {
                 EventData data = getEventData(id);
@@ -353,7 +403,7 @@ public class Event extends CommandHelp {
         final CommandData setWorld = new CommandData(ArgumentTypes.STRING, TabCompleterTypes.WORLDS, "mutility.eventy.manage");
 
         // 8. stupeň
-        final CommandData setServer = new CommandData(ArgumentTypes.STRING, TabCompleterTypes.SERVERS, "mutility.eventy.manage", CommandExecutors.BOTH, t -> {
+        final CommandData setServer = new CommandData(ArgumentTypes.STRING, TabCompleterTypes.SERVERS, "mutility.eventy.manage", CommandExecutors.PLAYER, t -> {
             int id = Integer.parseInt(t.getArgs()[1]);
             if(isEvent(id)) {
                 float x = Float.parseFloat(t.getArgs()[3]);

@@ -31,7 +31,7 @@ public class Anketa extends CommandHelp {
      * Metoda slouzici k definovani a sestaveni prikazu a jeho parametru v ramci vlastniho prikazovaho systemu
      */
     public CommandData create() {
-        final CommandData anketa = new CommandData("anketa", prefix.getAnketaPrefix(true, false),"mutility.anketa.help", CommandExecutors.PLAYER, t -> {
+        final CommandData anketa = new CommandData("anketa", "Anketa","mutility.anketa.help", CommandExecutors.PLAYER, t -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
             helpList.getList(1).toPlayer((Player) t.getSender());
         });

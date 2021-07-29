@@ -69,7 +69,7 @@ public class Tpdata extends CommandHelp {
      * Metoda slouzici k definovani a sestaveni prikazu a jeho parametru v ramci vlastniho prikazovaho systemu
      */
     public final CommandData create() {
-        final CommandData tpData = new CommandData("tpdata", prefix.getTpDataPrefix(true, false), "mutility.tpdata.help", CommandExecutors.PLAYER, t -> {
+        final CommandData tpData = new CommandData("tpdata", "TP-Data", "mutility.tpdata.help", CommandExecutors.PLAYER, t -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
             helpList.getList(1).toPlayer((Player) t.getSender());
         });

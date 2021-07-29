@@ -18,7 +18,7 @@ public class Prefix {
         this.prefixName = prefixName;
     }
 
-    private String getPrefix(boolean hexColor, boolean json) {
+    public String getPrefix(boolean hexColor, boolean json) {
         if(hexColor) {
             if(json) {
                 return "{\"text\":\"[\",\"color\":\"" + colors.getSecondaryColorHEX() + "\"},{\"text\":\"" + getPrefixName() + "\",\"color\":\"" + colors.getPrimaryColorHEX() + "\"},{\"text\":\"]\",\"color\":\"" + colors.getSecondaryColorHEX() + "\"}";
