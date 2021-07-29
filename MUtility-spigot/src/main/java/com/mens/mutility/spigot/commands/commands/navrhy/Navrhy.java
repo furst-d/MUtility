@@ -80,10 +80,7 @@ public class Navrhy extends CommandHelp {
             helpList.getList(1).toPlayer((Player) t.getSender());
         });
         final CommandData helpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
-        final CommandData admin = new CommandData(ArgumentTypes.DEFAULT, "admin", TabCompleterTypes.DEFAULT, "mutility.navrhy.admin", CommandExecutors.PLAYER, t -> {
-            loadAdminList((Player) t.getSender(), 1);
-            adminList.getList(1).toPlayer((Player) t.getSender());
-        });
+        final CommandData admin = new CommandData(ArgumentTypes.DEFAULT, "admin", TabCompleterTypes.DEFAULT, "mutility.navrhy.admin", CommandExecutors.PLAYER, t -> loadAdminList((Player) t.getSender(), 1));
         final CommandData show = new CommandData(ArgumentTypes.DEFAULT, "zobraz", TabCompleterTypes.DEFAULT, "mutility.navrhy.show", CommandExecutors.PLAYER, t -> loadShowList((Player)t.getSender(), 1));
         final CommandData add = new CommandData(ArgumentTypes.DEFAULT, "pridej", TabCompleterTypes.DEFAULT, "mutility.navrhy.admin");
         final CommandData accept = new CommandData(ArgumentTypes.DEFAULT, "accept", TabCompleterTypes.NONE);

@@ -1,44 +1,46 @@
 package com.mens.mutility.bungeecord.chat;
 
+import com.mens.mutility.bungeecord.MUtilityBungeeCord;
 import net.md_5.bungee.api.ChatColor;
 
+import java.util.Objects;
+
 public class PluginColors {
-    String primaryColor = "#1eb0ff";
-    String secondaryColor = "#aaaaaa";
-    String thirdColor = "#55FFFF";
-    String disableColor = "#637C7E";
-    ChatColor consolePrimaryColor = ChatColor.DARK_AQUA;
-    ChatColor consoleSecondaryColor = ChatColor.GRAY;
+    private final MUtilityBungeeCord plugin;
+
+    public PluginColors() {
+        plugin = MUtilityBungeeCord.getInstance();
+    }
 
     public ChatColor getPrimaryColor() {
-        return ChatColor.of(primaryColor);
+        return ChatColor.of(Objects.requireNonNull(plugin.getConfiguration().getString("Colors.Chat.Primary")));
     }
 
     public ChatColor getSecondaryColor() {
-        return ChatColor.of(secondaryColor);
+        return ChatColor.of(Objects.requireNonNull(plugin.getConfiguration().getString("Colors.Chat.Secondary")));
     }
 
     public String getPrimaryColorHEX() {
-        return primaryColor;
+        return plugin.getConfiguration().getString("Colors.Chat.Primary");
     }
 
     public String getSecondaryColorHEX() {
-        return secondaryColor;
+        return plugin.getConfiguration().getString("Colors.Chat.Secondary");
     }
 
     public String getThirdColorHEX() {
-        return thirdColor;
+        return plugin.getConfiguration().getString("Colors.Chat.Third");
     }
 
     public String getDisableColorHEX() {
-        return disableColor;
+        return plugin.getConfiguration().getString("Colors.Chat.Disable");
     }
 
     public ChatColor getConsolePrimaryColor() {
-        return consolePrimaryColor;
+        return ChatColor.getByChar(Objects.requireNonNull(plugin.getConfiguration().getString("Colors.Console.Primary")).charAt(0));
     }
 
     public ChatColor getConsoleSecondaryColor() {
-        return consoleSecondaryColor;
+        return ChatColor.getByChar(Objects.requireNonNull(plugin.getConfiguration().getString("Colors.Console.Secondary")).charAt(0));
     }
 }

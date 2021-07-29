@@ -75,7 +75,22 @@ public class Prefix {
     }
 
     public String getZalohyPrefix(boolean hexColor, boolean json) {
-        setPrefixName("Zalohy");
+        setPrefixName("Zálohy");
+        return getPrefix(hexColor, json);
+    }
+
+    public String getTpDataPrefix(boolean hexColor, boolean json) {
+        setPrefixName("TP-Data");
+        return getPrefix(hexColor, json);
+    }
+
+    public String getRandomTeleportPrefix(boolean hexColor, boolean json) {
+        setPrefixName("Random teleport");
+        return getPrefix(hexColor, json);
+    }
+
+    public String getCustomPrefix(String prefix, boolean hexColor, boolean json) {
+        setPrefixName(prefix);
         return getPrefix(hexColor, json);
     }
 }

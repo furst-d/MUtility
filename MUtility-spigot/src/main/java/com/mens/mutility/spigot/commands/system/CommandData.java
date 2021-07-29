@@ -213,4 +213,8 @@ public class CommandData {
     public void setSyntax(String syntax) {
         this.syntax = syntax;
     }
+
+    public void sortSubcommands() {
+        next.sort((s1, s2) -> s1.getSubcommand().compareToIgnoreCase(s2.getSubcommand()));
+    }
 }

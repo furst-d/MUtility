@@ -9,6 +9,9 @@ import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.Collections;
+import java.util.Comparator;
+
 public abstract class CommandHelp {
     private final PluginColors colors;
 
@@ -19,6 +22,7 @@ public abstract class CommandHelp {
     public PageList getMainHelp(MUtilitySpigot plugin, CommandSender sender, PageList list) {
         list.clear();
         String command = list.getCommand().replace("/", "");
+        plugin.getCommands().sort((s1, s2) -> s1.getCommandName().compareToIgnoreCase(s2.getCommandName()));
         for (CommandData commandData : plugin.getCommands()) {
             if(commandData.getCommandName().equalsIgnoreCase(command)) {
                 list.setHead(new JsonBuilder("Příkazy:")
@@ -61,6 +65,7 @@ public abstract class CommandHelp {
         boolean isEmpty = true;
         String command = list.getCommand().replace("/", "");
         for (CommandData commandData : plugin.getCommands()) {
+            commandData.sortSubcommands();
             if(commandData.getCommandName().equalsIgnoreCase(command)) {
                 if(commandData.getAlias() == null) {
                     list.setHead(new JsonBuilder(commandData.getDescription())

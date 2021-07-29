@@ -25,6 +25,10 @@ commands:
     description: Navrhy
   tpdata:
     description: Teleportacni data
+  randomteleport:
+    description: Nahodny teleport
+  rt:
+    description: Nahodny teleport
 permissions:
   mutility.help:
     default: op
@@ -170,6 +174,12 @@ permissions:
   mutility.tpdata.rb.all:
     default: op
     description: Rollback vsech dat
+  mutility.rt.help:
+    default: op
+    description: Napoveda k nahodnemu teleportu
+  mutility.rt.use:
+    default: op
+    description: Pouziti prikazu k nahodnemu teleportu
 
 
 

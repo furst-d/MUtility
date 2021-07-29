@@ -88,6 +88,11 @@ public class Prefix {
         return getPrefix(hexColor, json);
     }
 
+    public String getRandomTeleportPrefix(boolean hexColor, boolean json) {
+        setPrefixName("Random teleport");
+        return getPrefix(hexColor, json);
+    }
+
     public String getCustomPrefix(String prefix, boolean hexColor, boolean json) {
         setPrefixName(prefix);
         return getPrefix(hexColor, json);
