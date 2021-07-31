@@ -6,8 +6,11 @@ import com.mens.mutility.bungeecord.chat.Prefix;
 import com.mens.mutility.bungeecord.chat.json.JsonBuilder;
 import com.mens.mutility.bungeecord.commands.anketa.Anketa;
 import com.mens.mutility.bungeecord.requests.PortalRequest;
+import com.mens.mutility.bungeecord.requests.RandomTeleportRequest;
 import com.mens.mutility.bungeecord.requests.TeleportDataRequest;
 import com.mens.mutility.bungeecord.requests.TeleportRequest;
+import com.mens.mutility.bungeecord.utils.randomteleport.RandomTeleport;
+import com.mens.mutility.bungeecord.utils.randomteleport.ServerData;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -60,23 +63,23 @@ public class MessageChannelListener implements Listener {
                         case "overworld": {
                             String targetStr = "";
                             boolean loadPlayerData = false;
-                            if ((plugin.getConfiguration().getInt("Servers.OverWorld 1.From.X") < x) && (x < plugin.getConfiguration().getInt("Servers.OverWorld 1.To.X"))) {
-                                if ((plugin.getConfiguration().getInt("Servers.OverWorld 1.From.Z") < z) && (z < plugin.getConfiguration().getInt("Servers.OverWorld 1.To.Z"))) {
+                            if (((plugin.getConfiguration().getInt("Servers.OverWorld 1.Center.X") - (plugin.getConfiguration().getInt("Servers.OverWorld 1.Radius"))) < x) && (x < (plugin.getConfiguration().getInt("Servers.OverWorld 1.Center.X") + (plugin.getConfiguration().getInt("Servers.OverWorld 1.Radius"))))) {
+                                if (((plugin.getConfiguration().getInt("Servers.OverWorld 1.Center.Z") - (plugin.getConfiguration().getInt("Servers.OverWorld 1.Radius"))) < z) && (z < (plugin.getConfiguration().getInt("Servers.OverWorld 1.Center.Z") + (plugin.getConfiguration().getInt("Servers.OverWorld 1.Radius"))))) {
                                     targetStr = plugin.getConfiguration().getString("Servers.OverWorld 1.Name");
                                     loadPlayerData = plugin.getConfiguration().getBoolean("Servers.OverWorld 1.LoadPlayerData");
                                 }
-                            } else if ((plugin.getConfiguration().getInt("Servers.OverWorld 2.From.X") < x) && (x < plugin.getConfiguration().getInt("Servers.OverWorld 2.To.X"))) {
-                                if ((plugin.getConfiguration().getInt("Servers.OverWorld 2.From.Z") < z) && (z < plugin.getConfiguration().getInt("Servers.OverWorld 2.To.Z"))) {
+                            } else if (((plugin.getConfiguration().getInt("Servers.OverWorld 2.Center.X") - (plugin.getConfiguration().getInt("Servers.OverWorld 2.Radius"))) < x) && (x < (plugin.getConfiguration().getInt("Servers.OverWorld 2.Center.X") + (plugin.getConfiguration().getInt("Servers.OverWorld 2.Radius"))))) {
+                                if (((plugin.getConfiguration().getInt("Servers.OverWorld 2.Center.Z") - (plugin.getConfiguration().getInt("Servers.OverWorld 2.Radius"))) < z) && (z < (plugin.getConfiguration().getInt("Servers.OverWorld 2.Center.Z") + (plugin.getConfiguration().getInt("Servers.OverWorld 2.Radius"))))) {
                                     targetStr = plugin.getConfiguration().getString("Servers.OverWorld 2.Name");
                                     loadPlayerData = plugin.getConfiguration().getBoolean("Servers.OverWorld 2.LoadPlayerData");
                                 }
-                            } else if ((plugin.getConfiguration().getInt("Servers.OverWorld 3.From.X") < x) && (x < plugin.getConfiguration().getInt("Servers.OverWorld 3.To.X"))) {
-                                if ((plugin.getConfiguration().getInt("Servers.OverWorld 3.From.Z") < z) && (z < plugin.getConfiguration().getInt("Servers.OverWorld 3.To.Z"))) {
+                            } else if (((plugin.getConfiguration().getInt("Servers.OverWorld 3.Center.X") - (plugin.getConfiguration().getInt("Servers.OverWorld 3.Radius"))) < x) && (x < (plugin.getConfiguration().getInt("Servers.OverWorld 3.Center.X") + (plugin.getConfiguration().getInt("Servers.OverWorld 3.Radius"))))) {
+                                if (((plugin.getConfiguration().getInt("Servers.OverWorld 3.Center.Z") - (plugin.getConfiguration().getInt("Servers.OverWorld 3.Radius"))) < z) && (z < (plugin.getConfiguration().getInt("Servers.OverWorld 3.Center.Z") + (plugin.getConfiguration().getInt("Servers.OverWorld 3.Radius"))))) {
                                     targetStr = plugin.getConfiguration().getString("Servers.OverWorld 3.Name");
                                     loadPlayerData = plugin.getConfiguration().getBoolean("Servers.OverWorld 3.LoadPlayerData");
                                 }
-                            } else if ((plugin.getConfiguration().getInt("Servers.OverWorld 4.From.X") < x) && (x < plugin.getConfiguration().getInt("Servers.OverWorld 4.To.X"))) {
-                                if ((plugin.getConfiguration().getInt("Servers.OverWorld 4.From.Z") < z) && (z < plugin.getConfiguration().getInt("Servers.OverWorld 4.To.Z"))) {
+                            } else if (((plugin.getConfiguration().getInt("Servers.OverWorld 4.Center.X") - (plugin.getConfiguration().getInt("Servers.OverWorld 4.Radius"))) < x) && (x < (plugin.getConfiguration().getInt("Servers.OverWorld 4.Center.X") + (plugin.getConfiguration().getInt("Servers.OverWorld 4.Radius"))))) {
+                                if (((plugin.getConfiguration().getInt("Servers.OverWorld 4.Center.Z") - (plugin.getConfiguration().getInt("Servers.OverWorld 4.Radius"))) < z) && (z < (plugin.getConfiguration().getInt("Servers.OverWorld 4.Center.Z") + (plugin.getConfiguration().getInt("Servers.OverWorld 4.Radius"))))) {
                                     targetStr = plugin.getConfiguration().getString("Servers.OverWorld 4.Name");
                                     loadPlayerData = plugin.getConfiguration().getBoolean("Servers.OverWorld 4.LoadPlayerData");
                                 }
@@ -220,6 +223,26 @@ public class MessageChannelListener implements Listener {
                             teleportRequest.startTimer(10000);
                         }
                     });
+                    break;
+                case "mens:random-teleport":
+                    RandomTeleport rt = new RandomTeleport();
+                    ServerData data = rt.findServer();
+                    RandomTeleportRequest randomTeleportRequest = new RandomTeleportRequest(
+                            ProxyServer.getInstance().getPlayer(stream.readUTF()),
+                            data.getCenterX(),
+                            data.getCenterZ(),
+                            data.getRadius(),
+                            data.getServer(),
+                            data.isLoadTeleportData());
+                    if(data.getServer().getPlayers().contains(randomTeleportRequest.getPlayer())) {
+                        messageChannel.sendRandomTeleportRequest(randomTeleportRequest.getServer(), randomTeleportRequest.getPlayer().getName(), randomTeleportRequest.getCenterX(), randomTeleportRequest.getCenterZ(), randomTeleportRequest.getRadius(), randomTeleportRequest.isLoadTeleportData());
+                    } else {
+                        player.connect(randomTeleportRequest.getServer(), (result, error) -> {
+                            if(result) {
+                                randomTeleportRequest.startTimer(10000);
+                            }
+                        });
+                    }
                     break;
             }
         } catch (IOException e) {

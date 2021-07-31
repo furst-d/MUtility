@@ -1,30 +1,31 @@
 package com.mens.mutility.spigot.commands.commands.randomteleport;
 
 import com.mens.mutility.spigot.MUtilitySpigot;
-import com.mens.mutility.spigot.chat.PluginColors;
 import com.mens.mutility.spigot.chat.Prefix;
 import com.mens.mutility.spigot.commands.system.CommandData;
 import com.mens.mutility.spigot.commands.system.CommandHelp;
 import com.mens.mutility.spigot.commands.system.enums.ArgumentTypes;
 import com.mens.mutility.spigot.commands.system.enums.CommandExecutors;
 import com.mens.mutility.spigot.commands.system.enums.TabCompleterTypes;
+import com.mens.mutility.spigot.inventory.TeleportDataManager;
 import com.mens.mutility.spigot.messages.MessageChannel;
 import com.mens.mutility.spigot.utils.PageList;
 import org.bukkit.entity.Player;
+
+import java.util.Objects;
 
 public class RandomTeleport extends CommandHelp {
     private final MUtilitySpigot plugin;
     private PageList helpList;
     private final MessageChannel messageChannel;
-    private final Prefix prefix;
-    private final PluginColors colors;
+    private final TeleportDataManager teleportDataManager;
 
     public RandomTeleport(MUtilitySpigot plugin) {
         this.plugin = plugin;
-        prefix = new Prefix();
+        Prefix prefix = new Prefix();
         helpList = new PageList(10, prefix.getRandomTeleportPrefix(true, true).replace("]", " - nápověda]"), "/randomteleport");
         messageChannel = new MessageChannel();
-        colors = new PluginColors();
+        teleportDataManager = new TeleportDataManager();
     }
 
     /**
@@ -32,7 +33,10 @@ public class RandomTeleport extends CommandHelp {
      */
     public final CommandData create() {
         final CommandData rt = new CommandData("randomteleport", "rt", "Random teleport", "mutility.rt.help", CommandExecutors.PLAYER, t -> {
-            //TODO
+            Player player = (Player) t.getSender();
+            teleportDataManager.saveData(player, player.getLocation().getX(), player.getLocation().getY(), player.getLocation().getZ(), Objects.requireNonNull(player.getLocation().getWorld()).getName());
+            teleportDataManager.deleteOldPlayerData(player, 30);
+            messageChannel.sendToBungeeCord(player, "mens:random-teleport", player.getName());
         });
 
         // 1. stupeň

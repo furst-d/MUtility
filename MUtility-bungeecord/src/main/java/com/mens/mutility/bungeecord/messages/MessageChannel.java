@@ -70,7 +70,7 @@ public class MessageChannel {
         plugin.getProxy().getServers().values().forEach((server) -> server.sendData("mens:mutility", stream.toByteArray()));
     }
 
-    public void sendTeleportRequest(ServerInfo server, String player, double x, double y, double z, String world) {
+    public void sendTeleportRequest(ServerInfo server, String player, double x, double y, double z, boolean loadTeleportData, String world) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         DataOutputStream output = new DataOutputStream(stream);
         try {
@@ -79,7 +79,24 @@ public class MessageChannel {
             output.writeDouble(x);
             output.writeDouble(y);
             output.writeDouble(z);
+            output.writeBoolean(loadTeleportData);
             output.writeUTF(world);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        server.sendData( "mens:mutility", stream.toByteArray());
+    }
+
+    public void sendRandomTeleportRequest(ServerInfo server, String player, double centerX, double centerZ, int radius, boolean loadTeleportData) {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        DataOutputStream output = new DataOutputStream(stream);
+        try {
+            output.writeUTF("mens:random-teleport-request");
+            output.writeUTF(player);
+            output.writeDouble(centerX);
+            output.writeDouble(centerZ);
+            output.writeInt(radius);
+            output.writeBoolean(loadTeleportData);
         } catch (IOException e) {
             e.printStackTrace();
         }

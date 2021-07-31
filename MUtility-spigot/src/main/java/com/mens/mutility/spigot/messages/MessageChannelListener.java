@@ -2,6 +2,8 @@ package com.mens.mutility.spigot.messages;
 
 import com.google.common.collect.Iterables;
 import com.mens.mutility.spigot.MUtilitySpigot;
+import com.mens.mutility.spigot.chat.PluginColors;
+import com.mens.mutility.spigot.chat.Prefix;
 import com.mens.mutility.spigot.inventory.TeleportDataManager;
 import com.mens.mutility.spigot.portal.PortalManager;
 import com.mens.mutility.spigot.utils.Checker;
@@ -24,6 +26,8 @@ public class MessageChannelListener implements PluginMessageListener {
 
     private final MUtilitySpigot plugin;
     private final TeleportDataManager teleportDataManager;
+    private final PluginColors colors;
+    private final Prefix prefix;
 
     /**
      * Konstruktor tridy
@@ -32,6 +36,8 @@ public class MessageChannelListener implements PluginMessageListener {
     public MessageChannelListener(MUtilitySpigot plugin) {
         this.plugin = plugin;
         teleportDataManager = new TeleportDataManager();
+        colors = new PluginColors();
+        prefix = new Prefix();
     }
 
     @Override
@@ -154,7 +160,20 @@ public class MessageChannelListener implements PluginMessageListener {
                 case "mens:teleport-data-request":
                     Player telDataPlayer = Bukkit.getPlayer(stream.readUTF());
                     assert telDataPlayer != null;
-                    teleportDataManager.applyData(telDataPlayer, teleportDataManager.loadNewestPlayerData(telDataPlayer), player.getLocation().getX(), player.getLocation().getY(), player.getLocation().getZ(), Objects.requireNonNull(player.getLocation().getWorld()).getName());
+                    teleportDataManager.applyData(telDataPlayer, teleportDataManager.loadNewestPlayerData(telDataPlayer), telDataPlayer.getLocation().getX(), telDataPlayer.getLocation().getY(), telDataPlayer.getLocation().getZ(), Objects.requireNonNull(telDataPlayer.getLocation().getWorld()).getName());
+                    break;
+                case "mens:random-teleport-request":
+                    Player telPlayerRt = Bukkit.getPlayer(stream.readUTF());
+                    assert telPlayerRt != null;
+                    double centerX = stream.readDouble();
+                    double centerZ = stream.readDouble();
+                    int radius = stream.readInt();
+                    boolean loadDataRt = stream.readBoolean();
+                    if(loadDataRt) {
+                        teleportDataManager.applyData(telPlayerRt, teleportDataManager.loadNewestPlayerData(telPlayerRt), telPlayerRt.getLocation().getX(), telPlayerRt.getLocation().getY(), telPlayerRt.getLocation().getZ(), Objects.requireNonNull(telPlayerRt.getLocation().getWorld()).getName());
+                    }
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "spreadplayers " + centerX + " " + centerZ + " 500 " + radius + " false " + telPlayerRt.getName());
+                    telPlayerRt.sendMessage(prefix.getRandomTeleportPrefix(true, false) + "Pokud jsi byl portnut do země nebo se ti lokace nelíbí, zadej " + colors.getPrimaryColor() + "/spawn");
                     break;
             }
 

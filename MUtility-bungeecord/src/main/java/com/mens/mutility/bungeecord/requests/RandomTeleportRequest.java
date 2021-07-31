@@ -8,12 +8,11 @@ import net.md_5.bungee.api.scheduler.ScheduledTask;
 
 import java.util.concurrent.TimeUnit;
 
-public class TeleportRequest {
+public class RandomTeleportRequest {
     private final ProxiedPlayer player;
-    private final double x;
-    private final double y;
-    private final double z;
-    private final String world;
+    private final double centerX;
+    private final double centerZ;
+    private final int radius;
     private final ServerInfo server;
     private final boolean loadTeleportData;
     private final MUtilityBungeeCord plugin;
@@ -21,12 +20,11 @@ public class TeleportRequest {
     private int seconds;
     private final MessageChannel messageChannel;
 
-    public TeleportRequest(ProxiedPlayer player, double x, double y, double z, String world, ServerInfo server, boolean loadTeleportData) {
+    public RandomTeleportRequest(ProxiedPlayer player, double centerX, double centerZ, int radius, ServerInfo server, boolean loadTeleportData) {
         this.player = player;
-        this.x = x;
-        this.y = y;
-        this.z = z;
-        this.world = world;
+        this.centerX = centerX;
+        this.centerZ = centerZ;
+        this.radius = radius;
         this.server = server;
         this.loadTeleportData = loadTeleportData;
         plugin = MUtilityBungeeCord.getInstance();
@@ -38,24 +36,20 @@ public class TeleportRequest {
         return player;
     }
 
+    public double getCenterX() {
+        return centerX;
+    }
+
+    public double getCenterZ() {
+        return centerZ;
+    }
+
+    public int getRadius() {
+        return radius;
+    }
+
     public ServerInfo getServer() {
         return server;
-    }
-
-    public double getX() {
-        return x;
-    }
-
-    public double getY() {
-        return y;
-    }
-
-    public double getZ() {
-        return z;
-    }
-
-    public String getWorld() {
-        return world;
     }
 
     public boolean isLoadTeleportData() {
@@ -67,9 +61,9 @@ public class TeleportRequest {
             if(seconds == timeInSec) {
                 st.cancel();
             }
-            for (ProxiedPlayer onlinePlayer : getServer().getPlayers()) {
-                if(onlinePlayer.getName().equals(getPlayer().getName())) {
-                    messageChannel.sendTeleportRequest(server, player.getName(), x, y, z, loadTeleportData, world);
+            for (ProxiedPlayer onlinePlayer : server.getPlayers()) {
+                if(onlinePlayer.getName().equals(player.getName())) {
+                    messageChannel.sendRandomTeleportRequest(server, player.getName(), centerX, centerZ, radius, loadTeleportData);
                     st.cancel();
                 }
             }

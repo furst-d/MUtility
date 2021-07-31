@@ -89,7 +89,7 @@ public class Prefix {
     }
 
     public String getRandomTeleportPrefix(boolean hexColor, boolean json) {
-        setPrefixName("Random teleport");
+        setPrefixName("Náhodný teleport");
         return getPrefix(hexColor, json);
     }
 

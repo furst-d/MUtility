@@ -11,12 +11,10 @@ Servers:
   OverWorld 1:
     Name: 'server1'
     LoadPlayerData: true
-    From:
-      X: -100000
-      Z: 0
-    To:
-      X: 0
-      Z: 100000
+    Center:
+      X: -50000
+      Z: 50000
+    Radius: 50000
     TP border 1:
       From:
         X: -100
@@ -35,12 +33,10 @@ Servers:
   OverWorld 2:
     Name: 'server2'
     LoadPlayerData: true
-    From:
-      X: -100000
-      Z: -100000
-    To:
-      X: 0
-      Z: 0
+    Center:
+      X: -50000
+      Z: -50000
+    Radius: 50000
     TP border 1:
       From:
         X: -100
@@ -59,12 +55,10 @@ Servers:
   OverWorld 3:
     Name: 'server3'
     LoadPlayerData: true
-    From:
-      X: 0
-      Z: 0
-    To:
-      X: 100000
-      Z: 100000
+    Center:
+      X: 50000
+      Z: 50000
+    Radius: 50000
     TP border 1:
       From:
         X: 0
@@ -83,12 +77,10 @@ Servers:
   OverWorld 4:
     Name: 'server4'
     LoadPlayerData: true
-    From:
-      X: 0
-      Z: -100000
-    To:
-      X: 100000
-      Z: 0
+    Center:
+      X: 50000
+      Z: -50000
+    Radius: 50000
     TP border 1:
       From:
         X: 0
