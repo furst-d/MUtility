@@ -64,7 +64,7 @@ public class PortalRequest {
                 st.cancel();
             }
             for (ProxiedPlayer onlinePlayer : getServer().getPlayers()) {
-                if(onlinePlayer.getName().equals(getPlayer().getName())) {
+                if(onlinePlayer.getName().equals(getPlayer().getName()) && player.isConnected()) {
                     String subChannel = "mens:send-to-";
                     switch (world) {
                         case "world":

@@ -62,7 +62,7 @@ public class RandomTeleportRequest {
                 st.cancel();
             }
             for (ProxiedPlayer onlinePlayer : server.getPlayers()) {
-                if(onlinePlayer.getName().equals(player.getName())) {
+                if(onlinePlayer.getName().equals(player.getName()) && player.isConnected()) {
                     messageChannel.sendRandomTeleportRequest(server, player.getName(), centerX, centerZ, radius, loadTeleportData);
                     st.cancel();
                 }

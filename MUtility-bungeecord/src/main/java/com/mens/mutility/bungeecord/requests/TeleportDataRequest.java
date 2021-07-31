@@ -38,7 +38,7 @@ public class TeleportDataRequest {
                 st.cancel();
             }
             for (ProxiedPlayer onlinePlayer : getServer().getPlayers()) {
-                if(onlinePlayer.getName().equals(getPlayer().getName())) {
+                if(onlinePlayer.getName().equals(getPlayer().getName()) && player.isConnected()) {
                     messageChannel.sendToServer(server, "mens:teleport-data-request", player.getName());
                     st.cancel();
                 }
