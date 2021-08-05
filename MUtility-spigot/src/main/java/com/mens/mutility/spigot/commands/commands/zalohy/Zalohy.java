@@ -16,6 +16,7 @@ import com.mens.mutility.spigot.utils.*;
 import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.WorldCreator;
 import org.bukkit.entity.Player;
 
 import java.sql.PreparedStatement;
@@ -1386,23 +1387,26 @@ public class Zalohy extends CommandHelp {
             if(!db.getCon().isValid(0)) {
                 db.openConnection();
             }
-            PreparedStatement stm = db.getCon().prepareStatement("SELECT building_name, posX, posY, posZ FROM "+ tables.getZalohyTable() + " WHERE id= ?");
+            PreparedStatement stm = db.getCon().prepareStatement("SELECT building_name, posX, posY, posZ, world FROM "+ tables.getZalohyTable() + " WHERE id= ?");
             stm.setInt(1, id);
             ResultSet rs =  stm.executeQuery();
             float x = 0;
             float y = 0;
             float z = 0;
+            String world = "";
             String name = "";
             if(rs.next()) {
                 name = rs.getString(1);
                 x = rs.getFloat(2);
                 y = rs.getFloat(3);
                 z = rs.getFloat(4);
+                world = rs.getString(5);
             }
             Location destination = player.getLocation();
             destination.setX(x);
             destination.setY(y);
             destination.setZ(z);
+            destination.setWorld(WorldCreator.name(world).createWorld());
             player.teleport(destination);
             player.sendMessage(prefix.getZalohyPrefix(true, false) + "Byl jsi teleportován k záloze " + colors.getPrimaryColor() + name + colors.getSecondaryColor() + "!");
         } catch (CommunicationsException e) {
