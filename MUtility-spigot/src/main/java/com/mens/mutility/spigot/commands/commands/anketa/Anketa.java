@@ -14,14 +14,13 @@ import org.bukkit.entity.Player;
 
 public class Anketa extends CommandHelp {
     private final MUtilitySpigot plugin;
-    private final Prefix prefix;
     private final MessageChannel channel;
     private final MyStringUtils strUt;
     private PageList helpList;
 
     public Anketa(MUtilitySpigot plugin) {
         this.plugin = plugin;
-        prefix = new Prefix();
+        Prefix prefix = new Prefix();
         channel = new MessageChannel();
         strUt = new MyStringUtils();
         helpList = new PageList(10, prefix.getAnketaPrefix(true, true).replace("]", " - nápověda]"), "/anketa");
@@ -33,13 +32,13 @@ public class Anketa extends CommandHelp {
     public CommandData create() {
         final CommandData anketa = new CommandData("anketa", "Anketa","mutility.anketa.help", CommandExecutors.PLAYER, t -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
-            helpList.getList(1).toPlayer((Player) t.getSender());
+            helpList.getList(1, null).toPlayer((Player) t.getSender());
         });
 
         // 1. stupeň
         final CommandData help = new CommandData(ArgumentTypes.DEFAULT, "help", TabCompleterTypes.DEFAULT, "mutility.anketa.help", CommandExecutors.PLAYER, (t) -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
-            helpList.getList(1).toPlayer((Player) t.getSender());
+            helpList.getList(1, null).toPlayer((Player) t.getSender());
         });
         final CommandData helpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         final CommandData vytvor = new CommandData(ArgumentTypes.DEFAULT, "vytvor", TabCompleterTypes.DEFAULT, "mutility.anketa.create");
@@ -52,7 +51,7 @@ public class Anketa extends CommandHelp {
         final CommandData helpHelpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         final CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.anketa.help", CommandExecutors.PLAYER, (t) -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
-            helpList.getList(Integer.parseInt(t.getArgs()[1])).toPlayer((Player) t.getSender());
+            helpList.getList(Integer.parseInt(t.getArgs()[1]), null).toPlayer((Player) t.getSender());
         });
         final CommandData nazevAnkety = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Název ankety >]" ,"mutility.anketa.create", CommandExecutors.PLAYER, t -> {
             String name = strUt.getStringFromArgs(t.getArgs(), 1);
@@ -69,7 +68,7 @@ public class Anketa extends CommandHelp {
         // 3. stupeň
         final CommandData helpHelpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.anketa.help", CommandExecutors.BOTH, (t) -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
-            helpList.getList(Integer.parseInt(t.getArgs()[2])).toPlayer((Player) t.getSender());
+            helpList.getList(Integer.parseInt(t.getArgs()[2]), null).toPlayer((Player) t.getSender());
         });
         final CommandData sec = new CommandData(ArgumentTypes.DEFAULT, "sec", TabCompleterTypes.DEFAULT,"mutility.anketa.run", CommandExecutors.PLAYER, t -> channel.sendSurveyStartSignalToBungeecord((Player) t.getSender(), Integer.parseInt(t.getArgs()[1]), "sec"));
         final CommandData min = new CommandData(ArgumentTypes.DEFAULT, "min", TabCompleterTypes.DEFAULT,"mutility.anketa.run", CommandExecutors.PLAYER, t -> channel.sendSurveyStartSignalToBungeecord((Player) t.getSender(), Integer.parseInt(t.getArgs()[1]), "min"));

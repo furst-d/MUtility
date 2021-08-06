@@ -4,7 +4,7 @@ import com.google.common.collect.Iterables;
 import com.mens.mutility.spigot.MUtilitySpigot;
 import com.mens.mutility.spigot.chat.PluginColors;
 import com.mens.mutility.spigot.chat.Prefix;
-import com.mens.mutility.spigot.inventory.TeleportDataManager;
+import com.mens.mutility.spigot.commands.commands.tpdata.Tpdata;
 import com.mens.mutility.spigot.portal.PortalManager;
 import com.mens.mutility.spigot.utils.Checker;
 import com.mens.mutility.spigot.utils.ServerInfo;
@@ -25,7 +25,7 @@ import java.util.Objects;
 public class MessageChannelListener implements PluginMessageListener {
 
     private final MUtilitySpigot plugin;
-    private final TeleportDataManager teleportDataManager;
+    private final Tpdata teleportDataManager;
     private final PluginColors colors;
     private final Prefix prefix;
 
@@ -35,7 +35,7 @@ public class MessageChannelListener implements PluginMessageListener {
      */
     public MessageChannelListener(MUtilitySpigot plugin) {
         this.plugin = plugin;
-        teleportDataManager = new TeleportDataManager();
+        teleportDataManager = new Tpdata(plugin);
         colors = new PluginColors();
         prefix = new Prefix();
     }

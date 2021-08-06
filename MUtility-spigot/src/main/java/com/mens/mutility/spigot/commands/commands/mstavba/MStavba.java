@@ -54,13 +54,13 @@ public class MStavba extends CommandHelp {
     public final CommandData create() {
         final CommandData stavba = new CommandData("mstavba", "M-Stavba", "mutility.stavba.help", CommandExecutors.PLAYER, t -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
-            helpList.getList(1).toPlayer((Player) t.getSender());
+            helpList.getList(1, null).toPlayer((Player) t.getSender());
         });
 
         // 1. stupeň
         final CommandData help = new CommandData(ArgumentTypes.DEFAULT, "help", TabCompleterTypes.DEFAULT, "mutility.stavba.help", CommandExecutors.PLAYER, (t) -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
-            helpList.getList(1).toPlayer((Player) t.getSender());
+            helpList.getList(1, null).toPlayer((Player) t.getSender());
         });
         final CommandData helpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         final CommandData zobraz = new CommandData(ArgumentTypes.DEFAULT, "zobraz", TabCompleterTypes.DEFAULT, "mutility.stavba.manage", CommandExecutors.PLAYER, (t) -> loadShowList((Player) t.getSender(), 1));
@@ -78,7 +78,7 @@ public class MStavba extends CommandHelp {
         final CommandData helpHelpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         final CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.stavba.help", CommandExecutors.PLAYER, (t) -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
-            helpList.getList(Integer.parseInt(t.getArgs()[1])).toPlayer((Player) t.getSender());
+            helpList.getList(Integer.parseInt(t.getArgs()[1]), null).toPlayer((Player) t.getSender());
         });
         final CommandData zobrazPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         final CommandData startDate = new CommandData(ArgumentTypes.DATE, TabCompleterTypes.DATE_NOW, "mutility.stavba.create");
@@ -88,7 +88,7 @@ public class MStavba extends CommandHelp {
         // 3. stupeň
         final CommandData helpHelpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.stavba.help", CommandExecutors.PLAYER, (t) -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
-            helpList.getList(Integer.parseInt(t.getArgs()[2])).toPlayer((Player) t.getSender());
+            helpList.getList(Integer.parseInt(t.getArgs()[2]), null).toPlayer((Player) t.getSender());
         });
         final CommandData zobrazPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.stavba.manage", CommandExecutors.PLAYER, (t) -> loadShowList((Player) t.getSender(), Integer.parseInt(t.getArgs()[2])));
         final CommandData endDate = new CommandData(ArgumentTypes.DATE, TabCompleterTypes.DATE_PLUS_7, "mutility.stavba.create");
@@ -260,7 +260,7 @@ public class MStavba extends CommandHelp {
                             .color(colors.getPrimaryColorHEX())
                             .getJsonSegments());
             }
-            showList.getList(page).toPlayer(player);
+            showList.getList(page, null).toPlayer(player);
         } catch (CommunicationsException e) {
             db.openConnection();
             loadShowList(player, page);

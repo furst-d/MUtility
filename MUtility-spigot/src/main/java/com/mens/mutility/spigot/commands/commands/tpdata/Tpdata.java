@@ -1,5 +1,6 @@
 package com.mens.mutility.spigot.commands.commands.tpdata;
 
+import com.google.gson.JsonObject;
 import com.mens.mutility.spigot.MUtilitySpigot;
 import com.mens.mutility.spigot.chat.Errors;
 import com.mens.mutility.spigot.chat.PluginColors;
@@ -16,33 +17,38 @@ import com.mens.mutility.spigot.gui.GUIManager;
 import com.mens.mutility.spigot.inventory.InventoryManager;
 import com.mens.mutility.spigot.inventory.InventoryPair;
 import com.mens.mutility.spigot.inventory.TeleportData;
-import com.mens.mutility.spigot.inventory.TeleportDataManager;
 import com.mens.mutility.spigot.utils.Confirmation;
+import com.mens.mutility.spigot.utils.MyStringUtils;
 import com.mens.mutility.spigot.utils.PageList;
 import com.mens.mutility.spigot.utils.PlayerManager;
 import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 import javafx.util.Pair;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class Tpdata extends CommandHelp {
     private final MUtilitySpigot plugin;
     private PageList helpList;
-    private final PageList showList;
-    private final PageList showNameList;
+    private static PageList showList;
     private final Prefix prefix;
     private final PluginColors colors;
+    private final MyStringUtils strUt;
     private final Database db;
     private final DatabaseTables tables;
     private final PlayerManager playerManager;
@@ -54,9 +60,8 @@ public class Tpdata extends CommandHelp {
         this.plugin = plugin;
         prefix = new Prefix();
         helpList = new PageList(10, prefix.getTpDataPrefix(true, true).replace("]", " - nápověda]"), "/tpdata");
-        showList = new PageList(10, prefix.getTpDataPrefix(true, true).replace("]", " - seznam]"), "/tpdata zobraz");
-        showNameList = new PageList(10, null, null);
         colors = new PluginColors();
+        strUt = new MyStringUtils();
         db = plugin.getDb();
         tables = new DatabaseTables();
         playerManager = new PlayerManager();
@@ -69,25 +74,30 @@ public class Tpdata extends CommandHelp {
      * Metoda slouzici k definovani a sestaveni prikazu a jeho parametru v ramci vlastniho prikazovaho systemu
      */
     public final CommandData create() {
+        showList = new PageList(10, prefix.getTpDataPrefix(true, true).replace("]", " - seznam]"), "/tpdata zobraz");
+        loadShowList();
         final CommandData tpData = new CommandData("tpdata", "TP-Data", "mutility.tpdata.help", CommandExecutors.PLAYER, t -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
-            helpList.getList(1).toPlayer((Player) t.getSender());
+            helpList.getList(1, null).toPlayer((Player) t.getSender());
         });
 
         // 1. stupeň
         final CommandData help = new CommandData(ArgumentTypes.DEFAULT, "help", TabCompleterTypes.DEFAULT, "mutility.tpdata.help", CommandExecutors.PLAYER, (t) -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
-            helpList.getList(1).toPlayer((Player) t.getSender());
+            helpList.getList(1, null).toPlayer((Player) t.getSender());
         });
         final CommandData helpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
-        final CommandData show = new CommandData(ArgumentTypes.DEFAULT, "zobraz", TabCompleterTypes.DEFAULT, "mutility.tpdata.show", CommandExecutors.PLAYER, t -> loadShowList((Player)t.getSender(), 1));
+        final CommandData show = new CommandData(ArgumentTypes.DEFAULT, "zobraz", TabCompleterTypes.DEFAULT, "mutility.tpdata.show", CommandExecutors.PLAYER, t -> {
+            updateShowList();
+            showList.getList(1, null).toPlayer((Player)t.getSender());
+        });
         final CommandData rb = new CommandData(ArgumentTypes.DEFAULT, "rb", TabCompleterTypes.NONE);
 
         // 2. stupeň
         final CommandData helpHelpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         final CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.tpdata.help", CommandExecutors.PLAYER, (t) -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
-            helpList.getList(Integer.parseInt(t.getArgs()[1])).toPlayer((Player) t.getSender());
+            helpList.getList(Integer.parseInt(t.getArgs()[1]), null).toPlayer((Player) t.getSender());
         });
         final CommandData showName = new CommandData(ArgumentTypes.STRING, TabCompleterTypes.ONLINE_PLAYERS, "mutility.tpdata.show", CommandExecutors.PLAYER, t -> loadShowNameList(t.getArgs()[1], (Player)t.getSender(), 1));
         final CommandData rbInv = new CommandData(ArgumentTypes.DEFAULT, "inv", TabCompleterTypes.NONE);
@@ -98,7 +108,7 @@ public class Tpdata extends CommandHelp {
         // 3. stupeň
         final CommandData helpHelpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.tpdata.help", CommandExecutors.PLAYER, (t) -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
-            helpList.getList(Integer.parseInt(t.getArgs()[2])).toPlayer((Player) t.getSender());
+            helpList.getList(Integer.parseInt(t.getArgs()[2]), null).toPlayer((Player) t.getSender());
         });
         final CommandData rbInvId = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.tpdata.rb.inv", CommandExecutors.PLAYER, (t) -> {
             int id = Integer.parseInt(t.getArgs()[2]);
@@ -192,7 +202,7 @@ public class Tpdata extends CommandHelp {
         final CommandData rbInvConfirm = new CommandData(ArgumentTypes.DEFAULT, "confirm", TabCompleterTypes.NONE);
         final CommandData rbAllConfirm = new CommandData(ArgumentTypes.DEFAULT, "confirm", TabCompleterTypes.NONE);
         final CommandData showNamePage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
-        final CommandData showPageId = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.tpdata.show", CommandExecutors.PLAYER, (t) -> loadShowList((Player)t.getSender(), Integer.parseInt(t.getArgs()[2])));
+        final CommandData showPageId = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.tpdata.show", CommandExecutors.PLAYER, (t) -> showList.getList(Integer.parseInt(t.getArgs()[2]), null).toPlayer((Player)t.getSender()));
 
         // 4. stupeň
         final CommandData rbInvConfirmId = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.tpdata.rb.inv", CommandExecutors.PLAYER, (t) -> {
@@ -205,8 +215,7 @@ public class Tpdata extends CommandHelp {
                         if(!invConfirmationList.get(i).isFinished()) {
                             valid = true;
                             invConfirmationList.get(i).setFinished(true);
-                            TeleportDataManager teleportDataManager = new TeleportDataManager();
-                            TeleportData data = teleportDataManager.loadDataById(id);
+                            TeleportData data = loadDataById(id);
                             Player player = Bukkit.getPlayer(playerManager.getUsername(data.getUserId()));
                             if(player != null) {
                                 InventoryManager inventoryManager = new InventoryManager();
@@ -238,11 +247,10 @@ public class Tpdata extends CommandHelp {
                         if(!allConfirmationList.get(i).isFinished()) {
                             valid = true;
                             allConfirmationList.get(i).setFinished(true);
-                            TeleportDataManager teleportDataManager = new TeleportDataManager();
-                            TeleportData data = teleportDataManager.loadDataById(id);
+                            TeleportData data = loadDataById(id);
                             Player player = Bukkit.getPlayer(playerManager.getUsername(data.getUserId()));
                             if(player != null) {
-                                teleportDataManager.applyData(player, data, player.getLocation().getX(), player.getLocation().getY(), player.getLocation().getZ(), Objects.requireNonNull(player.getLocation().getWorld()).getName());
+                                applyData(player, data, player.getLocation().getX(), player.getLocation().getY(), player.getLocation().getZ(), Objects.requireNonNull(player.getLocation().getWorld()).getName());
                                 t.getSender().sendMessage(prefix.getTpDataPrefix(true, false) + "Data byla rollbacknuta!");
                             } else {
                                 t.getSender().sendMessage(prefix.getTpDataPrefix(true, false) + "Hráč není online nebo se nachází na jiném serveru");
@@ -299,7 +307,7 @@ public class Tpdata extends CommandHelp {
         return tpData;
     }
 
-    private void loadShowList(Player player, int page) {
+    private void loadShowList() {
         try {
             if(!db.getCon().isValid(0)) {
                 db.openConnection();
@@ -307,11 +315,26 @@ public class Tpdata extends CommandHelp {
             showList.clear();
             PreparedStatement stm = db.getCon().prepareStatement("SELECT id, user_id, fromX, fromY, fromZ, fromWorld, fromServer, toX, toY, toZ, toWorld, toServer, gamemode, exp, level, hunger, health, fly, effects, created_date, completed FROM " + tables.getTeleportDataTable() + " ORDER BY created_date DESC");
             ResultSet rs =  stm.executeQuery();
-            loadFormattedList(rs, showList);
-            showList.getList(page).toPlayer(player);
+            loadFormattedList(rs, showList, false);
         } catch (CommunicationsException e) {
             db.openConnection();
-            loadShowList(player, page);
+            loadShowList();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
+
+    private void updateShowList() {
+        try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
+            PreparedStatement stm = db.getCon().prepareStatement("SELECT id, user_id, fromX, fromY, fromZ, fromWorld, fromServer, toX, toY, toZ, toWorld, toServer, gamemode, exp, level, hunger, health, fly, effects, created_date, completed FROM " + tables.getTeleportDataTable() + " WHERE created_date > SYSDATE() - INTERVAL 1 DAY ");
+            ResultSet rs =  stm.executeQuery();
+            loadFormattedList(rs, showList,true);
+        } catch (CommunicationsException e) {
+            db.openConnection();
+            loadShowList();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -322,14 +345,11 @@ public class Tpdata extends CommandHelp {
             if(!db.getCon().isValid(0)) {
                 db.openConnection();
             }
-            showNameList.clear();
+            PageList showNameList = new PageList(showList);
             showNameList.setCommand("/tpdata zobraz " + playerName);
             showNameList.setTitleJson(prefix.getTpDataPrefix(true, true).replace("]", " - " + playerName + "]"));
-            PreparedStatement stm = db.getCon().prepareStatement("SELECT id, user_id, fromX, fromY, fromZ, fromWorld, fromServer, toX, toY, toZ, toWorld, toServer, gamemode, exp, level, hunger, health, fly, effects, created_date, completed FROM " + tables.getTeleportDataTable() + " WHERE user_id = ? ORDER BY created_date DESC");
-            stm.setInt(1, playerManager.getUserId(playerName));
-            ResultSet rs =  stm.executeQuery();
-            loadFormattedList(rs, showNameList);
-            showNameList.getList(page).toPlayer(player);
+            showNameList.setRows(showList.getRows().stream().filter(x -> x.contains(playerName)).collect(Collectors.toList()));
+            showList.getList(page, showNameList).toPlayer(player);
         } catch (CommunicationsException e) {
             db.openConnection();
             loadShowNameList(playerName, player, page);
@@ -338,7 +358,7 @@ public class Tpdata extends CommandHelp {
         }
     }
 
-    private void loadFormattedList(ResultSet rs, PageList list) {
+    private void loadFormattedList(ResultSet rs, PageList list, boolean update) {
         try {
             if(!db.getCon().isValid(0)) {
                 db.openConnection();
@@ -576,11 +596,17 @@ public class Tpdata extends CommandHelp {
                             .color(ChatColor.GREEN)
                             .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, hoverInfo.toString(), true);
                 }
-                list.add(jb.getJsonSegments());
+                if(update) {
+                    if(!list.getRows().contains(jb.getJsonSegments())) {
+                        list.add(0, jb.getJsonSegments());
+                    }
+                } else {
+                    list.add(jb.getJsonSegments());
+                }
             }
         } catch (CommunicationsException e) {
             db.openConnection();
-            loadFormattedList(rs, list);
+            loadFormattedList(rs, list, update);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -628,5 +654,174 @@ public class Tpdata extends CommandHelp {
             e.printStackTrace();
         }
         return (count != 0);
+    }
+
+    public void saveData(Player player, double x, double y, double z, String world) {
+        try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
+            TeleportData data = new TeleportData(plugin, player, x, y, z, world);
+            PreparedStatement stm;
+            stm = db.getCon().prepareStatement("INSERT INTO " + tables.getTeleportDataTable() + " (user_id, inventory, fromX, fromY, fromZ, fromWorld, fromServer, gamemode, exp, level, hunger, health, fly, effects, created_date, completed) VALUE (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            stm.setInt(1, data.getUserId());
+            stm.setObject(2, data.getInventory());
+            stm.setDouble(3, data.getFromX());
+            stm.setDouble(4, data.getFromY());
+            stm.setDouble(5, data.getFromZ());
+            stm.setString(6, data.getFromWorld());
+            stm.setString(7, data.getFromServer());
+            stm.setString(8, data.getGamemode());
+            stm.setFloat(9, data.getExp());
+            stm.setInt(10, data.getLevel());
+            stm.setInt(11, data.getFoodLevel());
+            stm.setDouble(12, data.getHealth());
+            stm.setInt(13, data.isAllowFlight() ? 1 : 0);
+            stm.setObject(14, data.getEffectsToString());
+            stm.setString(15, strUt.getCurrentFormattedDate());
+            stm.setInt(16, 0);
+            stm.execute();
+        } catch (CommunicationsException e) {
+            db.openConnection();
+            saveData(player, x, y, z, world);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
+
+    public void updateData(int id, double x, double y, double z, String world, String server) {
+        try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
+            PreparedStatement stm;
+            stm = db.getCon().prepareStatement("UPDATE " + tables.getTeleportDataTable() + " SET toX = ?, toY = ?, toZ = ?, toWorld = ?, toServer = ?, completed = ? WHERE id = ?");
+            stm.setDouble(1, x);
+            stm.setDouble(2, y);
+            stm.setDouble(3, z);
+            stm.setString(4, world);
+            stm.setString(5, server);
+            stm.setInt(6, 1);
+            stm.setInt(7, id);
+            stm.execute();
+        } catch (CommunicationsException e) {
+            db.openConnection();
+            updateData(id, x, y, z, world, server);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
+
+    public void deleteOldPlayerData(Player player, int days) {
+        try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
+            PreparedStatement stm;
+            stm = db.getCon().prepareStatement("DELETE FROM " + tables.getTeleportDataTable() + " WHERE created_date < NOW() - INTERVAL ? DAY");
+            stm.setInt(1, days);
+            stm.execute();
+        } catch (CommunicationsException e) {
+            db.openConnection();
+            deleteOldPlayerData(player, days);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
+
+    public TeleportData loadNewestPlayerData(Player player) {
+        try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
+            PreparedStatement stm;
+            stm = db.getCon().prepareStatement("SELECT id, inventory, gamemode, exp, level, hunger, health, fly, effects FROM " + tables.getTeleportDataTable() + " WHERE user_id = ?  AND completed = 0 ORDER BY created_date DESC LIMIT 1");
+            stm.setInt(1, playerManager.getUserId(player.getName()));
+            ResultSet rs =  stm.executeQuery();
+            return getData(rs);
+        } catch (CommunicationsException e) {
+            db.openConnection();
+            loadNewestPlayerData(player);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return null;
+    }
+
+    public TeleportData loadDataById(int id) {
+        try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
+            PreparedStatement stm;
+            stm = db.getCon().prepareStatement("SELECT id, inventory, gamemode, exp, level, hunger, health, fly, effects FROM " + tables.getTeleportDataTable() + " WHERE id = ?");
+            stm.setInt(1, id);
+            ResultSet rs =  stm.executeQuery();
+            return getData(rs);
+        } catch (CommunicationsException e) {
+            db.openConnection();
+            loadDataById(id);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return null;
+    }
+
+    private TeleportData getData(ResultSet rs) {
+        try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
+            int health;
+            boolean fly;
+            Collection<PotionEffect> effects;
+            if(rs.next()) {
+                effects = new ArrayList<>();
+                TeleportData data = new TeleportData(plugin);
+                data.setId(rs.getInt(1));
+                data.setInventory(rs.getString(2));
+                data.setGamemode(rs.getString(3));
+                data.setExp(rs.getFloat(4));
+                data.setLevel(rs.getInt(5));
+                data.setFoodLevel(rs.getInt(6));
+                data.setHealth(rs.getDouble(7));
+                data.setAllowFlight(rs.getInt(8) == 1);
+                String effectsStr = rs.getString(9);
+                String[] effectsSplitted = effectsStr == null ? new String[]{} : effectsStr.split(";");
+                for(String effect : effectsSplitted) {
+                    String[] attributes = effect.split(":");
+                    effects.add(new PotionEffect(Objects.requireNonNull(PotionEffectType.getByName(attributes[0])),
+                            Integer.parseInt(attributes[1]),
+                            Integer.parseInt(attributes[2]),
+                            attributes[3].equalsIgnoreCase("true"),
+                            attributes[4].equalsIgnoreCase("true"),
+                            attributes[5].equalsIgnoreCase("true")));
+                }
+                data.setActivePotionEffects(effects);
+                return data;
+            }
+        } catch (CommunicationsException e) {
+            db.openConnection();
+            getData(rs);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return null;
+    }
+
+    public void applyData(Player player, TeleportData data, double x, double y, double z, String world) {
+        InventoryManager manager = new InventoryManager();
+        int inventoryId = data.getId();
+        JsonObject inventory = manager.toJsonObject(data.getInventory());
+        String server = plugin.getCurrentServer();
+        updateData(inventoryId, x, y, z, world, server);
+        manager.loadInventory(player, inventory);
+        player.setGameMode(GameMode.valueOf(data.getGamemode()));
+        player.setLevel(data.getLevel());
+        player.setExp(data.getExp());
+        player.setFoodLevel(data.getFoodLevel());
+        player.setHealth(data.getHealth());
+        player.setAllowFlight(data.isAllowFlight());
+        player.addPotionEffects(data.getActivePotionEffects());
     }
 }

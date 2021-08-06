@@ -2,12 +2,12 @@ package com.mens.mutility.spigot.commands.commands.randomteleport;
 
 import com.mens.mutility.spigot.MUtilitySpigot;
 import com.mens.mutility.spigot.chat.Prefix;
+import com.mens.mutility.spigot.commands.commands.tpdata.Tpdata;
 import com.mens.mutility.spigot.commands.system.CommandData;
 import com.mens.mutility.spigot.commands.system.CommandHelp;
 import com.mens.mutility.spigot.commands.system.enums.ArgumentTypes;
 import com.mens.mutility.spigot.commands.system.enums.CommandExecutors;
 import com.mens.mutility.spigot.commands.system.enums.TabCompleterTypes;
-import com.mens.mutility.spigot.inventory.TeleportDataManager;
 import com.mens.mutility.spigot.messages.MessageChannel;
 import com.mens.mutility.spigot.utils.PageList;
 import org.bukkit.entity.Player;
@@ -18,14 +18,14 @@ public class RandomTeleport extends CommandHelp {
     private final MUtilitySpigot plugin;
     private PageList helpList;
     private final MessageChannel messageChannel;
-    private final TeleportDataManager teleportDataManager;
+    private final Tpdata teleportDataManager;
 
     public RandomTeleport(MUtilitySpigot plugin) {
         this.plugin = plugin;
         Prefix prefix = new Prefix();
         helpList = new PageList(10, prefix.getRandomTeleportPrefix(true, true).replace("]", " - nápověda]"), "/randomteleport");
         messageChannel = new MessageChannel();
-        teleportDataManager = new TeleportDataManager();
+        teleportDataManager = new Tpdata(plugin);
     }
 
     /**
@@ -42,7 +42,7 @@ public class RandomTeleport extends CommandHelp {
         // 1. stupeň
         final CommandData help = new CommandData(ArgumentTypes.DEFAULT, "help", TabCompleterTypes.DEFAULT, "mutility.rt.help", CommandExecutors.PLAYER, (t) -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
-            helpList.getList(1).toPlayer((Player) t.getSender());
+            helpList.getList(1, null).toPlayer((Player) t.getSender());
         });
         final CommandData helpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
 
@@ -50,13 +50,13 @@ public class RandomTeleport extends CommandHelp {
         final CommandData helpHelpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         final CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.rt.help", CommandExecutors.PLAYER, (t) -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
-            helpList.getList(Integer.parseInt(t.getArgs()[1])).toPlayer((Player) t.getSender());
+            helpList.getList(Integer.parseInt(t.getArgs()[1]), null).toPlayer((Player) t.getSender());
         });
 
         // 3. stupeň
         final CommandData helpHelpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.rt.help", CommandExecutors.PLAYER, (t) -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
-            helpList.getList(Integer.parseInt(t.getArgs()[2])).toPlayer((Player) t.getSender());
+            helpList.getList(Integer.parseInt(t.getArgs()[2]), null).toPlayer((Player) t.getSender());
         });
 
         rt.setDescription("Náhodný teleport");

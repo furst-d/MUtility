@@ -18,7 +18,7 @@ public class PageList {
     private String titleJson;
     private String command;
     private final JsonBuilder jb;
-    private final List<String> rows;
+    private List<String> rows;
     private JsonBuilder head;
     private String emptyMessage;
     private int extraDistance;
@@ -29,6 +29,22 @@ public class PageList {
         this.limit = limit;
         this.titleJson = titleJson;
         this.command = command;
+        index = 0;
+        maxPage = 1;
+        rows = new ArrayList<>();
+        head = null;
+        jb = new JsonBuilder();
+        extraDistance = 0;
+        titleLength = 0;
+        topLineFinalLength = 0;
+        titleRaw = "";
+        emptyMessage = "   Seznam je prázdný! ";
+    }
+
+    public PageList(PageList clone) {
+        this.limit = clone.getLimit();
+        this.titleJson = clone.getTitleJson();
+        this.command = clone.getCommand();
         index = 0;
         maxPage = 1;
         rows = new ArrayList<>();
@@ -73,6 +89,10 @@ public class PageList {
         return rows;
     }
 
+    public void setRows(List<String> rows) {
+        this.rows = rows;
+    }
+
     public JsonBuilder getHead() {
         return head;
     }
@@ -85,6 +105,10 @@ public class PageList {
         this.head = head;
     }
 
+    public String getEmptyMessage() {
+        return emptyMessage;
+    }
+
     public void setEmptyMessage(String emptyMessage) {
         this.emptyMessage = emptyMessage;
     }
@@ -95,6 +119,15 @@ public class PageList {
 
     public void add(String row) {
         rows.add(row);
+        checkIndexes();
+    }
+
+    public void add(int i, String row) {
+        rows.add(i, row);
+        checkIndexes();
+    }
+
+    private void checkIndexes() {
         setIndex(getIndex() + 1);
         if(getIndex() == getLimit()) {
             setMaxPage(getMaxPage() + 1);
@@ -108,7 +141,15 @@ public class PageList {
         rows.clear();
     }
 
-    public JsonBuilder getList(int pageNumber) {
+    public JsonBuilder getList(int pageNumber, PageList filteredList) {
+        PageList temp = this;
+        if(filteredList != null) {
+            temp = filteredList;
+            temp.setMaxPage(filteredList.getRows().size() <= filteredList.getLimit()
+                    ? 1 : filteredList.getRows().size() % filteredList.getLimit() == 0
+                    ? filteredList.getRows().size() / filteredList.getLimit() : filteredList.getRows().size() / filteredList.getLimit() + 1);
+            temp.setIndex(filteredList.getRows().size() % filteredList.getLimit() == 0 ? 9 : filteredList.getRows().size() % filteredList.getLimit() - 1);
+        }
         jb.clear();
         PluginColors colors = new PluginColors();
         StringBuilder sb = new StringBuilder();
@@ -120,33 +161,33 @@ public class PageList {
         JsonBuilder nextPage = new JsonBuilder("[");
         JsonBuilder lastPageHover = new JsonBuilder();
         JsonBuilder lastPage = new JsonBuilder("[");
-        jb.addJsonSegment(getTopLine(colors.getSecondaryColorHEX()));
+        jb.addJsonSegment(temp.getTopLine(colors.getSecondaryColorHEX()));
 
         // Head
-        if(!getRows().isEmpty() && getHead() != null) {
+        if(!temp.getRows().isEmpty() && temp.getHead() != null) {
             sb.append(",{\"text\":\"\n \"},");
-            sb.append(getHead().getJsonSegments());
+            sb.append(temp.getHead().getJsonSegments());
             jb.addJsonSegment(sb.toString());
         }
 
         boolean error = false;
-        if(pageNumber > maxPage) {
-            pageNumber = maxPage;
+        if(pageNumber > temp.getMaxPage()) {
+            pageNumber = temp.getMaxPage();
         }
         // Body
         sb = new StringBuilder();
-        for (int i = pageNumber * limit - limit; i < pageNumber * limit; i++) {
+        for (int i = pageNumber * temp.getLimit() - temp.getLimit(); i < pageNumber * temp.getLimit(); i++) {
             try {
-                if(getRows().get(i) != null) {
+                if(temp.getRows().get(i) != null) {
                     sb.append(",{\"text\":\"\n \"},");
                 }
-                sb.append(getRows().get(i));
+                sb.append(temp.getRows().get(i));
             } catch (IndexOutOfBoundsException e) {
-                if(i == pageNumber * limit - limit) {
+                if(i == pageNumber * temp.getLimit() - temp.getLimit()) {
                     error = true;
-                    if(pageNumber == 1 && getRows().isEmpty()) {
+                    if(pageNumber == 1 && temp.getRows().isEmpty()) {
                         sb.append(",{\"text\":\"\n\n\"},");
-                        sb.append("{\"text\":\"").append(emptyMessage).append("\n\",");
+                        sb.append("{\"text\":\"").append(temp.getEmptyMessage()).append("\n\",");
                         sb.append("\"color\":\"");
                         sb.append(colors.getPrimaryColorHEX());
                         sb.append("\"}");
@@ -169,15 +210,15 @@ public class PageList {
                 firstPage
                         .color(colors.getSecondaryColorHEX())
                         .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, firstPageHover.toString(), true)
-                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, getCommand() + " page 1")
+                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, temp.getCommand() + " page 1")
                         .text("◀◀")
                         .color(colors.getPrimaryColorHEX())
                         .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, firstPageHover.toString(), true)
-                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, getCommand() + " page 1")
+                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, temp.getCommand() + " page 1")
                         .text("]")
                         .color(colors.getSecondaryColorHEX())
                         .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, firstPageHover.toString(), true)
-                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, getCommand() + " page 1");
+                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, temp.getCommand() + " page 1");
 
                 previousPageHover
                         .text(">> ")
@@ -189,15 +230,15 @@ public class PageList {
                 previousPage
                         .color(colors.getSecondaryColorHEX())
                         .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, previousPageHover.toString(), true)
-                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, getCommand() + " page " + (pageNumber - 1))
+                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, temp.getCommand() + " page " + (pageNumber - 1))
                         .text("◀")
                         .color(colors.getPrimaryColorHEX())
                         .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, previousPageHover.toString(), true)
-                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, getCommand() + " page " + (pageNumber - 1))
+                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, temp.getCommand() + " page " + (pageNumber - 1))
                         .text("]")
                         .color(colors.getSecondaryColorHEX())
                         .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, previousPageHover.toString(), true)
-                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, getCommand() + " page " + (pageNumber - 1));
+                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, temp.getCommand() + " page " + (pageNumber - 1));
             } else {
                 firstPageHover
                         .text(">> ")
@@ -233,7 +274,7 @@ public class PageList {
                         .color(colors.getSecondaryColorHEX())
                         .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, previousPageHover.toString(), true);
             }
-            if(pageNumber != getMaxPage()) {
+            if(pageNumber != temp.getMaxPage()) {
                 nextPageHover
                         .text(">> ")
                         .color(colors.getSecondaryColorHEX())
@@ -244,15 +285,15 @@ public class PageList {
                 nextPage
                         .color(colors.getSecondaryColorHEX())
                         .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, nextPageHover.toString(), true)
-                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, getCommand() + " page " + (pageNumber + 1))
+                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, temp.getCommand() + " page " + (pageNumber + 1))
                         .text("▶")
                         .color(colors.getPrimaryColorHEX())
                         .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, nextPageHover.toString(), true)
-                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, getCommand() + " page " + (pageNumber + 1))
+                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, temp.getCommand() + " page " + (pageNumber + 1))
                         .text("]")
                         .color(colors.getSecondaryColorHEX())
                         .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, nextPageHover.toString(), true)
-                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, getCommand() + " page " + (pageNumber + 1));
+                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, temp.getCommand() + " page " + (pageNumber + 1));
 
                 lastPageHover
                         .text(">> ")
@@ -264,15 +305,15 @@ public class PageList {
                 lastPage
                         .color(colors.getSecondaryColorHEX())
                         .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, lastPageHover.toString(), true)
-                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, getCommand() + " page " + getMaxPage())
+                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, temp.getCommand() + " page " + temp.getMaxPage())
                         .text("▶▶")
                         .color(colors.getPrimaryColorHEX())
                         .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, lastPageHover.toString(), true)
-                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, getCommand() + " page " + getMaxPage())
+                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, temp.getCommand() + " page " + temp.getMaxPage())
                         .text("]")
                         .color(colors.getSecondaryColorHEX())
                         .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, lastPageHover.toString(), true)
-                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, getCommand() + " page " + getMaxPage());
+                        .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, temp.getCommand() + " page " + temp.getMaxPage());
             } else {
                 nextPageHover
                         .text(">> ")
@@ -310,10 +351,10 @@ public class PageList {
             }
         }
         jb.addJsonSegment(sb.toString());
-        if(getMaxPage() > 1) {
-            jb.addJsonSegment(getBottomLine(colors.getSecondaryColorHEX(), true, pageNumber, firstPage, previousPage, nextPage, lastPage));
+        if(temp.getMaxPage() > 1) {
+            jb.addJsonSegment(temp.getBottomLine(colors.getSecondaryColorHEX(), true, pageNumber, firstPage, previousPage, nextPage, lastPage));
         } else {
-            jb.addJsonSegment(getBottomLine(colors.getSecondaryColorHEX(), false, pageNumber, firstPage, previousPage, nextPage, lastPage));
+            jb.addJsonSegment(temp.getBottomLine(colors.getSecondaryColorHEX(), false, pageNumber, firstPage, previousPage, nextPage, lastPage));
         }
         return jb;
     }

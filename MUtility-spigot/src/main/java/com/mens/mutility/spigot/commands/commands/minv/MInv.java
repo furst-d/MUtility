@@ -66,13 +66,13 @@ public class MInv extends CommandHelp {
     public final CommandData create() {
         final CommandData minv = new CommandData("minv", "M-Inventory","mutility.inventory.help", CommandExecutors.PLAYER, t -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
-            helpList.getList(1).toPlayer((Player) t.getSender());
+            helpList.getList(1, null).toPlayer((Player) t.getSender());
         });
 
         // 1. stupeň
         final CommandData help = new CommandData(ArgumentTypes.DEFAULT, "help", TabCompleterTypes.DEFAULT, "mutility.inventory.help", CommandExecutors.PLAYER, (t) -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
-            helpList.getList(1).toPlayer((Player) t.getSender());
+            helpList.getList(1, null).toPlayer((Player) t.getSender());
         });
         final CommandData helpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         final CommandData uloz = new CommandData(ArgumentTypes.DEFAULT, "uloz", TabCompleterTypes.DEFAULT, "mutility.inventory.save", CommandExecutors.PLAYER, t -> {
@@ -90,7 +90,7 @@ public class MInv extends CommandHelp {
         final CommandData helpHelpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         final CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.inventory.help", CommandExecutors.PLAYER, (t) -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
-            helpList.getList(Integer.parseInt(t.getArgs()[1])).toPlayer((Player) t.getSender());
+            helpList.getList(Integer.parseInt(t.getArgs()[1]), null).toPlayer((Player) t.getSender());
         });
         final CommandData nazev = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Název inventáře >]", "mutility.inventory.save", CommandExecutors.PLAYER, t ->  {
             String inventoryName = strUt.getStringFromArgs(t.getArgs(), 1);
@@ -186,7 +186,7 @@ public class MInv extends CommandHelp {
         // 3. stupeň
         final CommandData helpHelpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.inventory.help", CommandExecutors.PLAYER, (t) -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
-            helpList.getList(Integer.parseInt(t.getArgs()[2])).toPlayer((Player) t.getSender());
+            helpList.getList(Integer.parseInt(t.getArgs()[2]), null).toPlayer((Player) t.getSender());
         });
         final CommandData loadPageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.inventory.load", CommandExecutors.PLAYER, t -> loadLoadData((Player) t.getSender(), Integer.parseInt(t.getArgs()[2])));
         final CommandData setName = new CommandData(ArgumentTypes.DEFAULT, "setname", TabCompleterTypes.NONE);
@@ -359,7 +359,7 @@ public class MInv extends CommandHelp {
                             .getJsonSegments());
                 }
             }
-            loadList.getList(page).toPlayer(player);
+            loadList.getList(page, null).toPlayer(player);
         } catch (CommunicationsException e) {
             db.openConnection();
             loadLoadData(player, page);
@@ -491,7 +491,7 @@ public class MInv extends CommandHelp {
                             .getJsonSegments());
                 }
             }
-            manageList.getList(page).toPlayer(player);
+            manageList.getList(page, null).toPlayer(player);
         } catch (CommunicationsException e) {
             db.openConnection();
             loadManageListData(player, page);

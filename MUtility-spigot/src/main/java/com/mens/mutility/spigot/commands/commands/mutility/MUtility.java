@@ -30,7 +30,7 @@ public class MUtility extends CommandHelp {
     public final CommandData create() {
         final CommandData mutility = new CommandData("mutility", "M-Utility","mutility.help", CommandExecutors.PLAYER, t -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
-            helpList.getList(1).toPlayer((Player) t.getSender());
+            helpList.getList(1, null).toPlayer((Player) t.getSender());
         });
 
         // 1. stupeň
@@ -48,20 +48,20 @@ public class MUtility extends CommandHelp {
         });
         final CommandData pluginHelp = new CommandData(ArgumentTypes.DEFAULT, "help", TabCompleterTypes.DEFAULT, "mutility.help", CommandExecutors.PLAYER, (t) -> {
             pluginHelpList = getMainHelp(plugin, t.getSender(), pluginHelpList);
-            pluginHelpList.getList(1).toPlayer((Player) t.getSender());
+            pluginHelpList.getList(1, null).toPlayer((Player) t.getSender());
         });
 
         // 2. stupeň
         final CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.help", CommandExecutors.PLAYER, (t) -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
-            helpList.getList(Integer.parseInt(t.getArgs()[1])).toPlayer((Player) t.getSender());
+            helpList.getList(Integer.parseInt(t.getArgs()[1]), null).toPlayer((Player) t.getSender());
         });
         final CommandData pluginHelpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
 
         // 3. stupeň
         final CommandData pluginHelpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.help", CommandExecutors.PLAYER, (t) -> {
             pluginHelpList = getMainHelp(plugin, t.getSender(), pluginHelpList);
-            pluginHelpList.getList(Integer.parseInt(t.getArgs()[2])).toPlayer((Player) t.getSender());
+            pluginHelpList.getList(Integer.parseInt(t.getArgs()[2]), null).toPlayer((Player) t.getSender());
         });
 
         mutility.setDescription("Správa pluginu");

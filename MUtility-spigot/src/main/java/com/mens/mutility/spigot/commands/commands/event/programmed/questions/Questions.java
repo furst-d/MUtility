@@ -124,7 +124,7 @@ public class Questions {
                     }
                     questPageList.clear();
                     questPageList.add(text.getJsonSegments());
-                    questPageList.getList(1).toPlayer(player);
+                    questPageList.getList(1, null).toPlayer(player);
                 }
             }
         });
@@ -335,7 +335,7 @@ public class Questions {
             Bukkit.getOnlinePlayers().stream()
                     .filter(player -> checker.chechEventLocation(player.getLocation(), "Otazky"))
                     .filter(player -> player.hasPermission("mutility.eventy.otazky.vote"))
-                    .forEach(player -> winnerPL.getList(1).toPlayer(player));
+                    .forEach(player -> winnerPL.getList(1, null).toPlayer(player));
             resetEvent();
         }
     }

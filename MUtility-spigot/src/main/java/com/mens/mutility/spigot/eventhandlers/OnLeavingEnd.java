@@ -1,7 +1,7 @@
 package com.mens.mutility.spigot.eventhandlers;
 
 import com.mens.mutility.spigot.MUtilitySpigot;
-import com.mens.mutility.spigot.inventory.TeleportDataManager;
+import com.mens.mutility.spigot.commands.commands.tpdata.Tpdata;
 import com.mens.mutility.spigot.messages.MessageChannel;
 
 import com.mens.mutility.spigot.utils.Timer;
@@ -21,14 +21,14 @@ import java.util.Objects;
 public class OnLeavingEnd implements Listener {
     private final MUtilitySpigot plugin;
     private final MessageChannel messageChannel;
-    private final TeleportDataManager teleportDataManager;
+    private final Tpdata teleportDataManager;
     private final List<Player> conectingPlayers;
     private final LinkedList<Player> players;
 
     public OnLeavingEnd(MUtilitySpigot plugin) {
         this.plugin = plugin;
         messageChannel = new MessageChannel();
-        teleportDataManager = new TeleportDataManager();
+        teleportDataManager = new Tpdata(plugin);
         conectingPlayers = new ArrayList<>();
         players = new LinkedList<>();
     }

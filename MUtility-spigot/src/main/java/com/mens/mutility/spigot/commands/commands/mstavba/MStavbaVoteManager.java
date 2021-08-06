@@ -92,7 +92,7 @@ public class MStavbaVoteManager {
                         .text(".")
                         .color(colors.getSecondaryColorHEX())
                         .getJsonSegments());
-                list.getList(1).toPlayer(player);
+                list.getList(1, null).toPlayer(player);
                 Timer timer = new Timer();
                 timer.setOnFinish((sec, tt) -> deletePlayerKey(player));
                 timer.startTimer(300);

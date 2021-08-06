@@ -76,13 +76,13 @@ public class Navrhy extends CommandHelp {
     public final CommandData create() {
         final CommandData navrhy = new CommandData("navrhy", "Návrhy","mutility.navrhy.help", CommandExecutors.PLAYER, t -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
-            helpList.getList(1).toPlayer((Player) t.getSender());
+            helpList.getList(1, null).toPlayer((Player) t.getSender());
         });
 
         // 1. stupeň
         final CommandData help = new CommandData(ArgumentTypes.DEFAULT, "help", TabCompleterTypes.DEFAULT, "mutility.navrhy.help", CommandExecutors.PLAYER, (t) -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
-            helpList.getList(1).toPlayer((Player) t.getSender());
+            helpList.getList(1, null).toPlayer((Player) t.getSender());
         });
         final CommandData helpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         final CommandData admin = new CommandData(ArgumentTypes.DEFAULT, "admin", TabCompleterTypes.DEFAULT, "mutility.navrhy.admin", CommandExecutors.PLAYER, t -> loadAdminList((Player) t.getSender(), 1));
@@ -98,7 +98,7 @@ public class Navrhy extends CommandHelp {
         final CommandData helpHelpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         final CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.navrhy.help", CommandExecutors.PLAYER, (t) -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
-            helpList.getList(Integer.parseInt(t.getArgs()[1])).toPlayer((Player) t.getSender());
+            helpList.getList(Integer.parseInt(t.getArgs()[1]), null).toPlayer((Player) t.getSender());
         });
         final CommandData addText = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Tvůj návrh >]", "mutility.navrhy.add", CommandExecutors.PLAYER, t -> {
             String content = strUt.getStringFromArgs(t.getArgs(), 1);
@@ -171,7 +171,7 @@ public class Navrhy extends CommandHelp {
         // 3. stupeň
         final CommandData helpHelpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.navrhy.help", CommandExecutors.PLAYER, (t) -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
-            helpList.getList(Integer.parseInt(t.getArgs()[2])).toPlayer((Player) t.getSender());
+            helpList.getList(Integer.parseInt(t.getArgs()[2]), null).toPlayer((Player) t.getSender());
         });
         final CommandData rejectReason = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Důvod zamítnutí >]", "mutility.navrhy.reject", CommandExecutors.PLAYER, t -> {
             int id = Integer.parseInt(t.getArgs()[1]);
@@ -421,7 +421,7 @@ public class Navrhy extends CommandHelp {
                 jb.hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, hoverInfo.toString(), true);
                 adminList.add(jb.getJsonSegments());
             }
-            adminList.getList(page).toPlayer(player);
+            adminList.getList(page, null).toPlayer(player);
         } catch (CommunicationsException e) {
             db.openConnection();
             loadAdminList(player, page);
@@ -499,7 +499,7 @@ public class Navrhy extends CommandHelp {
                 jb.hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, hoverInfo.toString(), true);
                 adminNameList.add(jb.getJsonSegments());
             }
-            adminNameList.getList(page).toPlayer(player);
+            adminNameList.getList(page, null).toPlayer(player);
         } catch (CommunicationsException e) {
             db.openConnection();
             loadAdminNameList(playerName, player, page);
@@ -643,7 +643,7 @@ public class Navrhy extends CommandHelp {
                 jb.hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, hoverInfo.toString(), true);
                 showList.add(jb.getJsonSegments());
             }
-            showList.getList(page).toPlayer(player);
+            showList.getList(page, null).toPlayer(player);
         } catch (CommunicationsException e) {
             db.openConnection();
             loadShowList(player, page);

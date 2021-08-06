@@ -69,13 +69,13 @@ public class Zalohy extends CommandHelp {
     public final CommandData create() {
         final CommandData zalohy = new CommandData("zalohy", "Zálohy","mutility.zalohy.help", CommandExecutors.PLAYER, t -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
-            helpList.getList(1).toPlayer((Player) t.getSender());
+            helpList.getList(1, null).toPlayer((Player) t.getSender());
         });
 
         // 1. stupeň
         final CommandData help = new CommandData(ArgumentTypes.DEFAULT, "help", TabCompleterTypes.DEFAULT, "mutility.zalohy.help", CommandExecutors.PLAYER, (t) -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
-            helpList.getList(1).toPlayer((Player) t.getSender());
+            helpList.getList(1, null).toPlayer((Player) t.getSender());
         });
         final CommandData helpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         final CommandData pridej = new CommandData(ArgumentTypes.DEFAULT, "pridej", TabCompleterTypes.DEFAULT, "mutility.zalohy.create");
@@ -92,7 +92,7 @@ public class Zalohy extends CommandHelp {
         final CommandData helpHelpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         final CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.zalohy.help", CommandExecutors.PLAYER, (t) -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
-            helpList.getList(Integer.parseInt(t.getArgs()[1])).toPlayer((Player) t.getSender());
+            helpList.getList(Integer.parseInt(t.getArgs()[1]), null).toPlayer((Player) t.getSender());
         });
         final CommandData pridejX = new CommandData(ArgumentTypes.FLOAT, TabCompleterTypes.POSX, "mutility.zalohy.create");
         final CommandData zobrazPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
@@ -175,7 +175,7 @@ public class Zalohy extends CommandHelp {
         // 3. stupeň
         final CommandData helpHelpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.zalohy.help", CommandExecutors.PLAYER, (t) -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
-            helpList.getList(Integer.parseInt(t.getArgs()[2])).toPlayer((Player) t.getSender());
+            helpList.getList(Integer.parseInt(t.getArgs()[2]), null).toPlayer((Player) t.getSender());
         });
         final CommandData pridejY = new CommandData(ArgumentTypes.FLOAT, TabCompleterTypes.POSY, "mutility.zalohy.create");
         final CommandData zobrazPageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.manage", CommandExecutors.PLAYER, t-> loadShowList((Player)t.getSender(), Integer.parseInt(t.getArgs()[2])));
@@ -614,7 +614,7 @@ public class Zalohy extends CommandHelp {
                         .clickEvent(JsonBuilder.ClickAction.SUGGEST_COMMAND, "/zalohy manage " + recordId + " setNote ")
                         .getJsonSegments());
             }
-            manageList.getList(1).toPlayer(player);
+            manageList.getList(1, null).toPlayer(player);
         } catch (CommunicationsException e) {
             db.openConnection();
             loadManageList(player, recordId);
@@ -764,7 +764,7 @@ public class Zalohy extends CommandHelp {
                 jb.hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, hoverInfo.toString(), true);
                 showList.add(jb.getJsonSegments());
             }
-            showList.getList(page).toPlayer(player);
+            showList.getList(page, null).toPlayer(player);
         } catch (CommunicationsException e) {
             db.openConnection();
             loadShowList(player, page);
@@ -870,7 +870,7 @@ public class Zalohy extends CommandHelp {
                         .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, "/zalohy admin " + username);
                 adminList.add(jb.getJsonSegments());
             }
-            adminList.getList(page).toPlayer(player);
+            adminList.getList(page, null).toPlayer(player);
         } catch (CommunicationsException e) {
             db.openConnection();
             loadAdminList(player, page);
@@ -1023,7 +1023,7 @@ public class Zalohy extends CommandHelp {
                 jb.hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, hoverInfo.toString(), true);
                 adminUserList.add(jb.getJsonSegments());
             }
-            adminUserList.getList(page).toPlayer(player);
+            adminUserList.getList(page, null).toPlayer(player);
         } catch (CommunicationsException e) {
             db.openConnection();
             loadAdminUserList(playerName, player, page);

@@ -73,13 +73,13 @@ public class Event extends CommandHelp {
     public final CommandData create() {
         final CommandData event = new CommandData("event", "Event", "mutility.eventy.help", CommandExecutors.PLAYER, t -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
-            helpList.getList(1).toPlayer((Player) t.getSender());
+            helpList.getList(1, null).toPlayer((Player) t.getSender());
         });
 
         // 1. stupeň
         final CommandData help = new CommandData(ArgumentTypes.DEFAULT, "help", TabCompleterTypes.DEFAULT, "mutility.eventy.help", CommandExecutors.PLAYER, (t) -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
-            helpList.getList(1).toPlayer((Player) t.getSender());
+            helpList.getList(1, null).toPlayer((Player) t.getSender());
         });
         final CommandData helpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         final CommandData spust = new CommandData(ArgumentTypes.DEFAULT, "spust", TabCompleterTypes.DEFAULT, "mutility.eventy.otazky.create");
@@ -94,7 +94,7 @@ public class Event extends CommandHelp {
         final CommandData helpHelpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         final CommandData helpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.eventy.help", CommandExecutors.PLAYER, (t) -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
-            helpList.getList(Integer.parseInt(t.getArgs()[1])).toPlayer((Player) t.getSender());
+            helpList.getList(Integer.parseInt(t.getArgs()[1]), null).toPlayer((Player) t.getSender());
         });
         final CommandData otazky = new CommandData(ArgumentTypes.DEFAULT, "otazky", TabCompleterTypes.DEFAULT, "mutility.eventy.otazky.create");
         final CommandData hledacka = new CommandData(ArgumentTypes.DEFAULT, "hledacka", TabCompleterTypes.DEFAULT, "mutility.eventy.hledacka.create");
@@ -108,7 +108,7 @@ public class Event extends CommandHelp {
         final CommandData messageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.eventy.message", CommandExecutors.PLAYER, t -> {
             int id = Integer.parseInt(t.getArgs()[1]);
             if(isEvent(id)) {
-                messageChannel.broadcastJson(getEventMessageData(id).getList(1).toString());
+                messageChannel.broadcastJson(getEventMessageData(id).getList(1, null).toString());
             } else {
                 t.getSender().sendMessage(prefix.getEventPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1],true, false));
             }
@@ -116,7 +116,7 @@ public class Event extends CommandHelp {
         final CommandData fakeMessageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.eventy.message", CommandExecutors.PLAYER, t -> {
             int id = Integer.parseInt(t.getArgs()[1]);
             if(isEvent(id)) {
-                getEventMessageData(id).getList(1).toPlayer((Player) t.getSender());
+                getEventMessageData(id).getList(1, null).toPlayer((Player) t.getSender());
             } else {
                 t.getSender().sendMessage(prefix.getEventPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1],true, false));
             }
@@ -167,7 +167,7 @@ public class Event extends CommandHelp {
         // 3. stupeň
         final CommandData helpHelpPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.eventy.help", CommandExecutors.PLAYER, (t) -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
-            helpList.getList(Integer.parseInt(t.getArgs()[2])).toPlayer((Player) t.getSender());
+            helpList.getList(Integer.parseInt(t.getArgs()[2]), null).toPlayer((Player) t.getSender());
         });
         final CommandData ano = new CommandData(ArgumentTypes.DEFAULT, "ano", TabCompleterTypes.DEFAULT, "mutility.eventy.otazky.create");
         final CommandData ne = new CommandData(ArgumentTypes.DEFAULT, "ne", TabCompleterTypes.DEFAULT, "mutility.eventy.otazky.create");
@@ -700,7 +700,7 @@ public class Event extends CommandHelp {
                         .getJsonSegments());
                 index++;
             }
-            manageList.getList(page).toPlayer(player);
+            manageList.getList(page, null).toPlayer(player);
         } catch (CommunicationsException e) {
             db.openConnection();
             loadManageListData(player, page);
@@ -869,7 +869,7 @@ public class Event extends CommandHelp {
                         .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, "/event fakemessage " + id)
                         .getJsonSegments());
             }
-            manageIDList.getList(page).toPlayer(player);
+            manageIDList.getList(page, null).toPlayer(player);
         } catch (CommunicationsException e) {
             db.openConnection();
             loadManageIDListData(idStr, player, page);
