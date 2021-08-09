@@ -334,7 +334,7 @@ public class Tpdata extends CommandHelp {
             loadFormattedList(rs, showList,true);
         } catch (CommunicationsException e) {
             db.openConnection();
-            loadShowList();
+            updateShowList();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }

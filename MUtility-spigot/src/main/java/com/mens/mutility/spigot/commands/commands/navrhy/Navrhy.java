@@ -38,7 +38,7 @@ public class Navrhy extends CommandHelp {
     private final MUtilitySpigot plugin;
     private final Prefix prefix;
     private PageList helpList;
-    private final PageList adminList;
+    private static PageList adminList;
     private final PageList adminNameList;
     private final PageList showList;
     private final Database db;
@@ -54,8 +54,6 @@ public class Navrhy extends CommandHelp {
         this.plugin = plugin;
         prefix = new Prefix();
         helpList = new PageList(10, prefix.getNavrhyPrefix(true, true).replace("]", " - nápověda]"), "/navrhy");
-        adminList = new PageList(10, prefix.getNavrhyPrefix(true, true).replace("]", " - admin]"), "/navrhy admin");
-        adminList.setEmptyMessage(" Nejsou vytvořené žádné návrhy!");
         adminNameList = new PageList(10, null, null);
         adminNameList.setEmptyMessage(" Hráč nemá vytvořené žádné návrhy!");
         showList = new PageList(10, prefix.getNavrhyPrefix(true, true).replace("]", " - seznam]"), "/navrhy zobraz");
@@ -74,6 +72,9 @@ public class Navrhy extends CommandHelp {
      * Metoda slouzici k definovani a sestaveni prikazu a jeho parametru v ramci vlastniho prikazovaho systemu
      */
     public final CommandData create() {
+        adminList = new PageList(10, prefix.getNavrhyPrefix(true, true).replace("]", " - admin]"), "/navrhy admin");
+        adminList.setEmptyMessage(" Nejsou vytvořené žádné návrhy!");
+        loadAdminList();
         final CommandData navrhy = new CommandData("navrhy", "Návrhy","mutility.navrhy.help", CommandExecutors.PLAYER, t -> {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
             helpList.getList(1, null).toPlayer((Player) t.getSender());
@@ -85,7 +86,10 @@ public class Navrhy extends CommandHelp {
             helpList.getList(1, null).toPlayer((Player) t.getSender());
         });
         final CommandData helpPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
-        final CommandData admin = new CommandData(ArgumentTypes.DEFAULT, "admin", TabCompleterTypes.DEFAULT, "mutility.navrhy.admin", CommandExecutors.PLAYER, t -> loadAdminList((Player) t.getSender(), 1));
+        final CommandData admin = new CommandData(ArgumentTypes.DEFAULT, "admin", TabCompleterTypes.DEFAULT, "mutility.navrhy.admin", CommandExecutors.PLAYER, t -> {
+            updateAdminList();
+            adminList.getList(1, null).toPlayer((Player) t.getSender());
+        });
         final CommandData show = new CommandData(ArgumentTypes.DEFAULT, "zobraz", TabCompleterTypes.DEFAULT, "mutility.navrhy.show", CommandExecutors.PLAYER, t -> loadShowList((Player)t.getSender(), 1));
         final CommandData add = new CommandData(ArgumentTypes.DEFAULT, "pridej", TabCompleterTypes.DEFAULT, "mutility.navrhy.admin");
         final CommandData accept = new CommandData(ArgumentTypes.DEFAULT, "accept", TabCompleterTypes.NONE);
@@ -123,10 +127,10 @@ public class Navrhy extends CommandHelp {
                 int userId = playerManager.getUserId(t.getSender().getName());
                 acceptNavrh(id, userId);
                 editStatusNavrhyDiscordEmbed(discordManager.getChannelByName(plugin.getConfig().getString("Discord.Rooms.Vote")), id, Color.GREEN, null, t.getSender().getName(), false);
+                t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false) + "Návrh byl schválen");
             } else {
                 t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1], true, false));
             }
-            t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false) + "Návrh byl schválen");
         });
         final CommandData rejectID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE);
         final CommandData returnID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.navrhy.return", CommandExecutors.PLAYER, t -> {
@@ -134,10 +138,10 @@ public class Navrhy extends CommandHelp {
             if(isNavrh(id)) {
                 returnNavrh(id);
                 editStatusNavrhyDiscordEmbed(discordManager.getChannelByName(plugin.getConfig().getString("Discord.Rooms.Vote")), id, Color.ORANGE, null, null, true);
+                t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false) + "Návrh byl vrácen mezi neprojednané");
             } else {
                 t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1], true, false));
             }
-            t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false) + "Návrh byl vrácen mezi neprojednané");
         });
         final CommandData deleteID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.navrhy.delete", CommandExecutors.PLAYER, (t) -> {
             int recordId = Integer.parseInt(t.getArgs()[1]);
@@ -180,12 +184,12 @@ public class Navrhy extends CommandHelp {
                 int userId = playerManager.getUserId(t.getSender().getName());
                 rejectNavrh(id, userId, rejectedReason);
                 editStatusNavrhyDiscordEmbed(discordManager.getChannelByName(plugin.getConfig().getString("Discord.Rooms.Vote")), id, Color.RED, rejectedReason, t.getSender().getName(), false);
+                t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false) + "Návrh byl zamítnut");
             } else {
                 t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1], true, false));
             }
-            t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false) + "Návrh byl zamítnut");
         });
-        final CommandData adminPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.navrhy.admin", CommandExecutors.PLAYER, (t) -> loadAdminList((Player) t.getSender(), Integer.parseInt(t.getArgs()[2])));
+        final CommandData adminPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.navrhy.admin", CommandExecutors.PLAYER, (t) -> adminList.getList(Integer.parseInt(t.getArgs()[2]), null).toPlayer((Player)t.getSender()));
         final CommandData adminNamePage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         final CommandData showPageID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.navrhy.show", CommandExecutors.PLAYER, (t) -> loadShowList((Player)t.getSender(), Integer.parseInt(t.getArgs()[2])));
         final CommandData deleteConfirmID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.eventy.delete", CommandExecutors.PLAYER, t -> {
@@ -287,6 +291,117 @@ public class Navrhy extends CommandHelp {
         return navrhy;
     }
 
+    private void updateAdminList() {
+        try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
+            PreparedStatement stm = db.getCon().prepareStatement("SELECT id, user_id, content, rejected, rejected_reason, accepted, admin_id, create_date, update_date, (SUM(accepted+rejected)) FROM " + tables.getNavrhyTable() + " WHERE create_date > SYSDATE() - INTERVAL 1 DAY OR update_date > SYSDATE() - INTERVAL 1 DAY GROUP BY id ORDER BY (SUM(accepted+rejected)), create_date DESC");
+            ResultSet rs =  stm.executeQuery();
+            loadFormattedAdminList(rs, true);
+        } catch (CommunicationsException e) {
+            db.openConnection();
+            updateAdminList();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
+
+    private void loadFormattedAdminList(ResultSet rs, boolean update) {
+        try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
+            String acceptHover = new JsonBuilder(">> Klikni pro ")
+                    .color(colors.getSecondaryColorHEX())
+                    .text("Schválení")
+                    .color(ChatColor.GREEN)
+                    .text(" návrhu <<")
+                    .color(colors.getSecondaryColorHEX())
+                    .toString();
+            String rejectHover = new JsonBuilder(">> Klikni pro ")
+                    .color(colors.getSecondaryColorHEX())
+                    .text("Zamítnutí")
+                    .color(ChatColor.DARK_RED)
+                    .text(" návrhu <<")
+                    .color(colors.getSecondaryColorHEX())
+                    .toString();
+            String returnHover = new JsonBuilder(">> Klikni pro ")
+                    .color(colors.getSecondaryColorHEX())
+                    .text("Vrácení")
+                    .color(ChatColor.GOLD)
+                    .text(" návrhu mezi neprojednané <<")
+                    .color(colors.getSecondaryColorHEX())
+                    .toString();
+            int id;
+            int userId;
+            int recordId;
+            String content;
+            int rejected;
+            String rejectedReason;
+            int accepted;
+            int adminId;
+            String updateDate;
+            int completed;
+            while(rs.next()) {
+                id = rs.getInt(1);
+                userId = rs.getInt(2);
+                content = rs.getString(3);
+                rejected = rs.getInt(4);
+                rejectedReason = rs.getString(5);
+                accepted = rs.getInt(6);
+                adminId = rs.getInt(7);
+                String createDate = rs.getString(8);
+                updateDate = rs.getString(9);
+                completed = rs.getInt(10);
+                JsonBuilder hoverInfo = getNavrhInfoHover(rejected, accepted, adminId, rejectedReason, content, createDate, updateDate);
+                JsonBuilder jb = getAdminButtons(hoverInfo, completed, rejected, accepted, id, adminId, rejectedReason, content, createDate, updateDate, acceptHover, rejectHover, returnHover);
+                String username = playerManager.getUsername(userId);
+                jb.text(username);
+                if(accepted == 0 && rejected == 0) {
+                    jb.color(ChatColor.GOLD);
+                } else if(accepted == 1) {
+                    jb.color(ChatColor.GREEN);
+                } else {
+                    jb.color(ChatColor.DARK_RED);
+                }
+                jb.hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, hoverInfo.toString(), true);
+                if(update) {
+                    if(!adminList.getRows().contains(jb.getJsonSegments())) {
+                        Optional<String> elementOpt = adminList.getRows().stream().filter(x -> x.contains(username)
+                                && x.contains(createDate)).findFirst();
+                        if(elementOpt.isPresent()) {
+                            String element = elementOpt.get();
+                            adminList.remove(element);
+                            int index = -1;
+                            for (int i = 0; i < adminList.getRows().size(); i++) {
+                                if(adminList.getRows().get(i).contains("Schváleno")
+                                        || adminList.getRows().get(i).contains("Zamítnuto")) {
+                                    index = i;
+                                    break;
+                                }
+                            }
+                            if(index == -1) {
+                                adminList.add(jb.getJsonSegments());
+                            } else {
+                                adminList.add(index, jb.getJsonSegments());
+                            }
+                        } else {
+                            adminList.add(0, jb.getJsonSegments());
+                        }
+                    }
+                } else {
+                    adminList.add(jb.getJsonSegments());
+                }
+            }
+        } catch (CommunicationsException e) {
+            db.openConnection();
+            loadAdminList();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
+
     private void editNavrhyDiscordEmbed(MessageChannel channel, int id, String content, String name) {
         Optional<Message> messageOpt = channel.getIterableHistory().stream().filter(x -> !x.getEmbeds().isEmpty()
                 && x.getEmbeds().get(0).getAuthor() != null
@@ -357,7 +472,7 @@ public class Navrhy extends CommandHelp {
         }
     }
 
-    private void loadAdminList(Player player, int page) {
+    private void loadAdminList() {
         try {
             if(!db.getCon().isValid(0)) {
                 db.openConnection();
@@ -365,66 +480,10 @@ public class Navrhy extends CommandHelp {
             adminList.clear();
             PreparedStatement stm = db.getCon().prepareStatement("SELECT id, user_id, content, rejected, rejected_reason, accepted, admin_id, create_date, update_date, (SUM(accepted+rejected)) FROM " + tables.getNavrhyTable() + " GROUP BY id ORDER BY (SUM(accepted+rejected)), create_date DESC");
             ResultSet rs =  stm.executeQuery();
-            String acceptHover = new JsonBuilder(">> Klikni pro ")
-                    .color(colors.getSecondaryColorHEX())
-                    .text("Schválení")
-                    .color(ChatColor.GREEN)
-                    .text(" návrhu <<")
-                    .color(colors.getSecondaryColorHEX())
-                    .toString();
-            String rejectHover = new JsonBuilder(">> Klikni pro ")
-                    .color(colors.getSecondaryColorHEX())
-                    .text("Zamítnutí")
-                    .color(ChatColor.DARK_RED)
-                    .text(" návrhu <<")
-                    .color(colors.getSecondaryColorHEX())
-                    .toString();
-            String returnHover = new JsonBuilder(">> Klikni pro ")
-                    .color(colors.getSecondaryColorHEX())
-                    .text("Vrácení")
-                    .color(ChatColor.GOLD)
-                    .text(" návrhu mezi neprojednané <<")
-                    .color(colors.getSecondaryColorHEX())
-                    .toString();
-            int id;
-            int userId;
-            int recordId;
-            String content;
-            int rejected;
-            String rejectedReason;
-            int accepted;
-            int adminId;
-            String createDate;
-            String updateDate;
-            int completed;
-            while(rs.next()) {
-                id = rs.getInt(1);
-                userId = rs.getInt(2);
-                content = rs.getString(3);
-                rejected = rs.getInt(4);
-                rejectedReason = rs.getString(5);
-                accepted = rs.getInt(6);
-                adminId = rs.getInt(7);
-                createDate = rs.getString(8);
-                updateDate = rs.getString(9);
-                completed = rs.getInt(10);
-                JsonBuilder hoverInfo = getNavrhInfoHover(rejected, accepted, adminId, rejectedReason, content, createDate, updateDate);
-                JsonBuilder jb = getAdminButtons(hoverInfo, completed, rejected, accepted, id, adminId, rejectedReason, content, createDate, updateDate, acceptHover, rejectHover, returnHover);
-                jb.text(playerManager.getUsername(userId));
-                if(accepted == 0 && rejected == 0) {
-                    jb.color(ChatColor.GOLD);
-                } else if(accepted == 1) {
-                    jb.color(ChatColor.GREEN);
-                } else {
-                    jb.color(ChatColor.DARK_RED);
-                }
-                jb.hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, hoverInfo.toString(), true);
-                adminList.add(jb.getJsonSegments());
-            }
-            adminList.getList(page, null).toPlayer(player);
+            loadFormattedAdminList(rs, false);
         } catch (CommunicationsException e) {
             db.openConnection();
-            loadAdminList(player, page);
+            loadAdminList();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -858,6 +917,7 @@ public class Navrhy extends CommandHelp {
             PreparedStatement stm = db.getCon().prepareStatement("UPDATE " + tables.getNavrhyTable() + " SET rejected = 0, accepted = 0, admin_id = NULL, update_date = NULL, rejected_reason = NULL WHERE id = ?");
             stm.setInt(1, id);
             stm.execute();
+            loadAdminList();
         } catch (CommunicationsException e) {
             db.openConnection();
             returnNavrh(id);
@@ -876,6 +936,7 @@ public class Navrhy extends CommandHelp {
             stm.setInt(2, playerManager.getUserId(player.getName()));
             stm.setInt(3, recordId);
             stm.execute();
+            loadAdminList();
         } catch (CommunicationsException e) {
             db.openConnection();
             editNavrh(player, recordId, content);
@@ -924,6 +985,7 @@ public class Navrhy extends CommandHelp {
             stm.setInt(1, recordId);
             stm.setInt(2, playerManager.getUserId(player.getName()));
             stm.execute();
+            loadAdminList();
         } catch (CommunicationsException e) {
             db.openConnection();
             deleteNavrh(player, recordId);

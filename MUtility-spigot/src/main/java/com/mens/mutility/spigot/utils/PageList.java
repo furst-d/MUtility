@@ -119,19 +119,30 @@ public class PageList {
 
     public void add(String row) {
         rows.add(row);
+        setIndex(getIndex() + 1);
         checkIndexes();
     }
 
     public void add(int i, String row) {
         rows.add(i, row);
+        setIndex(getIndex() + 1);
         checkIndexes();
     }
 
+    public void remove(String row) {
+        if(rows.remove(row)) {
+            setIndex(getIndex() - 1);
+            checkIndexes();
+        }
+    }
+
     private void checkIndexes() {
-        setIndex(getIndex() + 1);
         if(getIndex() == getLimit()) {
             setMaxPage(getMaxPage() + 1);
             setIndex(0);
+        } else if(getIndex() == -1) {
+            setMaxPage(getMaxPage() - 1);
+            setIndex(getLimit() - 1);
         }
     }
 
