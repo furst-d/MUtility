@@ -17,7 +17,7 @@ import com.mens.mutility.spigot.gui.GUIManager;
 import com.mens.mutility.spigot.inventory.InventoryManager;
 import com.mens.mutility.spigot.inventory.InventoryPair;
 import com.mens.mutility.spigot.inventory.TeleportData;
-import com.mens.mutility.spigot.utils.Confirmation;
+import com.mens.mutility.spigot.utils.confirmations.Confirmation;
 import com.mens.mutility.spigot.utils.MyStringUtils;
 import com.mens.mutility.spigot.utils.PageList;
 import com.mens.mutility.spigot.utils.PlayerManager;

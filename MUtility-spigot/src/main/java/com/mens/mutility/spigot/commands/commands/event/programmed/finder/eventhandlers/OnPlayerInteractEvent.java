@@ -28,7 +28,7 @@ public class OnPlayerInteractEvent implements Listener {
         checker = new Checker(plugin);
         prefix = new Prefix();
         colors = new PluginColors();
-        ccManager = new CraftCoinManager(plugin);
+        ccManager = new CraftCoinManager();
     }
 
     @EventHandler

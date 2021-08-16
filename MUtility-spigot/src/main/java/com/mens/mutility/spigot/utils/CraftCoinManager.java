@@ -14,8 +14,8 @@ public class CraftCoinManager {
     private final MUtilitySpigot plugin;
     private final Connection con;
 
-    public CraftCoinManager(MUtilitySpigot plugin) {
-        this.plugin = plugin;
+    public CraftCoinManager() {
+        this.plugin = MUtilitySpigot.getInstance();
         con = plugin.getDb().getCon();
     }
 
@@ -40,12 +40,35 @@ public class CraftCoinManager {
                 stm.setInt(4, type);
                 stm.execute();
             }
-
         } catch (CommunicationsException e) {
             plugin.getDb().openConnection();
             addCC(amount, username, type);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
+    }
+
+    public void removeCC(int amount, String username, int type) {
+        addCC(-amount, username, type);
+    }
+
+    public int getCC(String username) {
+        try {
+            if(!plugin.getDb().getCon().isValid(0)) {
+                plugin.getDb().openConnection();
+            }
+            PreparedStatement stm = con.prepareStatement("SELECT SUM(amount) FROM shop_transactions WHERE user_id = ?");
+            stm.setInt(1, new PlayerManager().getUserId(username));
+            ResultSet rs = stm.executeQuery();
+            if(rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (CommunicationsException e) {
+            plugin.getDb().openConnection();
+            getCC(username);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return 0;
     }
 }

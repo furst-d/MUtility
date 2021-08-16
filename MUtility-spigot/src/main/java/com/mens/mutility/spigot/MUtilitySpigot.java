@@ -1,5 +1,6 @@
 package com.mens.mutility.spigot;
 
+import com.mens.mutility.spigot.commands.commands.cc.CC;
 import com.mens.mutility.spigot.commands.commands.event.programmed.finder.eventhandlers.OnPlayerInteractEvent;
 import com.mens.mutility.spigot.commands.commands.event.programmed.graveyard.eventhandlers.OnBlockBreakEvent;
 import com.mens.mutility.spigot.commands.commands.mstavba.MStavbaVoteManager;
@@ -107,6 +108,7 @@ public final class MUtilitySpigot extends JavaPlugin {
         commands.add(new Navrhy(this).create());
         commands.add(new Tpdata(this).create());
         commands.add(new RandomTeleport(this).create());
+        commands.add(new CC(this).create());
 
         CommandListener commandListener = new CommandListener(this);
         Objects.requireNonNull(getCommand("mutility")).setExecutor(commandListener);
@@ -121,6 +123,7 @@ public final class MUtilitySpigot extends JavaPlugin {
         Objects.requireNonNull(getCommand("tpdata")).setExecutor(commandListener);
         Objects.requireNonNull(getCommand("randomteleport")).setExecutor(commandListener);
         Objects.requireNonNull(getCommand("rt")).setExecutor(commandListener);
+        Objects.requireNonNull(getCommand("cc")).setExecutor(commandListener);
     }
 
     /**

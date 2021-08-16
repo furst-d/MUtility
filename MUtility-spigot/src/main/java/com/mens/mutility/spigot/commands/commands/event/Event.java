@@ -16,7 +16,7 @@ import com.mens.mutility.spigot.database.Database;
 import com.mens.mutility.spigot.database.DatabaseTables;
 import com.mens.mutility.spigot.messages.MessageChannel;
 import com.mens.mutility.spigot.utils.Checker;
-import com.mens.mutility.spigot.utils.Confirmation;
+import com.mens.mutility.spigot.utils.confirmations.Confirmation;
 import com.mens.mutility.spigot.utils.MyStringUtils;
 import com.mens.mutility.spigot.utils.PageList;
 import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;

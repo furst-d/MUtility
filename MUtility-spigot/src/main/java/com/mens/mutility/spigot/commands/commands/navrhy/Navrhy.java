@@ -13,7 +13,7 @@ import com.mens.mutility.spigot.commands.system.enums.TabCompleterTypes;
 import com.mens.mutility.spigot.database.Database;
 import com.mens.mutility.spigot.database.DatabaseTables;
 import com.mens.mutility.spigot.discord.DiscordManager;
-import com.mens.mutility.spigot.utils.Confirmation;
+import com.mens.mutility.spigot.utils.confirmations.Confirmation;
 import com.mens.mutility.spigot.utils.MyStringUtils;
 import com.mens.mutility.spigot.utils.PageList;
 import com.mens.mutility.spigot.utils.PlayerManager;
@@ -149,7 +149,7 @@ public class Navrhy extends CommandHelp {
                 if(!isCompleted((Player)t.getSender(), recordId)) {
                     Confirmation deleteConfirmation = new Confirmation(recordId, (Player) t.getSender(), "/navrhy delete confirm");
                     deleteConfirmation.setMessage(new JsonBuilder()
-                            .addJsonSegment(prefix.getZalohyPrefix(true, true))
+                            .addJsonSegment(prefix.getNavrhyPrefix(true, true))
                             .text(": Opravdu si přejete odstranit tento návrh?")
                             .color(colors.getSecondaryColorHEX()));
                     if(deleteConfirmationList.stream().noneMatch(x -> (x.getId() == recordId

@@ -403,7 +403,7 @@ public class MStavbaVoteManager {
             int userId;
             if(rs.next()) {
                 userId = rs.getInt(3);
-                CraftCoinManager ccManager = new CraftCoinManager(plugin);
+                CraftCoinManager ccManager = new CraftCoinManager();
                 ccManager.addCC(2000, playerManager.getUsername(userId), 13);
             }
         } catch (CommunicationsException e) {

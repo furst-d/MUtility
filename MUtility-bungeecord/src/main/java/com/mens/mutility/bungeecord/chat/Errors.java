@@ -90,6 +90,20 @@ public class Errors {
                 + " - argument musí být jméno online hráče!";
     }
 
+    public String errWrongArgumentPlayer(String arg, boolean json) {
+        if(json) {
+            return new JsonBuilder(" Chybný argument ")
+                    .color(colors.getSecondaryColorHEX())
+                    .text(arg)
+                    .color(colors.getPrimaryColorHEX())
+                    .text(" - hráč nenalezen!")
+                    .color(colors.getSecondaryColorHEX())
+                    .getJsonSegments();
+        }
+        return "Chybný argument " +getColors().getPrimaryColor() + arg + getColors().getSecondaryColor()
+                + " - hráč nenalezen!";
+    }
+
     public String errWrongArgumentPositiveNumber(String arg, boolean json) {
         if(json) {
             return new JsonBuilder(" Chybný argument ")

@@ -29,6 +29,8 @@ commands:
     description: Nahodny teleport
   rt:
     description: Nahodny teleport
+  cc:
+    description: Sprava Craft-Coinu
 permissions:
   mutility.help:
     default: op
@@ -180,6 +182,16 @@ permissions:
   mutility.rt.use:
     default: op
     description: Pouziti prikazu k nahodnemu teleportu
+  mutility.cc.help:
+    default: op
+    description: Napoveda k Craft-Coinum
+  mutility.cc.transfer:
+    default: op
+    description: Posilani Craft-Coinu jinym hracum
+  mutility.cc.status:
+    default: op
+    description: Zobrazeni statusu Craft-Coinu
+
 
 
 

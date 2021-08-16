@@ -179,6 +179,34 @@ public class Errors {
                 + errMessageDesc;
     }
 
+    public String errWrongArgumentPlayer(String arg, boolean hexColor, boolean json) {
+        String errMessage = "Chybný argument ";
+        String errMessageDesc = " - hráč nenalezen!";
+        if(json) {
+            JsonBuilder jb = new JsonBuilder(errMessage);
+            if(hexColor) {
+                return jb.color(colors.getSecondaryColorHEX())
+                        .text(arg)
+                        .color(colors.getPrimaryColorHEX())
+                        .text(errMessageDesc)
+                        .color(colors.getSecondaryColorHEX())
+                        .getJsonSegments();
+            }
+            return jb.color(colors.getConsoleSecondaryColor())
+                    .text(arg)
+                    .color(colors.getConsolePrimaryColor())
+                    .text(errMessageDesc)
+                    .color(colors.getConsoleSecondaryColor())
+                    .getJsonSegments();
+        }
+        if(hexColor) {
+            return errMessage + colors.getPrimaryColor() + arg + getColors().getSecondaryColor()
+                    + errMessageDesc;
+        }
+        return errMessage + colors.getConsolePrimaryColor() + arg + getColors().getConsoleSecondaryColor()
+                + errMessageDesc;
+    }
+
     public String errWrongArgumentPositiveNumber(String arg, boolean hexColor, boolean json) {
         String errMessage = "Chybný argument ";
         String errMessageDesc = " - argument musí být kladné číslo!";

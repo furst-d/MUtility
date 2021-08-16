@@ -17,6 +17,7 @@ import com.mens.mutility.spigot.gui.GUIManager;
 import com.mens.mutility.spigot.inventory.InventoryManager;
 import com.mens.mutility.spigot.inventory.InventoryPair;
 import com.mens.mutility.spigot.utils.*;
+import com.mens.mutility.spigot.utils.confirmations.Confirmation;
 import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 import javafx.util.Pair;
 import net.md_5.bungee.api.ChatColor;
