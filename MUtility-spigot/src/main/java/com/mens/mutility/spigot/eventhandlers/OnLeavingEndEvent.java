@@ -18,14 +18,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-public class OnLeavingEnd implements Listener {
+public class OnLeavingEndEvent implements Listener {
     private final MUtilitySpigot plugin;
     private final MessageChannel messageChannel;
     private final Tpdata teleportDataManager;
     private final List<Player> conectingPlayers;
     private final LinkedList<Player> players;
 
-    public OnLeavingEnd(MUtilitySpigot plugin) {
+    public OnLeavingEndEvent(MUtilitySpigot plugin) {
         this.plugin = plugin;
         messageChannel = new MessageChannel();
         teleportDataManager = new Tpdata(plugin);

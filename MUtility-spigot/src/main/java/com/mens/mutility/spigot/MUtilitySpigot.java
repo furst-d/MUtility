@@ -135,8 +135,9 @@ public final class MUtilitySpigot extends JavaPlugin {
         pm.registerEvents(new OnPlayerJoinEvent(this), this);
         pm.registerEvents(new OnPlayerInteractEvent(this), this);
         pm.registerEvents(new OnBlockBreakEvent(this), this);
-        pm.registerEvents(new OnLeavingEnd(this), this);
-        pm.registerEvents(new OnCommandPreprocess(this), this);
+        pm.registerEvents(new OnLeavingEndEvent(this), this);
+        pm.registerEvents(new OnCommandPreprocessEvent(this), this);
+        pm.registerEvents(new OnPlayerMoveEvent(this), this);
         pm.registerEvents(new com.mens.mutility.spigot.commands.commands.mstavba.eventhandlers.OnPlayerJoinEvent(this), this);
     }
 
@@ -177,10 +178,10 @@ public final class MUtilitySpigot extends JavaPlugin {
         return servers;
     }
 
-    public String getCurrentServer() {
+    public ServerInfo getCurrentServer() {
         for(ServerInfo server : servers) {
             if(server.isThis()) {
-                return server.getName();
+                return server;
             }
         }
         return null;

@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 
 import java.util.Collection;
+import java.util.Objects;
 
 public class TeleportData {
     private int id;
@@ -46,7 +47,7 @@ public class TeleportData {
         fromY = y;
         fromZ = z;
         fromWorld = world;
-        fromServer = plugin.getCurrentServer();
+        fromServer = Objects.requireNonNull(plugin.getCurrentServer()).getName();
         gamemode = player.getGameMode().name();
         level = player.getLevel();
         exp = player.getExp();

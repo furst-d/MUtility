@@ -890,7 +890,7 @@ public class Event extends CommandHelp {
             stm.setInt(3, 100);
             stm.setInt(4, 0);
             stm.setString(5, Objects.requireNonNull(player.getLocation().getWorld()).getName());
-            stm.setString(6, plugin.getCurrentServer());
+            stm.setString(6, Objects.requireNonNull(plugin.getCurrentServer()).getName());
             stm.setString(7, "-");
             stm.setString(8, "-");
             stm.execute();

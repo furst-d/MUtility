@@ -6,6 +6,7 @@ import com.mens.mutility.spigot.chat.PluginColors;
 import com.mens.mutility.spigot.chat.Prefix;
 import com.mens.mutility.spigot.commands.commands.tpdata.Tpdata;
 import com.mens.mutility.spigot.portal.PortalManager;
+import com.mens.mutility.spigot.utils.AreaInfo;
 import com.mens.mutility.spigot.utils.Checker;
 import com.mens.mutility.spigot.utils.ServerInfo;
 import org.bukkit.*;
@@ -132,11 +133,21 @@ public class MessageChannelListener implements PluginMessageListener {
                     break;
                 case "mens:servers-info-response":
                     String[] servers = stream.readUTF().split(";");
+                    String[] borders = stream.readUTF().split(";");
+                    String[] rtLoc = stream.readUTF().split(";");
                     String serverName = stream.readUTF();
                     plugin.getServers().clear();
                     for(String serverLoc : servers) {
                         if(serverLoc.equals(serverName)) {
-                            plugin.getServers().add(new ServerInfo(serverLoc, true));
+                            ServerInfo info = new ServerInfo(serverLoc, true);
+                            if(borders.length > 1) {
+                                info.setBorder1(new AreaInfo(Integer.parseInt(borders[0]), Integer.parseInt(borders[1]), -64, 320, Integer.parseInt(borders[2]), Integer.parseInt(borders[3])));
+                                info.setBorder2(new AreaInfo(Integer.parseInt(borders[4]), Integer.parseInt(borders[5]), -64, 320, Integer.parseInt(borders[6]), Integer.parseInt(borders[7])));
+                            }
+                            if(rtLoc.length > 1) {
+                                info.setRandomTeleport(new AreaInfo(Integer.parseInt(rtLoc[0]), Integer.parseInt(rtLoc[1]), Integer.parseInt(rtLoc[2]), Integer.parseInt(rtLoc[3]), Integer.parseInt(rtLoc[4]), Integer.parseInt(rtLoc[5])));
+                            }
+                            plugin.getServers().add(info);
                         } else {
                             plugin.getServers().add(new ServerInfo(serverLoc, false));
                         }

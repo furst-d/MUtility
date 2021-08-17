@@ -29,7 +29,6 @@ public class MessageChannelListener implements Listener {
     private final MessageChannel messageChannel;
     private Anketa survey;
     JsonBuilder surveyNotCreated;
-    StringBuilder servers;
     ServerInfo target;
     private ScheduledTask st;
 
@@ -196,18 +195,52 @@ public class MessageChannelListener implements Listener {
                     }
                     break;
                 case "mens:servers-info-request":
-                    servers = new StringBuilder();
+                    StringBuilder servers = new StringBuilder();
+                    StringBuilder borders = new StringBuilder();
+                    StringBuilder rtLoc = new StringBuilder();
                     player = ProxyServer.getInstance().getPlayer(stream.readUTF());
                     target = (ServerInfo) plugin.getProxy().getServers().values().toArray()[0];
                     for(ServerInfo server : plugin.getProxy().getServers().values()) {
-                        servers.append(server.getName());
-                        servers.append(";");
+                        servers.append(server.getName()).append(";");
+                        boolean isOw = false;
+                        String configServerName = "";
                         if(player.getServer().getInfo().getName().equals(server.getName())) {
                             target = ProxyServer.getInstance().getServerInfo(server.getName());
+                            if(server.getName().equals(plugin.getConfiguration().getString("RandomTeleport.Server"))) {
+                                rtLoc.append(plugin.getConfiguration().getInt("RandomTeleport.From.X")).append(";");
+                                rtLoc.append(plugin.getConfiguration().getInt("RandomTeleport.To.X")).append(";");
+                                rtLoc.append(plugin.getConfiguration().getInt("RandomTeleport.From.Y")).append(";");
+                                rtLoc.append(plugin.getConfiguration().getInt("RandomTeleport.To.Y")).append(";");
+                                rtLoc.append(plugin.getConfiguration().getInt("RandomTeleport.From.Z")).append(";");
+                                rtLoc.append(plugin.getConfiguration().getInt("RandomTeleport.To.Z"));
+                            }
+                            if(server.getName().equals(plugin.getConfiguration().getString("Servers.OverWorld 1.Name"))) {
+                                isOw = true;
+                                configServerName = "OverWorld 1";
+                            } else if(server.getName().equals(plugin.getConfiguration().getString("Servers.OverWorld 2.Name"))) {
+                                isOw = true;
+                                configServerName = "OverWorld 2";
+                            } else if(server.getName().equals(plugin.getConfiguration().getString("Servers.OverWorld 3.Name"))) {
+                                isOw = true;
+                                configServerName = "OverWorld 3";
+                            } else if(server.getName().equals(plugin.getConfiguration().getString("Servers.OverWorld 4.Name"))) {
+                                isOw = true;
+                                configServerName = "OverWorld 4";
+                            }
+                            if(isOw) {
+                                borders.append(plugin.getConfiguration().getInt("Servers." + configServerName + ".TP border 1.From.X")).append(";");
+                                borders.append(plugin.getConfiguration().getInt("Servers." + configServerName + ".TP border 1.To.X")).append(";");
+                                borders.append(plugin.getConfiguration().getInt("Servers." + configServerName + ".TP border 1.From.Z")).append(";");
+                                borders.append(plugin.getConfiguration().getInt("Servers." + configServerName + ".TP border 1.To.Z")).append(";");
+                                borders.append(plugin.getConfiguration().getInt("Servers." + configServerName + ".TP border 2.From.X")).append(";");
+                                borders.append(plugin.getConfiguration().getInt("Servers." + configServerName + ".TP border 2.To.X")).append(";");
+                                borders.append(plugin.getConfiguration().getInt("Servers." + configServerName + ".TP border 2.From.Z")).append(";");
+                                borders.append(plugin.getConfiguration().getInt("Servers." + configServerName + ".TP border 2.To.Z"));
+                            }
                         }
                     }
                     servers.substring(0, servers.length() - 1);
-                    messageChannel.sendToServer(target, "mens:servers-info-response", servers.toString(), target.getName());
+                    messageChannel.sendToServer(target, "mens:servers-info-response", servers.toString(), borders.toString(), rtLoc.toString(), target.getName());
                     break;
                 case "mens:teleport-request":
                     TeleportRequest teleportRequest = new TeleportRequest(

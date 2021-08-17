@@ -128,6 +128,17 @@ Servers:
       Z: 0
     Radius: 25000
 
+RandomTeleport:
+  Server: 'lobby'
+  From:
+    X: 100
+    Y: 100
+    Z: 100
+  To:
+    X: 100
+    Y: 102
+    Z: 100
+
 Colors:
   Chat:
     Primary: '#1eb0ff'

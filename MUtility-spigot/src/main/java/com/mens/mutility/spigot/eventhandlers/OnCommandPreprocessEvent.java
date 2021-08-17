@@ -10,11 +10,11 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 
 import java.util.List;
 
-public class OnCommandPreprocess implements Listener {
+public class OnCommandPreprocessEvent implements Listener {
     private final MUtilitySpigot plugin;
     MessageChannel messageChannel;
 
-    public OnCommandPreprocess(MUtilitySpigot plugin) {
+    public OnCommandPreprocessEvent(MUtilitySpigot plugin) {
         this.plugin = plugin;
         messageChannel = new MessageChannel();
     }

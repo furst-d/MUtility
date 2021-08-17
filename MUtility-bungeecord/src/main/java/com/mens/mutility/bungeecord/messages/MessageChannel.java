@@ -13,13 +13,14 @@ public class MessageChannel {
 
     MUtilityBungeeCord plugin = MUtilityBungeeCord.getInstance();
 
-    public  void sendToServer(ServerInfo server, String channel, String message) {
+    public  void sendToServer(ServerInfo server, String channel, String... messages) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         DataOutputStream output = new DataOutputStream(stream);
-
         try {
             output.writeUTF(channel);
-            output.writeUTF(message);
+            for(String message : messages) {
+                output.writeUTF(message);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

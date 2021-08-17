@@ -813,7 +813,7 @@ public class Tpdata extends CommandHelp {
         InventoryManager manager = new InventoryManager();
         int inventoryId = data.getId();
         JsonObject inventory = manager.toJsonObject(data.getInventory());
-        String server = plugin.getCurrentServer();
+        String server = Objects.requireNonNull(plugin.getCurrentServer()).getName();
         updateData(inventoryId, x, y, z, world, server);
         manager.loadInventory(player, inventory);
         player.setGameMode(GameMode.valueOf(data.getGamemode()));
