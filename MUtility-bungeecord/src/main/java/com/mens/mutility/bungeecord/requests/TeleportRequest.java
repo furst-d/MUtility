@@ -14,7 +14,7 @@ public class TeleportRequest {
     private final double y;
     private final double z;
     private final String world;
-    private final ServerInfo server;
+    private ServerInfo server;
     private final boolean loadTeleportData;
     private final MUtilityBungeeCord plugin;
     private ScheduledTask st;
@@ -60,6 +60,10 @@ public class TeleportRequest {
 
     public boolean isLoadTeleportData() {
         return loadTeleportData;
+    }
+
+    public void setServer(ServerInfo server) {
+        this.server = server;
     }
 
     public void startTimer(int timeInSec) {

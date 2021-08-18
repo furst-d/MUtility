@@ -60,42 +60,23 @@ public class MessageChannelListener implements Listener {
                     double z = stream.readDouble();
                     switch (world) {
                         case "overworld": {
-                            String targetStr = "";
-                            boolean loadPlayerData = false;
-                            if (((plugin.getConfiguration().getInt("Servers.OverWorld 1.Center.X") - (plugin.getConfiguration().getInt("Servers.OverWorld 1.Radius"))) < x) && (x < (plugin.getConfiguration().getInt("Servers.OverWorld 1.Center.X") + (plugin.getConfiguration().getInt("Servers.OverWorld 1.Radius"))))) {
-                                if (((plugin.getConfiguration().getInt("Servers.OverWorld 1.Center.Z") - (plugin.getConfiguration().getInt("Servers.OverWorld 1.Radius"))) < z) && (z < (plugin.getConfiguration().getInt("Servers.OverWorld 1.Center.Z") + (plugin.getConfiguration().getInt("Servers.OverWorld 1.Radius"))))) {
-                                    targetStr = plugin.getConfiguration().getString("Servers.OverWorld 1.Name");
-                                    loadPlayerData = plugin.getConfiguration().getBoolean("Servers.OverWorld 1.LoadPlayerData");
-                                }
-                            } else if (((plugin.getConfiguration().getInt("Servers.OverWorld 2.Center.X") - (plugin.getConfiguration().getInt("Servers.OverWorld 2.Radius"))) < x) && (x < (plugin.getConfiguration().getInt("Servers.OverWorld 2.Center.X") + (plugin.getConfiguration().getInt("Servers.OverWorld 2.Radius"))))) {
-                                if (((plugin.getConfiguration().getInt("Servers.OverWorld 2.Center.Z") - (plugin.getConfiguration().getInt("Servers.OverWorld 2.Radius"))) < z) && (z < (plugin.getConfiguration().getInt("Servers.OverWorld 2.Center.Z") + (plugin.getConfiguration().getInt("Servers.OverWorld 2.Radius"))))) {
-                                    targetStr = plugin.getConfiguration().getString("Servers.OverWorld 2.Name");
-                                    loadPlayerData = plugin.getConfiguration().getBoolean("Servers.OverWorld 2.LoadPlayerData");
-                                }
-                            } else if (((plugin.getConfiguration().getInt("Servers.OverWorld 3.Center.X") - (plugin.getConfiguration().getInt("Servers.OverWorld 3.Radius"))) < x) && (x < (plugin.getConfiguration().getInt("Servers.OverWorld 3.Center.X") + (plugin.getConfiguration().getInt("Servers.OverWorld 3.Radius"))))) {
-                                if (((plugin.getConfiguration().getInt("Servers.OverWorld 3.Center.Z") - (plugin.getConfiguration().getInt("Servers.OverWorld 3.Radius"))) < z) && (z < (plugin.getConfiguration().getInt("Servers.OverWorld 3.Center.Z") + (plugin.getConfiguration().getInt("Servers.OverWorld 3.Radius"))))) {
-                                    targetStr = plugin.getConfiguration().getString("Servers.OverWorld 3.Name");
-                                    loadPlayerData = plugin.getConfiguration().getBoolean("Servers.OverWorld 3.LoadPlayerData");
-                                }
-                            } else if (((plugin.getConfiguration().getInt("Servers.OverWorld 4.Center.X") - (plugin.getConfiguration().getInt("Servers.OverWorld 4.Radius"))) < x) && (x < (plugin.getConfiguration().getInt("Servers.OverWorld 4.Center.X") + (plugin.getConfiguration().getInt("Servers.OverWorld 4.Radius"))))) {
-                                if (((plugin.getConfiguration().getInt("Servers.OverWorld 4.Center.Z") - (plugin.getConfiguration().getInt("Servers.OverWorld 4.Radius"))) < z) && (z < (plugin.getConfiguration().getInt("Servers.OverWorld 4.Center.Z") + (plugin.getConfiguration().getInt("Servers.OverWorld 4.Radius"))))) {
-                                    targetStr = plugin.getConfiguration().getString("Servers.OverWorld 4.Name");
-                                    loadPlayerData = plugin.getConfiguration().getBoolean("Servers.OverWorld 4.LoadPlayerData");
-                                }
+                            ServerInfo target = getServerByCoords(x, z);
+                            if(target != null) {
+                                boolean loadPlayerData = isLoadData(target);
+                                PortalRequest portalRequest = new PortalRequest(
+                                        player,
+                                        x,
+                                        y,
+                                        z,
+                                        "world",
+                                        target,
+                                        loadPlayerData);
+                                player.connect(portalRequest.getServer(), (result, error) -> {
+                                    if (result) {
+                                        portalRequest.startTimer(20);
+                                    }
+                                });
                             }
-                            PortalRequest portalRequest = new PortalRequest(
-                                    player,
-                                    x,
-                                    y,
-                                    z,
-                                    "world",
-                                    ProxyServer.getInstance().getServerInfo(targetStr),
-                                    loadPlayerData);
-                            player.connect(portalRequest.getServer(), (result, error) -> {
-                                if (result) {
-                                    portalRequest.startTimer(20);
-                                }
-                            });
                             break;
                         }
                         case "nether": {
@@ -232,28 +213,43 @@ public class MessageChannelListener implements Listener {
                                 borders.append(plugin.getConfiguration().getInt("Servers." + configServerName + ".TP border 1.To.X")).append(";");
                                 borders.append(plugin.getConfiguration().getInt("Servers." + configServerName + ".TP border 1.From.Z")).append(";");
                                 borders.append(plugin.getConfiguration().getInt("Servers." + configServerName + ".TP border 1.To.Z")).append(";");
+                                borders.append(plugin.getConfiguration().getString("Servers." + configServerName + ".TP border 1.Direction")).append(";");
                                 borders.append(plugin.getConfiguration().getInt("Servers." + configServerName + ".TP border 2.From.X")).append(";");
                                 borders.append(plugin.getConfiguration().getInt("Servers." + configServerName + ".TP border 2.To.X")).append(";");
                                 borders.append(plugin.getConfiguration().getInt("Servers." + configServerName + ".TP border 2.From.Z")).append(";");
-                                borders.append(plugin.getConfiguration().getInt("Servers." + configServerName + ".TP border 2.To.Z"));
+                                borders.append(plugin.getConfiguration().getInt("Servers." + configServerName + ".TP border 2.To.Z")).append(";");
+                                borders.append(plugin.getConfiguration().getString("Servers." + configServerName + ".TP border 2.Direction"));
                             }
+                            break;
                         }
                     }
                     servers.substring(0, servers.length() - 1);
                     messageChannel.sendToServer(target, "mens:servers-info-response", servers.toString(), borders.toString(), rtLoc.toString(), target.getName());
                     break;
                 case "mens:teleport-request":
+                    player = ProxyServer.getInstance().getPlayer(stream.readUTF());
+                    x = stream.readFloat();
+                    y = stream.readFloat();
+                    z = stream.readFloat();
+                    world = stream.readUTF();
+                    String serverName = stream.readUTF();
+                    ServerInfo server;
+                    if(serverName.equals("null")) {
+                        server = getServerByCoords(x, z);
+                    } else {
+                        server = ProxyServer.getInstance().getServerInfo(serverName);
+                    }
                     TeleportRequest teleportRequest = new TeleportRequest(
-                            ProxyServer.getInstance().getPlayer(stream.readUTF()),
-                            stream.readFloat(),
-                            stream.readFloat(),
-                            stream.readFloat(),
-                            stream.readUTF(),
-                            ProxyServer.getInstance().getServerInfo(stream.readUTF()),
+                            player,
+                            x,
+                            y,
+                            z,
+                            world,
+                            server,
                             stream.readBoolean());
                     player.connect(teleportRequest.getServer(), (result, error) -> {
                         if(result) {
-                            teleportRequest.startTimer(10000);
+                            teleportRequest.startTimer(10);
                         }
                     });
                     break;
@@ -280,6 +276,42 @@ public class MessageChannelListener implements Listener {
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private ServerInfo getServerByCoords(double x, double z) {
+        ServerInfo server = null;
+        if ((((plugin.getConfiguration().getInt("Servers.OverWorld 1.Center.X") - (plugin.getConfiguration().getInt("Servers.OverWorld 1.Radius"))) < x) && (x < (plugin.getConfiguration().getInt("Servers.OverWorld 1.Center.X") + (plugin.getConfiguration().getInt("Servers.OverWorld 1.Radius"))))) && ((((plugin.getConfiguration().getInt("Servers.OverWorld 1.Center.Z") - (plugin.getConfiguration().getInt("Servers.OverWorld 1.Radius"))) < z) && (z < (plugin.getConfiguration().getInt("Servers.OverWorld 1.Center.Z") + (plugin.getConfiguration().getInt("Servers.OverWorld 1.Radius"))))))) {
+            server = ProxyServer.getInstance().getServerInfo(plugin.getConfiguration().getString("Servers.OverWorld 1.Name"));
+        } else if ((((plugin.getConfiguration().getInt("Servers.OverWorld 2.Center.X") - (plugin.getConfiguration().getInt("Servers.OverWorld 2.Radius"))) < x) && (x < (plugin.getConfiguration().getInt("Servers.OverWorld 2.Center.X") + (plugin.getConfiguration().getInt("Servers.OverWorld 2.Radius"))))) && ((((plugin.getConfiguration().getInt("Servers.OverWorld 2.Center.Z") - (plugin.getConfiguration().getInt("Servers.OverWorld 2.Radius"))) < z) && (z < (plugin.getConfiguration().getInt("Servers.OverWorld 2.Center.Z") + (plugin.getConfiguration().getInt("Servers.OverWorld 2.Radius"))))))) {
+            server = ProxyServer.getInstance().getServerInfo(plugin.getConfiguration().getString("Servers.OverWorld 2.Name"));
+        } else if ((((plugin.getConfiguration().getInt("Servers.OverWorld 3.Center.X") - (plugin.getConfiguration().getInt("Servers.OverWorld 3.Radius"))) < x) && (x < (plugin.getConfiguration().getInt("Servers.OverWorld 3.Center.X") + (plugin.getConfiguration().getInt("Servers.OverWorld 3.Radius"))))) && ((((plugin.getConfiguration().getInt("Servers.OverWorld 3.Center.Z") - (plugin.getConfiguration().getInt("Servers.OverWorld 3.Radius"))) < z) && (z < (plugin.getConfiguration().getInt("Servers.OverWorld 3.Center.Z") + (plugin.getConfiguration().getInt("Servers.OverWorld 3.Radius"))))))) {
+            server = ProxyServer.getInstance().getServerInfo(plugin.getConfiguration().getString("Servers.OverWorld 3.Name"));
+        } else if ((((plugin.getConfiguration().getInt("Servers.OverWorld 4.Center.X") - (plugin.getConfiguration().getInt("Servers.OverWorld 4.Radius"))) < x) && (x < (plugin.getConfiguration().getInt("Servers.OverWorld 4.Center.X") + (plugin.getConfiguration().getInt("Servers.OverWorld 4.Radius"))))) && ((((plugin.getConfiguration().getInt("Servers.OverWorld 4.Center.Z") - (plugin.getConfiguration().getInt("Servers.OverWorld 4.Radius"))) < z) && (z < (plugin.getConfiguration().getInt("Servers.OverWorld 4.Center.Z") + (plugin.getConfiguration().getInt("Servers.OverWorld 4.Radius"))))))) {
+            server = ProxyServer.getInstance().getServerInfo(plugin.getConfiguration().getString("Servers.OverWorld 4.Name"));
+        }
+        return server;
+    }
+
+    private boolean isLoadData(ServerInfo server) {
+        if(server.getName().equalsIgnoreCase(plugin.getConfiguration().getString("Servers.OverWorld 1.Name"))) {
+            return plugin.getConfiguration().getBoolean("Servers.OverWorld 1.LoadPlayerData");
+        } else if(server.getName().equalsIgnoreCase(plugin.getConfiguration().getString("Servers.OverWorld 2.Name"))) {
+            return plugin.getConfiguration().getBoolean("Servers.OverWorld 2.LoadPlayerData");
+        } else if(server.getName().equalsIgnoreCase(plugin.getConfiguration().getString("Servers.OverWorld 3.Name"))) {
+            return plugin.getConfiguration().getBoolean("Servers.OverWorld 3.LoadPlayerData");
+        } else if(server.getName().equalsIgnoreCase(plugin.getConfiguration().getString("Servers.OverWorld 4.Name"))) {
+            return plugin.getConfiguration().getBoolean("Servers.OverWorld 4.LoadPlayerData");
+        } else if(server.getName().equalsIgnoreCase(plugin.getConfiguration().getString("Servers.Lobby.Name"))) {
+            return plugin.getConfiguration().getBoolean("Servers.Lobby.LoadPlayerData");
+        } else if(server.getName().equalsIgnoreCase(plugin.getConfiguration().getString("Servers.Nether.Name"))) {
+            return plugin.getConfiguration().getBoolean("Servers.Nether.LoadPlayerData");
+        } else if(server.getName().equalsIgnoreCase(plugin.getConfiguration().getString("Servers.End.Name"))) {
+            return plugin.getConfiguration().getBoolean("Servers.End.LoadPlayerData");
+        } else if(server.getName().equalsIgnoreCase(plugin.getConfiguration().getString("Servers.Event.Name"))) {
+            return plugin.getConfiguration().getBoolean("Servers.Event.LoadPlayerData");
+        } else {
+            return false;
         }
     }
 }

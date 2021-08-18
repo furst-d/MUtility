@@ -6,8 +6,10 @@ import com.mens.mutility.spigot.chat.PluginColors;
 import com.mens.mutility.spigot.chat.Prefix;
 import com.mens.mutility.spigot.chat.json.JsonBuilder;
 import com.mens.mutility.spigot.commands.commands.tpdata.Tpdata;
+import com.mens.mutility.spigot.inventory.TeleportData;
 import com.mens.mutility.spigot.portal.PortalManager;
 import com.mens.mutility.spigot.utils.AreaInfo;
+import com.mens.mutility.spigot.utils.BorderInfo;
 import com.mens.mutility.spigot.utils.Checker;
 import com.mens.mutility.spigot.utils.ServerInfo;
 import org.bukkit.*;
@@ -142,8 +144,8 @@ public class MessageChannelListener implements PluginMessageListener {
                         if(serverLoc.equals(serverName)) {
                             ServerInfo info = new ServerInfo(serverLoc, true);
                             if(borders.length > 1) {
-                                info.setBorder1(new AreaInfo(Integer.parseInt(borders[0]), Integer.parseInt(borders[1]), -64, 320, Integer.parseInt(borders[2]), Integer.parseInt(borders[3])));
-                                info.setBorder2(new AreaInfo(Integer.parseInt(borders[4]), Integer.parseInt(borders[5]), -64, 320, Integer.parseInt(borders[6]), Integer.parseInt(borders[7])));
+                                info.setBorder1(new BorderInfo(Integer.parseInt(borders[0]), Integer.parseInt(borders[1]), -64, 320, Integer.parseInt(borders[2]), Integer.parseInt(borders[3]), borders[4]));
+                                info.setBorder2(new BorderInfo(Integer.parseInt(borders[5]), Integer.parseInt(borders[6]), -64, 320, Integer.parseInt(borders[7]), Integer.parseInt(borders[8]), borders[9]));
                             }
                             if(rtLoc.length > 1) {
                                 info.setRandomTeleport(new AreaInfo(Integer.parseInt(rtLoc[0]), Integer.parseInt(rtLoc[1]), Integer.parseInt(rtLoc[2]), Integer.parseInt(rtLoc[3]), Integer.parseInt(rtLoc[4]), Integer.parseInt(rtLoc[5])));
@@ -165,9 +167,10 @@ public class MessageChannelListener implements PluginMessageListener {
                     Location location = new Location(world, x, y, z);
                     if(loadDataTel) {
                         assert world != null;
-                        teleportDataManager.applyData(telPlayer, teleportDataManager.loadNewestPlayerData(telPlayer), x, y, z, world.getName());
+                        TeleportData data = teleportDataManager.loadNewestPlayerData(telPlayer);
+                        teleportDataManager.applyData(telPlayer, data, x, y, z, world.getName());
                     }
-                    telPlayer.teleport(location);
+                    player.teleport(location);
                     break;
                 case "mens:teleport-data-request":
                     Player telDataPlayer = Bukkit.getPlayer(stream.readUTF());

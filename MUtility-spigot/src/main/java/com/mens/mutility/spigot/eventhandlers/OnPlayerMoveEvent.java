@@ -48,7 +48,9 @@ public class OnPlayerMoveEvent implements Listener {
                                 && event.getTo().getBlockZ() <= server.getBorder1().getToZ()) {
                             player.sendMessage(prefix.getKostkujPrefix(true, false) + borderMessage);
                             pendingRequests.add(player);
-                            //TODO
+                            teleportDataManager.saveData(player, player.getLocation().getX(), player.getLocation().getY(), player.getLocation().getZ(), Objects.requireNonNull(player.getLocation().getWorld()).getName());
+                            teleportDataManager.deleteOldPlayerData(player, 30);
+                            setAndSend(player, server, event.getTo().getBlockX(), event.getTo().getBlockY(), event.getTo().getBlockZ(), server.getBorder1().getDirection());
                             setTimer(player);
                         } else if(server.getBorder2().getFromX() <= event.getTo().getBlockX()
                                 && event.getTo().getBlockX() <= server.getBorder2().getToX()
@@ -56,7 +58,9 @@ public class OnPlayerMoveEvent implements Listener {
                                 && event.getTo().getBlockZ() <= server.getBorder2().getToZ()) {
                             player.sendMessage(prefix.getKostkujPrefix(true, false) + borderMessage);
                             pendingRequests.add(player);
-                            //TODO
+                            teleportDataManager.saveData(player, player.getLocation().getX(), player.getLocation().getY(), player.getLocation().getZ(), Objects.requireNonNull(player.getLocation().getWorld()).getName());
+                            teleportDataManager.deleteOldPlayerData(player, 30);
+                            setAndSend(player, server, event.getTo().getBlockX(), event.getTo().getBlockY(), event.getTo().getBlockZ(), server.getBorder2().getDirection());
                             setTimer(player);
                         }
                     }
@@ -83,5 +87,23 @@ public class OnPlayerMoveEvent implements Listener {
         Timer timer = new Timer();
         timer.setOnFinish((sec, tt) -> pendingRequests.removeIf(playerLoc -> playerLoc.getName().equals(player.getName())));
         timer.startTimer(5);
+    }
+
+    private void setAndSend(Player player, ServerInfo server, int x, int y, int z, String direction) {
+        switch(direction) {
+            case "-x":
+                x = -x - 100;
+                break;
+            case "+x":
+                x = -x + 100;
+                break;
+            case "-z":
+                z = -z - 100;
+                break;
+            case "+z":
+                z = -z + 100;
+                break;
+        }
+        messageChannel.sendTeleportRequest(player, x, y, z, "world", "null", true);
     }
 }
