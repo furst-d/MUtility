@@ -17,6 +17,7 @@ import com.mens.mutility.spigot.gui.GUIManager;
 import com.mens.mutility.spigot.inventory.InventoryManager;
 import com.mens.mutility.spigot.inventory.InventoryPair;
 import com.mens.mutility.spigot.inventory.TeleportData;
+import com.mens.mutility.spigot.utils.ServerInfo;
 import com.mens.mutility.spigot.utils.confirmations.Confirmation;
 import com.mens.mutility.spigot.utils.MyStringUtils;
 import com.mens.mutility.spigot.utils.PageList;
@@ -813,8 +814,12 @@ public class Tpdata extends CommandHelp {
         InventoryManager manager = new InventoryManager();
         int inventoryId = data.getId();
         JsonObject inventory = manager.toJsonObject(data.getInventory());
-        String server = Objects.requireNonNull(plugin.getCurrentServer()).getName();
-        updateData(inventoryId, x, y, z, world, server);
+        ServerInfo server = plugin.getCurrentServer();
+        if(server == null) {
+            updateData(inventoryId, x, y, z, world, null);
+        } else {
+            updateData(inventoryId, x, y, z, world, server.getName());
+        }
         manager.loadInventory(player, inventory);
         player.setGameMode(GameMode.valueOf(data.getGamemode()));
         player.setLevel(data.getLevel());

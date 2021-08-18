@@ -79,7 +79,7 @@ public class JsonBuilder {
         return this;
     }
 
-    public JsonBuilder clickEvent( ClickAction action, String value ) {
+    public JsonBuilder clickEvent(ClickAction action, String value) {
         addSegment( "\"clickEvent\":{\"action\":\"" + action.toString().toLowerCase() + "\",\"value\":\"" + value + "\"}" );
         return this;
     }

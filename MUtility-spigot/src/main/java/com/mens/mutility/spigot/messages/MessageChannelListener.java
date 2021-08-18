@@ -4,6 +4,7 @@ import com.google.common.collect.Iterables;
 import com.mens.mutility.spigot.MUtilitySpigot;
 import com.mens.mutility.spigot.chat.PluginColors;
 import com.mens.mutility.spigot.chat.Prefix;
+import com.mens.mutility.spigot.chat.json.JsonBuilder;
 import com.mens.mutility.spigot.commands.commands.tpdata.Tpdata;
 import com.mens.mutility.spigot.portal.PortalManager;
 import com.mens.mutility.spigot.utils.AreaInfo;
@@ -184,7 +185,22 @@ public class MessageChannelListener implements PluginMessageListener {
                         teleportDataManager.applyData(telPlayerRt, teleportDataManager.loadNewestPlayerData(telPlayerRt), telPlayerRt.getLocation().getX(), telPlayerRt.getLocation().getY(), telPlayerRt.getLocation().getZ(), Objects.requireNonNull(telPlayerRt.getLocation().getWorld()).getName());
                     }
                     Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "spreadplayers " + centerX + " " + centerZ + " 500 " + radius + " false " + telPlayerRt.getName());
-                    telPlayerRt.sendMessage(prefix.getRandomTeleportPrefix(true, false) + "Pokud jsi byl portnut do země nebo se ti lokace nelíbí, zadej " + colors.getPrimaryColor() + "/spawn");
+                    JsonBuilder jb = new JsonBuilder()
+                            .addJsonSegment(prefix.getRandomTeleportPrefix(true, true))
+                            .text(": Pokud jsi byl portnut do země nebo se ti lokace nelíbí, klikni ")
+                            .color(colors.getSecondaryColorHEX())
+                            .text("➥Zde")
+                            .color(colors.getPrimaryColorHEX())
+                            .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, new JsonBuilder()
+                                    .text(">> Klikni pro ")
+                                    .color(colors.getSecondaryColorHEX())
+                                    .text("Teleportaci ")
+                                    .color(colors.getPrimaryColorHEX())
+                                    .text("na spawn <<")
+                                    .color(colors.getSecondaryColorHEX())
+                                    .toString() ,true)
+                            .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, "/spawn");
+                    jb.toPlayer(player);
                     break;
             }
 
