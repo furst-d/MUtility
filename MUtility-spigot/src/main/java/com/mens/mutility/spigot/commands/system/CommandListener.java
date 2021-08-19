@@ -350,10 +350,17 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                                                 }
                                             }
                                             break;
-                                        case ONLINE_PLAYERS:
+                                        case LOCAL_ONLINE_PLAYERS:
                                             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                                                 if(onlinePlayer.getName().contains(args[i])) {
                                                     arguments.add(onlinePlayer.getName());
+                                                }
+                                            }
+                                            break;
+                                        case GLOBAL_ONLINE_PLAYERS:
+                                            for (String playerName : plugin.getPlayerNames()) {
+                                                if(playerName.contains(args[i])) {
+                                                    arguments.add(playerName);
                                                 }
                                             }
                                             break;

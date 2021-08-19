@@ -8,7 +8,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-
 public class MessageChannel {
 
     MUtilityBungeeCord plugin = MUtilityBungeeCord.getInstance();
@@ -39,6 +38,20 @@ public class MessageChannel {
             e.printStackTrace();
         }
         player.getServer().sendData("mens:mutility", stream.toByteArray());
+    }
+
+    public void broadcastMessage(String channel, String... messages) {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        DataOutputStream output = new DataOutputStream(stream);
+        try {
+            output.writeUTF(channel);
+            for(String message : messages) {
+                output.writeUTF(message);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        plugin.getProxy().getServers().values().forEach((server) -> server.sendData("mens:mutility", stream.toByteArray()));
     }
 
     public void sendPortalInfoToServer(ProxiedPlayer player, String subchannel, double x, double y, double z, boolean loadInventory) {

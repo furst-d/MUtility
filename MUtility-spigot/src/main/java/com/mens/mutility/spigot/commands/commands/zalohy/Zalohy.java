@@ -139,7 +139,7 @@ public class Zalohy extends CommandHelp {
         });
         final CommandData deleteConfirm = new CommandData(ArgumentTypes.DEFAULT, "confirm", TabCompleterTypes.NONE);
         final CommandData adminPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
-        final CommandData adminName = new CommandData(ArgumentTypes.STRING, TabCompleterTypes.ONLINE_PLAYERS, "mutility.zalohy.admin", CommandExecutors.PLAYER, t -> loadAdminUserList(t.getArgs()[1], (Player) t.getSender(), 1));
+        final CommandData adminName = new CommandData(ArgumentTypes.STRING, TabCompleterTypes.GLOBAL_ONLINE_PLAYERS, "mutility.zalohy.admin", CommandExecutors.PLAYER, t -> loadAdminUserList(t.getArgs()[1], (Player) t.getSender(), 1));
         final CommandData tpID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.admin", CommandExecutors.PLAYER, t -> {
             Player player = (Player) t.getSender();
             int id = Integer.parseInt(t.getArgs()[1]);

@@ -100,7 +100,7 @@ public class Tpdata extends CommandHelp {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
             helpList.getList(Integer.parseInt(t.getArgs()[1]), null).toPlayer((Player) t.getSender());
         });
-        final CommandData showName = new CommandData(ArgumentTypes.STRING, TabCompleterTypes.ONLINE_PLAYERS, "mutility.tpdata.show", CommandExecutors.PLAYER, t -> loadShowNameList(t.getArgs()[1], (Player)t.getSender(), 1));
+        final CommandData showName = new CommandData(ArgumentTypes.STRING, TabCompleterTypes.GLOBAL_ONLINE_PLAYERS, "mutility.tpdata.show", CommandExecutors.PLAYER, t -> loadShowNameList(t.getArgs()[1], (Player)t.getSender(), 1));
         final CommandData rbInv = new CommandData(ArgumentTypes.DEFAULT, "inv", TabCompleterTypes.NONE);
         final CommandData rbAll = new CommandData(ArgumentTypes.DEFAULT, "all", TabCompleterTypes.NONE);
         final CommandData rbPreview = new CommandData(ArgumentTypes.DEFAULT, "preview", TabCompleterTypes.NONE);

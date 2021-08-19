@@ -7,7 +7,7 @@ import com.mens.mutility.bungeecord.requests.PortalRequest;
 import com.mens.mutility.bungeecord.requests.RandomTeleportRequest;
 import com.mens.mutility.bungeecord.requests.TeleportDataRequest;
 import com.mens.mutility.bungeecord.requests.TeleportRequest;
-import net.md_5.bungee.api.ProxyServer;
+import com.mens.mutility.bungeecord.utils.Response;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.ServerSwitchEvent;
@@ -21,16 +21,20 @@ import java.util.concurrent.TimeUnit;
 public class OnServerSwitchEvent implements Listener {
     private final MUtilityBungeeCord plugin;
     private final MessageChannel messageChannel;
+    private final Response response;
     private ScheduledTask st;
 
     public OnServerSwitchEvent() {
         plugin = MUtilityBungeeCord.getInstance();
         messageChannel = new MessageChannel();
+        response = new Response();
     }
 
     @EventHandler
     public void OnServerSwitch(ServerSwitchEvent event) {
-        sendServerInfoResponse(event.getPlayer());
+        response.sendServerInfoResponse(event.getPlayer());
+        response.broadcastPlayersInfo(event.getPlayer(), false);
+
         if(event.getFrom() != null) {
             Optional<TeleportRequest> optTeleportRequests = MessageChannelListener.teleportRequests.stream().filter(request -> request.getPlayer().getName().equals(event.getPlayer().getName())).findFirst();
             if(optTeleportRequests.isPresent()) {
@@ -55,74 +59,25 @@ public class OnServerSwitchEvent implements Listener {
                 messageChannel.sendToServer(request.getPlayer(), "mens:teleport-data-request");
                 MessageChannelListener.teleportDataRequests.remove(request);
             }
-        }
 
-        Optional<PortalRequest> optPortalRequests = MessageChannelListener.portalRequests.stream().filter(request -> request.getPlayer().getName().equals(event.getPlayer().getName())).findFirst();
-        if(optPortalRequests.isPresent()) {
-            PortalRequest request = optPortalRequests.get();
-            String subChannel = "mens:send-to-";
-            switch (request.getWorld()) {
-                case "world":
-                    subChannel += "overworld";
-                    break;
-                case "world_nether":
-                    subChannel += "nether";
-                    break;
-                case "world_the_end":
-                    subChannel += "end";
-                    break;
-            }
-            messageChannel.sendPortalInfoToServer(request.getPlayer(), subChannel, request.getX(), request.getY(), request.getZ(), request.isLoadTeleportData());
-            MessageChannelListener.portalRequests.remove(request);
-        }
-    }
-
-    private void sendServerInfoResponse(ProxiedPlayer player) {
-        StringBuilder servers = new StringBuilder();
-        StringBuilder borders = new StringBuilder();
-        StringBuilder rtLoc = new StringBuilder();
-        for(ServerInfo server : plugin.getProxy().getServers().values()) {
-            servers.append(server.getName()).append(";");
-            boolean isOw = false;
-            String configServerName = "";
-            if(player.getServer().getInfo().getName().equals(server.getName())) {
-                if(server.getName().equals(plugin.getConfiguration().getString("RandomTeleport.Server"))) {
-                    rtLoc.append(plugin.getConfiguration().getInt("RandomTeleport.From.X")).append(";");
-                    rtLoc.append(plugin.getConfiguration().getInt("RandomTeleport.To.X")).append(";");
-                    rtLoc.append(plugin.getConfiguration().getInt("RandomTeleport.From.Y")).append(";");
-                    rtLoc.append(plugin.getConfiguration().getInt("RandomTeleport.To.Y")).append(";");
-                    rtLoc.append(plugin.getConfiguration().getInt("RandomTeleport.From.Z")).append(";");
-                    rtLoc.append(plugin.getConfiguration().getInt("RandomTeleport.To.Z"));
+            Optional<PortalRequest> optPortalRequests = MessageChannelListener.portalRequests.stream().filter(request -> request.getPlayer().getName().equals(event.getPlayer().getName())).findFirst();
+            if(optPortalRequests.isPresent()) {
+                PortalRequest request = optPortalRequests.get();
+                String subChannel = "mens:send-to-";
+                switch (request.getWorld()) {
+                    case "world":
+                        subChannel += "overworld";
+                        break;
+                    case "world_nether":
+                        subChannel += "nether";
+                        break;
+                    case "world_the_end":
+                        subChannel += "end";
+                        break;
                 }
-                if(server.getName().equals(plugin.getConfiguration().getString("Servers.OverWorld 1.Name"))) {
-                    isOw = true;
-                    configServerName = "OverWorld 1";
-                } else if(server.getName().equals(plugin.getConfiguration().getString("Servers.OverWorld 2.Name"))) {
-                    isOw = true;
-                    configServerName = "OverWorld 2";
-                } else if(server.getName().equals(plugin.getConfiguration().getString("Servers.OverWorld 3.Name"))) {
-                    isOw = true;
-                    configServerName = "OverWorld 3";
-                } else if(server.getName().equals(plugin.getConfiguration().getString("Servers.OverWorld 4.Name"))) {
-                    isOw = true;
-                    configServerName = "OverWorld 4";
-                }
-                if(isOw) {
-                    borders.append(plugin.getConfiguration().getInt("Servers." + configServerName + ".TP border 1.From.X")).append(";");
-                    borders.append(plugin.getConfiguration().getInt("Servers." + configServerName + ".TP border 1.To.X")).append(";");
-                    borders.append(plugin.getConfiguration().getInt("Servers." + configServerName + ".TP border 1.From.Z")).append(";");
-                    borders.append(plugin.getConfiguration().getInt("Servers." + configServerName + ".TP border 1.To.Z")).append(";");
-                    borders.append(plugin.getConfiguration().getString("Servers." + configServerName + ".TP border 1.Direction")).append(";");
-                    borders.append(plugin.getConfiguration().getInt("Servers." + configServerName + ".TP border 2.From.X")).append(";");
-                    borders.append(plugin.getConfiguration().getInt("Servers." + configServerName + ".TP border 2.To.X")).append(";");
-                    borders.append(plugin.getConfiguration().getInt("Servers." + configServerName + ".TP border 2.From.Z")).append(";");
-                    borders.append(plugin.getConfiguration().getInt("Servers." + configServerName + ".TP border 2.To.Z")).append(";");
-                    borders.append(plugin.getConfiguration().getString("Servers." + configServerName + ".TP border 2.Direction"));
-                }
-                break;
+                messageChannel.sendPortalInfoToServer(request.getPlayer(), subChannel, request.getX(), request.getY(), request.getZ(), request.isLoadTeleportData());
+                MessageChannelListener.portalRequests.remove(request);
             }
         }
-        servers.substring(0, servers.length() - 1);
-        messageChannel.sendToServer(player, "mens:servers-info-response", servers.toString(), borders.toString(), rtLoc.toString(), player.getServer().getInfo().getName());
     }
 }

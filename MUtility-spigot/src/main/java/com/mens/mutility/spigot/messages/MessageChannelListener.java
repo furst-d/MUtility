@@ -20,6 +20,8 @@ import javax.annotation.Nonnull;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Objects;
 
 
@@ -154,7 +156,15 @@ public class MessageChannelListener implements PluginMessageListener {
                                 plugin.getServers().add(new ServerInfo(serverLoc, false));
                             }
                         }
+                        plugin.getPlayerNames().clear();
                     }
+                    break;
+
+                case "mens:players-info":
+                    String[] players = stream.readUTF().split(";");
+                    plugin.getPlayerNames().clear();
+                    plugin.getPlayerNames().addAll(Arrays.asList(players));
+                    Collections.sort(plugin.getPlayerNames());
                     break;
 
                 case "mens:teleport-request":

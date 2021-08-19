@@ -1,6 +1,7 @@
 package com.mens.mutility.bungeecord;
 
 import com.google.common.io.ByteStreams;
+import com.mens.mutility.bungeecord.events.OnPlayerDisconnectEvent;
 import com.mens.mutility.bungeecord.events.OnServerSwitchEvent;
 import com.mens.mutility.bungeecord.messages.MessageChannelListener;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -61,6 +62,7 @@ public final class MUtilityBungeeCord extends Plugin {
      */
     private void loadEvents() {
         getProxy().getPluginManager().registerListener(this, new OnServerSwitchEvent());
+        getProxy().getPluginManager().registerListener(this, new OnPlayerDisconnectEvent());
         getProxy().getPluginManager().registerListener(this, new MessageChannelListener(this));
     }
 

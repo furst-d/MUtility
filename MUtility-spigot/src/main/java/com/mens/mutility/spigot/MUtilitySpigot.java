@@ -34,6 +34,7 @@ public final class MUtilitySpigot extends JavaPlugin {
     private static MUtilitySpigot instance;
     private List<CommandData> commands;
     private List<ServerInfo> servers;
+    private List<String> playerNames;
     private Database db;
     private PluginManager pm;
 
@@ -57,6 +58,7 @@ public final class MUtilitySpigot extends JavaPlugin {
         loadFiles();
         registerChannels();
         servers = new ArrayList<>();
+        playerNames = new ArrayList<>();
         DiscordManager.startBot(this);
         setMstavba();
     }
@@ -185,6 +187,10 @@ public final class MUtilitySpigot extends JavaPlugin {
             }
         }
         return null;
+    }
+
+    public List<String> getPlayerNames() {
+        return playerNames;
     }
 
     private void setMstavba() {
