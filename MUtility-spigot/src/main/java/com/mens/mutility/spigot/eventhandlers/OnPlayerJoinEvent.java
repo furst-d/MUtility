@@ -9,7 +9,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
 import java.util.List;
-import java.util.TimerTask;
 
 public class OnPlayerJoinEvent implements Listener {
     private final MUtilitySpigot plugin;
@@ -23,20 +22,6 @@ public class OnPlayerJoinEvent implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        if(plugin.getServers().isEmpty()) {
-            new java.util.Timer().schedule(new TimerTask(){
-                int seconds = 0;
-                @Override
-                public void run() {
-                        if (seconds == 5) {
-                            messageChannel.sendToBungeeCord(player, "mens:servers-info-request", player.getName());
-                            this.cancel();
-                        }
-                        seconds++;
-                }
-            },0,1000);
-        }
-
         boolean isVanished = false;
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
             if (!onlinePlayer.canSee(player)) {

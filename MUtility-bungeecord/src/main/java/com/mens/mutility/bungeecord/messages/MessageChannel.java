@@ -13,7 +13,7 @@ public class MessageChannel {
 
     MUtilityBungeeCord plugin = MUtilityBungeeCord.getInstance();
 
-    public  void sendToServer(ServerInfo server, String channel, String... messages) {
+    public void sendToServer(ServerInfo server, String channel, String... messages) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         DataOutputStream output = new DataOutputStream(stream);
         try {
@@ -27,27 +27,25 @@ public class MessageChannel {
         server.sendData("mens:mutility", stream.toByteArray());
     }
 
-    public  void sendToServer(ServerInfo server, String channel, String message, String message2) {
+    public void sendToServer(ProxiedPlayer player, String channel, String... messages) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         DataOutputStream output = new DataOutputStream(stream);
-
         try {
             output.writeUTF(channel);
-            output.writeUTF(message);
-            output.writeUTF(message2);
+            for(String message : messages) {
+                output.writeUTF(message);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        server.sendData("mens:mutility", stream.toByteArray());
+        player.getServer().sendData("mens:mutility", stream.toByteArray());
     }
 
-    public void sendPortalInfoToServer(ProxiedPlayer player, String subchannel, ServerInfo server, double x, double y, double z, boolean loadInventory)
-    {
+    public void sendPortalInfoToServer(ProxiedPlayer player, String subchannel, double x, double y, double z, boolean loadInventory) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         DataOutputStream output = new DataOutputStream(stream);
         try {
             output.writeUTF(subchannel);
-            output.writeUTF(player.getName());
             output.writeBoolean(loadInventory);
             output.writeDouble(x);
             output.writeDouble(y);
@@ -55,7 +53,7 @@ public class MessageChannel {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        server.sendData( "mens:mutility", stream.toByteArray());
+        player.getServer().sendData( "mens:mutility", stream.toByteArray());
     }
 
     public void sendPermissionRequestBroadcast(String subChannel, String permission, String returnChannel) {
@@ -71,12 +69,11 @@ public class MessageChannel {
         plugin.getProxy().getServers().values().forEach((server) -> server.sendData("mens:mutility", stream.toByteArray()));
     }
 
-    public void sendTeleportRequest(ServerInfo server, String player, double x, double y, double z, boolean loadTeleportData, String world) {
+    public void sendTeleportRequest(ProxiedPlayer player, double x, double y, double z, boolean loadTeleportData, String world) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         DataOutputStream output = new DataOutputStream(stream);
         try {
             output.writeUTF("mens:teleport-request");
-            output.writeUTF(player);
             output.writeDouble(x);
             output.writeDouble(y);
             output.writeDouble(z);
@@ -85,15 +82,14 @@ public class MessageChannel {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        server.sendData( "mens:mutility", stream.toByteArray());
+        player.getServer().sendData( "mens:mutility", stream.toByteArray());
     }
 
-    public void sendRandomTeleportRequest(ServerInfo server, String player, double centerX, double centerZ, int radius, boolean loadTeleportData) {
+    public void sendRandomTeleportRequest(ProxiedPlayer player, double centerX, double centerZ, int radius, boolean loadTeleportData) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         DataOutputStream output = new DataOutputStream(stream);
         try {
             output.writeUTF("mens:random-teleport-request");
-            output.writeUTF(player);
             output.writeDouble(centerX);
             output.writeDouble(centerZ);
             output.writeInt(radius);
@@ -101,6 +97,6 @@ public class MessageChannel {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        server.sendData( "mens:mutility", stream.toByteArray());
+        player.getServer().sendData( "mens:mutility", stream.toByteArray());
     }
 }

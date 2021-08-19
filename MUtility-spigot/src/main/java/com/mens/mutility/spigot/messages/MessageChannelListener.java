@@ -51,8 +51,6 @@ public class MessageChannelListener implements PluginMessageListener {
             String subChannel = stream.readUTF();
             switch(subChannel) {
                 case "mens:send-to-nether":
-                    Player telPlayerNe = Bukkit.getPlayer(stream.readUTF());
-                    assert telPlayerNe != null;
                     Location loc = player.getLocation();
                     boolean loadDataNe = stream.readBoolean();
                     double xNe = stream.readDouble();
@@ -64,18 +62,17 @@ public class MessageChannelListener implements PluginMessageListener {
                     loc.setZ(zNe);
                     loc.setWorld(WorldCreator.name(worldNe).createWorld());
                     if(loadDataNe) {
-                        teleportDataManager.applyData(telPlayerNe, teleportDataManager.loadNewestPlayerData(telPlayerNe), xNe, yNe, zNe, worldNe);
+                        teleportDataManager.applyData(player, teleportDataManager.loadNewestPlayerData(player), xNe, yNe, zNe, worldNe);
                     }
                     PortalManager pm = new PortalManager(player, loc);
                     pm.findPortal();
                     pm.createPortal();
                     if(pm.isPrepared()) {
-                        telPlayerNe.teleport(pm.getPortalLocation());
+                        player.teleport(pm.getPortalLocation());
                     }
                     break;
+
                 case "mens:send-to-overworld":
-                    Player telPlayerOw = Bukkit.getPlayer(stream.readUTF());
-                    assert telPlayerOw != null;
                     loc = player.getLocation();
                     boolean loadDataOw = stream.readBoolean();
                     double xOw = stream.readDouble();
@@ -87,18 +84,17 @@ public class MessageChannelListener implements PluginMessageListener {
                     loc.setZ(zOw);
                     loc.setWorld(WorldCreator.name(worldOw).createWorld());
                     if(loadDataOw) {
-                        teleportDataManager.applyData(telPlayerOw, teleportDataManager.loadNewestPlayerData(telPlayerOw), xOw, yOw, zOw, worldOw);
+                        teleportDataManager.applyData(player, teleportDataManager.loadNewestPlayerData(player), xOw, yOw, zOw, worldOw);
                     }
                     pm = new PortalManager(player, loc);
                     pm.findPortal();
                     pm.createPortal();
                     if(pm.isPrepared()) {
-                        telPlayerOw.teleport(pm.getPortalLocation());
+                        player.teleport(pm.getPortalLocation());
                     }
                     break;
+
                 case "mens:send-to-end":
-                    Player telPlayerEnd = Bukkit.getPlayer(stream.readUTF());
-                    assert telPlayerEnd != null;
                     loc = player.getLocation();
                     boolean loadDataEnd = stream.readBoolean();
                     double xEnd = 98;
@@ -110,13 +106,14 @@ public class MessageChannelListener implements PluginMessageListener {
                     loc.setZ(zEnd);
                     loc.setWorld(WorldCreator.name(worldEnd).createWorld());
                     if(loadDataEnd) {
-                        teleportDataManager.applyData(telPlayerEnd, teleportDataManager.loadNewestPlayerData(telPlayerEnd), xEnd, yEnd, zEnd, worldEnd);
+                        teleportDataManager.applyData(player, teleportDataManager.loadNewestPlayerData(player), xEnd, yEnd, zEnd, worldEnd);
                     }
                     pm = new PortalManager(player, loc);
                     if(pm.createEndPlatform()) {
-                        telPlayerEnd.teleport(pm.getEndPlatformLocation());
+                        player.teleport(pm.getEndPlatformLocation());
                     }
                     break;
+
                 case "mens:permissionRequest":
                     String permission = stream.readUTF();
                     String returnChannel = stream.readUTF();
@@ -134,31 +131,33 @@ public class MessageChannelListener implements PluginMessageListener {
                     player = Iterables.getFirst(Bukkit.getOnlinePlayers(), null);
                     messageChannel.sendToBungeeCord(player, returnChannel, permPlayers.toString());
                     break;
+
                 case "mens:servers-info-response":
-                    String[] servers = stream.readUTF().split(";");
-                    String[] borders = stream.readUTF().split(";");
-                    String[] rtLoc = stream.readUTF().split(";");
-                    String serverName = stream.readUTF();
-                    plugin.getServers().clear();
-                    for(String serverLoc : servers) {
-                        if(serverLoc.equals(serverName)) {
-                            ServerInfo info = new ServerInfo(serverLoc, true);
-                            if(borders.length > 1) {
-                                info.setBorder1(new BorderInfo(Integer.parseInt(borders[0]), Integer.parseInt(borders[1]), -64, 320, Integer.parseInt(borders[2]), Integer.parseInt(borders[3]), borders[4]));
-                                info.setBorder2(new BorderInfo(Integer.parseInt(borders[5]), Integer.parseInt(borders[6]), -64, 320, Integer.parseInt(borders[7]), Integer.parseInt(borders[8]), borders[9]));
+                    if(plugin.getServers().isEmpty()) {
+                        String[] servers = stream.readUTF().split(";");
+                        String[] borders = stream.readUTF().split(";");
+                        String[] rtLoc = stream.readUTF().split(";");
+                        String serverName = stream.readUTF();
+                        plugin.getServers().clear();
+                        for(String serverLoc : servers) {
+                            if(serverLoc.equals(serverName)) {
+                                ServerInfo info = new ServerInfo(serverLoc, true);
+                                if(borders.length > 1) {
+                                    info.setBorder1(new BorderInfo(Integer.parseInt(borders[0]), Integer.parseInt(borders[1]), -64, 320, Integer.parseInt(borders[2]), Integer.parseInt(borders[3]), borders[4]));
+                                    info.setBorder2(new BorderInfo(Integer.parseInt(borders[5]), Integer.parseInt(borders[6]), -64, 320, Integer.parseInt(borders[7]), Integer.parseInt(borders[8]), borders[9]));
+                                }
+                                if(rtLoc.length > 1) {
+                                    info.setRandomTeleport(new AreaInfo(Integer.parseInt(rtLoc[0]), Integer.parseInt(rtLoc[1]), Integer.parseInt(rtLoc[2]), Integer.parseInt(rtLoc[3]), Integer.parseInt(rtLoc[4]), Integer.parseInt(rtLoc[5])));
+                                }
+                                plugin.getServers().add(info);
+                            } else {
+                                plugin.getServers().add(new ServerInfo(serverLoc, false));
                             }
-                            if(rtLoc.length > 1) {
-                                info.setRandomTeleport(new AreaInfo(Integer.parseInt(rtLoc[0]), Integer.parseInt(rtLoc[1]), Integer.parseInt(rtLoc[2]), Integer.parseInt(rtLoc[3]), Integer.parseInt(rtLoc[4]), Integer.parseInt(rtLoc[5])));
-                            }
-                            plugin.getServers().add(info);
-                        } else {
-                            plugin.getServers().add(new ServerInfo(serverLoc, false));
                         }
                     }
                     break;
+
                 case "mens:teleport-request":
-                    Player telPlayer = Bukkit.getPlayer(stream.readUTF());
-                    assert telPlayer != null;
                     double x = stream.readDouble();
                     double y = stream.readDouble();
                     double z = stream.readDouble();
@@ -167,27 +166,24 @@ public class MessageChannelListener implements PluginMessageListener {
                     Location location = new Location(world, x, y, z);
                     if(loadDataTel) {
                         assert world != null;
-                        TeleportData data = teleportDataManager.loadNewestPlayerData(telPlayer);
-                        teleportDataManager.applyData(telPlayer, data, x, y, z, world.getName());
+                        TeleportData data = teleportDataManager.loadNewestPlayerData(player);
+                        teleportDataManager.applyData(player, data, x, y, z, world.getName());
                     }
                     player.teleport(location);
                     break;
+
                 case "mens:teleport-data-request":
-                    Player telDataPlayer = Bukkit.getPlayer(stream.readUTF());
-                    assert telDataPlayer != null;
-                    teleportDataManager.applyData(telDataPlayer, teleportDataManager.loadNewestPlayerData(telDataPlayer), telDataPlayer.getLocation().getX(), telDataPlayer.getLocation().getY(), telDataPlayer.getLocation().getZ(), Objects.requireNonNull(telDataPlayer.getLocation().getWorld()).getName());
+                    teleportDataManager.applyData(player, teleportDataManager.loadNewestPlayerData(player), player.getLocation().getX(), player.getLocation().getY(), player.getLocation().getZ(), Objects.requireNonNull(player.getLocation().getWorld()).getName());
                     break;
+
                 case "mens:random-teleport-request":
-                    Player telPlayerRt = Bukkit.getPlayer(stream.readUTF());
-                    assert telPlayerRt != null;
                     double centerX = stream.readDouble();
                     double centerZ = stream.readDouble();
                     int radius = stream.readInt();
                     boolean loadDataRt = stream.readBoolean();
                     if(loadDataRt) {
-                        teleportDataManager.applyData(telPlayerRt, teleportDataManager.loadNewestPlayerData(telPlayerRt), telPlayerRt.getLocation().getX(), telPlayerRt.getLocation().getY(), telPlayerRt.getLocation().getZ(), Objects.requireNonNull(telPlayerRt.getLocation().getWorld()).getName());
+                        teleportDataManager.applyData(player, teleportDataManager.loadNewestPlayerData(player), player.getLocation().getX(), player.getLocation().getY(), player.getLocation().getZ(), Objects.requireNonNull(player.getLocation().getWorld()).getName());
                     }
-                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "spreadplayers " + centerX + " " + centerZ + " 500 " + radius + " false " + telPlayerRt.getName());
                     JsonBuilder jb = new JsonBuilder()
                             .addJsonSegment(prefix.getRandomTeleportPrefix(true, true))
                             .text(": Pokud jsi byl portnut do země nebo se ti lokace nelíbí, klikni ")
@@ -204,9 +200,11 @@ public class MessageChannelListener implements PluginMessageListener {
                                     .toString() ,true)
                             .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, "/spawn");
                     jb.toPlayer(player);
+                    /*loc = player.getLocation();
+                    loc.setX((int)(Math.random() * ((centerX + radius) - (centerX - radius)) + (centerX - radius)));*/
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "spreadplayers " + centerX + " " + centerZ + " 500 " + radius + " false " + player.getName());
                     break;
             }
-
         } catch (IOException e) {
             e.printStackTrace();
         }

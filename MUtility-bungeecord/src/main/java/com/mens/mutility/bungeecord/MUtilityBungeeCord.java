@@ -1,8 +1,7 @@
 package com.mens.mutility.bungeecord;
 
 import com.google.common.io.ByteStreams;
-import com.mens.mutility.bungeecord.commands.Lobby;
-import com.mens.mutility.bungeecord.events.OnPostLoginEvent;
+import com.mens.mutility.bungeecord.events.OnServerSwitchEvent;
 import com.mens.mutility.bungeecord.messages.MessageChannelListener;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
@@ -25,7 +24,6 @@ public final class MUtilityBungeeCord extends Plugin {
         getLogger().info("Plugin spusten!");
 
         loadConfig("config.yml");
-        loadCommands();
         loadEvents();
         registerChannels();
     }
@@ -59,17 +57,10 @@ public final class MUtilityBungeeCord extends Plugin {
     }
 
     /**
-     * Metoda pro registraci prikazu
-     */
-    private void loadCommands() {
-        getProxy().getPluginManager().registerCommand(this, new Lobby());
-    }
-
-    /**
      * Metoda pro registraci eventu
      */
     private void loadEvents() {
-        getProxy().getPluginManager().registerListener(this, new OnPostLoginEvent());
+        getProxy().getPluginManager().registerListener(this, new OnServerSwitchEvent());
         getProxy().getPluginManager().registerListener(this, new MessageChannelListener(this));
     }
 
