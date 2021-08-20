@@ -463,7 +463,7 @@ public class PageList {
                 sb.append(StringUtils.repeat(" ", (bottomLineSpaces + extraDistance)));
             } else {
                 bottomFinalLength = strUt.getStringWidth(ChatColor.stripColor(StringUtils.repeat("I", 50)));
-                extraDistance = (int)Math.round((topLineFinalLength - bottomFinalLength) / spaceLength);
+                extraDistance = (int)((topLineFinalLength - bottomFinalLength) / 0.6);
                 sb.append("{\"text\":\"\n\"},");
                 sb.append("{\"text\":\"");
                 sb.append(StringUtils.repeat(" ", (50 + extraDistance)));
