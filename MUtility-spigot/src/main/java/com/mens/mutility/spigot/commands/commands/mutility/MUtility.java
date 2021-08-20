@@ -21,7 +21,7 @@ public class MUtility extends CommandHelp {
         this.plugin = plugin;
         prefix = new Prefix();
         helpList = new PageList(10, prefix.getMutilityPrefix(true, true).replace("]", " - nápověda]"), "/mutility");
-        pluginHelpList = new PageList(10, prefix.getMutilityPrefix(true, true).replace("]", " - nápověda]"), "/mutility");
+        pluginHelpList = new PageList(10, prefix.getMutilityPrefix(true, true).replace("]", " - nápověda]"), "/mutility help");
     }
 
     /**
