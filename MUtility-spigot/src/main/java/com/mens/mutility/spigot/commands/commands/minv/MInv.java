@@ -19,7 +19,6 @@ import com.mens.mutility.spigot.inventory.InventoryNamePair;
 import com.mens.mutility.spigot.inventory.InventoryPair;
 import com.mens.mutility.spigot.utils.*;
 import com.mens.mutility.spigot.utils.confirmations.Confirmation;
-import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -361,9 +360,6 @@ public class MInv extends CommandHelp {
                 }
             }
             loadList.getList(page, null).toPlayer(player);
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            loadLoadData(player, page);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -493,9 +489,6 @@ public class MInv extends CommandHelp {
                 }
             }
             manageList.getList(page, null).toPlayer(player);
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            loadManageListData(player, page);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -527,9 +520,6 @@ public class MInv extends CommandHelp {
                 stm.setObject(4, inventory.toString());
             }
             stm.execute();
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            saveInventory(player, inventory, inventoryName, quickSave);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -547,9 +537,6 @@ public class MInv extends CommandHelp {
             stm.setInt(2, id_user_record);
             stm.setInt(3, playerManager.getUserId(player.getName()));
             stm.execute();
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            updateInventory(player, id_user_record, inventory);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -568,9 +555,6 @@ public class MInv extends CommandHelp {
             if(rs.next()) {
                 count = rs.getInt(1);
             }
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            return getQuickSaveCount(player);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -590,9 +574,6 @@ public class MInv extends CommandHelp {
             if(rs.next()) {
                 count = rs.getInt(1);
             }
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            return getQuickSaveCount(player);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -612,9 +593,6 @@ public class MInv extends CommandHelp {
             if(rs.next()) {
                 count = rs.getInt(1);
             }
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            return isInventory(player, id_user_record);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -636,9 +614,6 @@ public class MInv extends CommandHelp {
                 inventory = rs.getString(1);
                 inventory_name = rs.getString(2);
             }
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            return getInventory(player, id_user_record);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -657,9 +632,6 @@ public class MInv extends CommandHelp {
             stm.setInt(2, id_user_record);
             stm.setInt(3, playerManager.getUserId(player.getName()));
             stm.execute();
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            updateInventoryName(player, id_user_record, inventory_name);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -680,9 +652,6 @@ public class MInv extends CommandHelp {
             stm.setInt(1, id_user_record);
             stm.setInt(2, playerManager.getUserId(player.getName()));
             stm.execute();
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            deleteInventory(player, id_user_record);
         } catch (SQLException e) {
             e.printStackTrace();
         }

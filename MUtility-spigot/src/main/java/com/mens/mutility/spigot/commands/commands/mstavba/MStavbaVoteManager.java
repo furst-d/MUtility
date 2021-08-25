@@ -7,7 +7,6 @@ import com.mens.mutility.spigot.chat.json.JsonBuilder;
 import com.mens.mutility.spigot.database.Database;
 import com.mens.mutility.spigot.database.DatabaseTables;
 import com.mens.mutility.spigot.utils.*;
-import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 import org.bukkit.entity.Player;
 
 import java.sql.PreparedStatement;
@@ -105,9 +104,6 @@ public class MStavbaVoteManager {
             if(rs.next()) {
                 season_id = rs.getInt(1);
             }
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            return getMaxSeason();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -127,9 +123,6 @@ public class MStavbaVoteManager {
             if(rs.next()) {
                 votes = rs.getInt(1);
             }
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            return getPlayerVoteNumber(player, seasonId);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -144,9 +137,6 @@ public class MStavbaVoteManager {
             PreparedStatement stm = db.getCon().prepareStatement("DELETE FROM " + tables.getStavbaKeysTable() + " WHERE user_id = ?");
             stm.setInt(1, playerManager.getUserId(player.getName()));
             stm.execute();
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            deletePlayerKey(player);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -161,9 +151,6 @@ public class MStavbaVoteManager {
             stm.setInt(1, playerManager.getUserId(player.getName()));
             stm.setString(2, key);
             stm.execute();
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            insertPlayerKey(player, key);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -180,13 +167,10 @@ public class MStavbaVoteManager {
             if(rs.next()) {
                 closeDate = rs.getString(1);
             }
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             LocalDateTime close_date = LocalDateTime.parse(closeDate, formatter);
             LocalDateTime now = LocalDateTime.now();
             active = now.isBefore(close_date);
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            synchronizeActive();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }

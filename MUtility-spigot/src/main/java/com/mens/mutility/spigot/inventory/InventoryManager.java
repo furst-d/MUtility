@@ -4,9 +4,9 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.server.v1_16_R3.MojangsonParser;
-import net.minecraft.server.v1_16_R3.NBTTagCompound;
-import org.bukkit.craftbukkit.v1_16_R3.inventory.CraftItemStack;
+import net.minecraft.nbt.MojangsonParser;
+import net.minecraft.nbt.NBTTagCompound;
+import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -24,15 +24,14 @@ public class InventoryManager {
         String offHand = inventoryJson.get("offHand").getAsJsonObject().get("ntb").getAsString();
 
         try {
-            player.getInventory().setHelmet(CraftItemStack.asBukkitCopy(net.minecraft.server.v1_16_R3.ItemStack.a(MojangsonParser.parse(helmet))));
-            player.getInventory().setChestplate(CraftItemStack.asBukkitCopy(net.minecraft.server.v1_16_R3.ItemStack.a(MojangsonParser.parse(chestplate))));
-            player.getInventory().setLeggings(CraftItemStack.asBukkitCopy(net.minecraft.server.v1_16_R3.ItemStack.a(MojangsonParser.parse(leggings))));
-            player.getInventory().setBoots(CraftItemStack.asBukkitCopy(net.minecraft.server.v1_16_R3.ItemStack.a(MojangsonParser.parse(boots))));
-            player.getInventory().setItemInOffHand(CraftItemStack.asBukkitCopy(net.minecraft.server.v1_16_R3.ItemStack.a(MojangsonParser.parse(offHand))));
+            player.getInventory().setHelmet(CraftItemStack.asBukkitCopy(net.minecraft.world.item.ItemStack.a(MojangsonParser.parse(helmet))));
+            player.getInventory().setChestplate(CraftItemStack.asBukkitCopy(net.minecraft.world.item.ItemStack.a(MojangsonParser.parse(chestplate))));
+            player.getInventory().setLeggings(CraftItemStack.asBukkitCopy(net.minecraft.world.item.ItemStack.a(MojangsonParser.parse(leggings))));
+            player.getInventory().setBoots(CraftItemStack.asBukkitCopy(net.minecraft.world.item.ItemStack.a(MojangsonParser.parse(boots))));
+            player.getInventory().setItemInOffHand(CraftItemStack.asBukkitCopy(net.minecraft.world.item.ItemStack.a(MojangsonParser.parse(offHand))));
 
             for (int i = 0; i < itemsJson.size(); i++) {
-                player.getInventory().setItem(i, CraftItemStack.asBukkitCopy(net.minecraft.server.v1_16_R3.ItemStack
-                        .a(MojangsonParser.parse(itemsJson.get(i).getAsJsonObject().get("ntb").getAsString()))));
+                player.getInventory().setItem(i, CraftItemStack.asBukkitCopy(net.minecraft.world.item.ItemStack.a(MojangsonParser.parse(itemsJson.get(i).getAsJsonObject().get("ntb").getAsString()))));
             }
         } catch (CommandSyntaxException e) {
             e.printStackTrace();
@@ -94,15 +93,14 @@ public class InventoryManager {
 
         try {
             for (int i = 0; i < itemsJson.size(); i++) {
-                items.add(CraftItemStack.asBukkitCopy(net.minecraft.server.v1_16_R3.ItemStack
-                        .a(MojangsonParser.parse(itemsJson.get(i).getAsJsonObject().get("ntb").getAsString()))));
+                items.add(CraftItemStack.asBukkitCopy(net.minecraft.world.item.ItemStack.a(MojangsonParser.parse(itemsJson.get(i).getAsJsonObject().get("ntb").getAsString()))));
             }
 
-            armor.add(CraftItemStack.asBukkitCopy(net.minecraft.server.v1_16_R3.ItemStack.a(MojangsonParser.parse(helmet))));
-            armor.add(CraftItemStack.asBukkitCopy(net.minecraft.server.v1_16_R3.ItemStack.a(MojangsonParser.parse(chestplate))));
-            armor.add(CraftItemStack.asBukkitCopy(net.minecraft.server.v1_16_R3.ItemStack.a(MojangsonParser.parse(leggings))));
-            armor.add(CraftItemStack.asBukkitCopy(net.minecraft.server.v1_16_R3.ItemStack.a(MojangsonParser.parse(boots))));
-            armor.add(CraftItemStack.asBukkitCopy(net.minecraft.server.v1_16_R3.ItemStack.a(MojangsonParser.parse(offHand))));
+            armor.add(CraftItemStack.asBukkitCopy(net.minecraft.world.item.ItemStack.a(MojangsonParser.parse(helmet))));
+            armor.add(CraftItemStack.asBukkitCopy(net.minecraft.world.item.ItemStack.a(MojangsonParser.parse(chestplate))));
+            armor.add(CraftItemStack.asBukkitCopy(net.minecraft.world.item.ItemStack.a(MojangsonParser.parse(leggings))));
+            armor.add(CraftItemStack.asBukkitCopy(net.minecraft.world.item.ItemStack.a(MojangsonParser.parse(boots))));
+            armor.add(CraftItemStack.asBukkitCopy(net.minecraft.world.item.ItemStack.a(MojangsonParser.parse(offHand))));
 
         } catch (CommandSyntaxException e) {
             e.printStackTrace();

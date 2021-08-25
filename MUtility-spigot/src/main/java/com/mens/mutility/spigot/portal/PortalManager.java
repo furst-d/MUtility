@@ -1,12 +1,14 @@
 package com.mens.mutility.spigot.portal;
 
-import net.minecraft.server.v1_16_R3.*;
-import net.minecraft.server.v1_16_R3.BlockUtil.Rectangle;
+import net.minecraft.BlockUtil.*;
+import net.minecraft.core.BlockPosition;
+import net.minecraft.core.EnumDirection;
+import net.minecraft.world.level.portal.PortalTravelAgent;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.WorldCreator;
-import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_17_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.util.Optional;
@@ -64,9 +66,9 @@ public class PortalManager {
     public void createPortal() {
         int createRadius = getCreateRadius();
         while(!portalRect.isPresent() && createRadius <= 512) {
-            portalRect = portalAgent.createPortal(new BlockPosition(searchLocation.getX(), searchLocation.getY(), searchLocation.getZ()), EnumDirection.EnumAxis.X, ((CraftPlayer) player).getHandle(), createRadius);
+            portalRect = portalAgent.createPortal(new BlockPosition(searchLocation.getX(), searchLocation.getY(), searchLocation.getZ()), EnumDirection.EnumAxis.a, ((CraftPlayer) player).getHandle(), createRadius);
             if(!portalRect.isPresent()) {
-                portalRect = portalAgent.createPortal(new BlockPosition(searchLocation.getX(), searchLocation.getY(), searchLocation.getZ()), EnumDirection.EnumAxis.Z, ((CraftPlayer) player).getHandle(), createRadius);
+                portalRect = portalAgent.createPortal(new BlockPosition(searchLocation.getX(), searchLocation.getY(), searchLocation.getZ()), EnumDirection.EnumAxis.c, ((CraftPlayer) player).getHandle(), createRadius);
             }
             createRadius += 16;
         }
@@ -95,9 +97,9 @@ public class PortalManager {
 
     public boolean isPrepared() {
         if(portalRect.isPresent()) {
-            portalLocation.setX(portalRect.get().origin.getX() + 0.5);
-            portalLocation.setY(portalRect.get().origin.getY());
-            portalLocation.setZ(portalRect.get().origin.getZ() + 0.5);
+            portalLocation.setX(portalRect.get().a.getX() + 0.5);
+            portalLocation.setY(portalRect.get().a.getY());
+            portalLocation.setZ(portalRect.get().a.getZ() + 0.5);
             portalLocation.setWorld(searchLocation.getWorld());
             return true;
         }

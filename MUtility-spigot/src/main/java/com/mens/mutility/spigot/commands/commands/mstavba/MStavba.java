@@ -15,7 +15,6 @@ import com.mens.mutility.spigot.messages.MessageChannel;
 import com.mens.mutility.spigot.utils.MyStringUtils;
 import com.mens.mutility.spigot.utils.PageList;
 import com.mens.mutility.spigot.utils.PlayerManager;
-import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.entity.Player;
 
@@ -264,9 +263,6 @@ public class MStavba extends CommandHelp {
                             .getJsonSegments());
             }
             showList.getList(page, null).toPlayer(player);
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            loadShowList(player, page);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -286,9 +282,6 @@ public class MStavba extends CommandHelp {
                 info[1] = rs.getString(2).replace("\"", "'");
                 info[2] = rs.getString(3).replace("\"", "'");
             }
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            return getBuildingInfo(id);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -306,9 +299,6 @@ public class MStavba extends CommandHelp {
             if(rs.next()) {
                 season_id = rs.getInt(1);
             }
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            return getMaxSeason();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -327,9 +317,6 @@ public class MStavba extends CommandHelp {
             if(rs.next()) {
                 buildingId = rs.getInt(1);
             }
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            return getNewBuildingId(seasonId);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -349,9 +336,6 @@ public class MStavba extends CommandHelp {
             stm.setString(5, title);
             stm.setString(6, image);
             stm.execute();
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            insertBuilding(seasonId, buildingId, forumId, userId, title, image);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -365,9 +349,6 @@ public class MStavba extends CommandHelp {
             PreparedStatement stm = db.getCon().prepareStatement("UPDATE web_forum_posts SET active = 0 WHERE id = ?");
             stm.setInt(1, forumId);
             stm.execute();
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            lockForumPost(forumId);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -387,9 +368,6 @@ public class MStavba extends CommandHelp {
             stm.setString(4, date);
             stm.setString(5, date);
             stm.execute();
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            insertAcceptComment(forumId, months);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -407,9 +385,6 @@ public class MStavba extends CommandHelp {
             if(rs.next()) {
                 desc = rs.getString(1);
             }
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            return getBuildingDesc(seasonId);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -432,9 +407,6 @@ public class MStavba extends CommandHelp {
             stm.setInt(7, 1);
             stm.setString(8, description);
             stm.execute();
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            createCompetition(seasonId, adminId, startDate, endDate, description);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -447,9 +419,6 @@ public class MStavba extends CommandHelp {
             }
             PreparedStatement stm = db.getCon().prepareStatement("UPDATE " + tables.getStavbaSeasonsTable() + " SET active = 0");
             stm.execute();
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            unsetSeasonActive();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }

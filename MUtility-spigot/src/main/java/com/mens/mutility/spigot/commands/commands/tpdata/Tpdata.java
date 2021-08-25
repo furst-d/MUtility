@@ -23,7 +23,6 @@ import com.mens.mutility.spigot.utils.confirmations.Confirmation;
 import com.mens.mutility.spigot.utils.MyStringUtils;
 import com.mens.mutility.spigot.utils.PageList;
 import com.mens.mutility.spigot.utils.PlayerManager;
-import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -317,9 +316,6 @@ public class Tpdata extends CommandHelp {
             PreparedStatement stm = db.getCon().prepareStatement("SELECT id, user_id, fromX, fromY, fromZ, fromWorld, fromServer, toX, toY, toZ, toWorld, toServer, gamemode, exp, level, hunger, health, fly, effects, created_date, completed FROM " + tables.getTeleportDataTable() + " ORDER BY created_date DESC");
             ResultSet rs =  stm.executeQuery();
             loadFormattedList(rs, showList, false);
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            loadShowList();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -333,9 +329,6 @@ public class Tpdata extends CommandHelp {
             PreparedStatement stm = db.getCon().prepareStatement("SELECT id, user_id, fromX, fromY, fromZ, fromWorld, fromServer, toX, toY, toZ, toWorld, toServer, gamemode, exp, level, hunger, health, fly, effects, created_date, completed FROM " + tables.getTeleportDataTable() + " WHERE created_date > SYSDATE() - INTERVAL 1 DAY ");
             ResultSet rs =  stm.executeQuery();
             loadFormattedList(rs, showList,true);
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            updateShowList();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -351,9 +344,6 @@ public class Tpdata extends CommandHelp {
             showNameList.setTitleJson(prefix.getTpDataPrefix(true, true).replace("]", " - " + playerName + "]"));
             showNameList.setRows(showList.getRows().stream().filter(x -> x.contains(playerName)).collect(Collectors.toList()));
             showList.getList(page, showNameList).toPlayer(player);
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            loadShowNameList(playerName, player, page);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -605,9 +595,6 @@ public class Tpdata extends CommandHelp {
                     list.add(jb.getJsonSegments());
                 }
             }
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            loadFormattedList(rs, list, update);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -627,9 +614,6 @@ public class Tpdata extends CommandHelp {
                 inventory = rs.getString(1);
                 inventory_name = playerManager.getUsername(rs.getInt(2)) + " - " + id;
             }
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            return getInventory(player, id);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -648,9 +632,6 @@ public class Tpdata extends CommandHelp {
             if(rs.next()) {
                 count = rs.getInt(1);
             }
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            return isData(id);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -682,9 +663,6 @@ public class Tpdata extends CommandHelp {
             stm.setString(15, strUt.getCurrentFormattedDate());
             stm.setInt(16, 0);
             stm.execute();
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            saveData(player, x, y, z, world);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -705,9 +683,6 @@ public class Tpdata extends CommandHelp {
             stm.setInt(6, 1);
             stm.setInt(7, id);
             stm.execute();
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            updateData(id, x, y, z, world, server);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -722,9 +697,6 @@ public class Tpdata extends CommandHelp {
             stm = db.getCon().prepareStatement("DELETE FROM " + tables.getTeleportDataTable() + " WHERE created_date < NOW() - INTERVAL ? DAY");
             stm.setInt(1, days);
             stm.execute();
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            deleteOldPlayerData(player, days);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -740,9 +712,6 @@ public class Tpdata extends CommandHelp {
             stm.setInt(1, playerManager.getUserId(player.getName()));
             ResultSet rs =  stm.executeQuery();
             return getData(rs);
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            loadNewestPlayerData(player);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -759,9 +728,6 @@ public class Tpdata extends CommandHelp {
             stm.setInt(1, id);
             ResultSet rs =  stm.executeQuery();
             return getData(rs);
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            loadDataById(id);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -801,9 +767,6 @@ public class Tpdata extends CommandHelp {
                 data.setActivePotionEffects(effects);
                 return data;
             }
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            getData(rs);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }

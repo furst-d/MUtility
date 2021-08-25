@@ -19,7 +19,6 @@ import com.mens.mutility.spigot.utils.Checker;
 import com.mens.mutility.spigot.utils.confirmations.Confirmation;
 import com.mens.mutility.spigot.utils.MyStringUtils;
 import com.mens.mutility.spigot.utils.PageList;
-import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.entity.Player;
 
@@ -103,7 +102,7 @@ public class Event extends CommandHelp {
             String name = strUt.getStringFromArgs(t.getArgs(), 1);
             createEvent(name, (Player) t.getSender());
         });
-        final CommandData manageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.eventy.manage", CommandExecutors.PLAYER, t -> loadManageIDListData(t.getArgs()[1], (Player) t.getSender(), 1));
+        final CommandData manageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.eventy.manage", CommandExecutors.PLAYER, t -> loadManageIDListData(t.getArgs()[1], (Player) t.getSender()));
         final CommandData page = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         final CommandData messageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.eventy.message", CommandExecutors.PLAYER, t -> {
             int id = Integer.parseInt(t.getArgs()[1]);
@@ -701,15 +700,12 @@ public class Event extends CommandHelp {
                 index++;
             }
             manageList.getList(page, null).toPlayer(player);
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            loadManageListData(player, page);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
     }
 
-    private void loadManageIDListData(String idStr, Player player, int page) {
+    private void loadManageIDListData(String idStr, Player player) {
         manageIDList.clear();
         try {
             if(!db.getCon().isValid(0)) {
@@ -869,10 +865,7 @@ public class Event extends CommandHelp {
                         .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, "/event fakemessage " + id)
                         .getJsonSegments());
             }
-            manageIDList.getList(page, null).toPlayer(player);
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            loadManageIDListData(idStr, player, page);
+            manageIDList.getList(1, null).toPlayer(player);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -915,9 +908,6 @@ public class Event extends CommandHelp {
                     .text(" pro jeho úpravu.")
                     .color(colors.getSecondaryColorHEX())
                     .toPlayer(player);
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            createEvent(eventName, player);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -935,9 +925,6 @@ public class Event extends CommandHelp {
             if(rs.next()) {
                 id = rs.getInt(1);
             }
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            return getEventIdFromName(name);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -956,9 +943,6 @@ public class Event extends CommandHelp {
             if(rs.next()) {
                 count = rs.getInt(1);
             }
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            return isEvent(id);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -1009,9 +993,6 @@ public class Event extends CommandHelp {
                             .color(colors.getPrimaryColorHEX())
                             .getJsonSegments()
             );
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            return getEventMessageData(id);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -1039,9 +1020,6 @@ public class Event extends CommandHelp {
                 data = new EventData(id, name, x, y, z, world, server, objective, note);
                 return data;
             }
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            return getEventData(id);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -1065,9 +1043,6 @@ public class Event extends CommandHelp {
             stm.setString(8, eventData.getNote());
             stm.setInt(9, eventData.getId());
             stm.execute();
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            setEventData(eventData);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -1080,9 +1055,6 @@ public class Event extends CommandHelp {
             }
             PreparedStatement stm = db.getCon().prepareStatement("DELETE FROM " + tables.getEventsTable() + " WHERE id=" + id + "");
             stm.execute();
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            deleteEvent(id);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }

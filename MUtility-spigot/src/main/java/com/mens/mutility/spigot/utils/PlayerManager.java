@@ -1,9 +1,7 @@
 package com.mens.mutility.spigot.utils;
 
 import com.mens.mutility.spigot.MUtilitySpigot;
-import com.mens.mutility.spigot.chat.Prefix;
 import com.mens.mutility.spigot.database.Database;
-import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -28,9 +26,6 @@ public class PlayerManager {
             if(rs.next()) {
                 id = rs.getInt(1);
             }
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            getUserId(username);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -46,9 +41,6 @@ public class PlayerManager {
             if(rs.next()) {
                 username = rs.getString(1);
             }
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            getUserId(username);
         } catch (SQLException e) {
             e.printStackTrace();
         }

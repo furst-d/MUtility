@@ -17,7 +17,6 @@ import com.mens.mutility.spigot.utils.confirmations.Confirmation;
 import com.mens.mutility.spigot.utils.MyStringUtils;
 import com.mens.mutility.spigot.utils.PageList;
 import com.mens.mutility.spigot.utils.PlayerManager;
-import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.entity.Player;
 
@@ -134,7 +133,7 @@ public class Navrhy extends CommandHelp {
         final CommandData deleteID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.navrhy.delete", CommandExecutors.PLAYER, (t) -> {
             int recordId = Integer.parseInt(t.getArgs()[1]);
             if(isRecordId((Player)t.getSender(), recordId)) {
-                if(!isCompleted((Player)t.getSender(), recordId)) {
+                if(isCompleted((Player) t.getSender(), recordId)) {
                     Confirmation deleteConfirmation = new Confirmation(recordId, (Player) t.getSender(), "/navrhy delete confirm");
                     deleteConfirmation.setMessage(new JsonBuilder()
                             .addJsonSegment(prefix.getNavrhyPrefix(true, true))
@@ -210,7 +209,7 @@ public class Navrhy extends CommandHelp {
         final CommandData manageIdText = new CommandData(ArgumentTypes.STRINGINF, TabCompleterTypes.CUSTOM, "[< Tvůj návrh >]", "mutility.navrhy.manage", CommandExecutors.PLAYER, t -> {
             int recordId = Integer.parseInt(t.getArgs()[1]);
             if(isRecordId((Player)t.getSender(), recordId)) {
-                if(!isCompleted((Player)t.getSender(), recordId)) {
+                if(isCompleted((Player) t.getSender(), recordId)) {
                     String content = strUt.getStringFromArgs(t.getArgs(), 2);
                     editNavrh((Player)t.getSender(), recordId, content);
                     t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false) + "Návrh byl upraven");
@@ -286,9 +285,6 @@ public class Navrhy extends CommandHelp {
             PreparedStatement stm = db.getCon().prepareStatement("SELECT id, user_id, content, rejected, rejected_reason, accepted, admin_id, create_date, update_date, (SUM(accepted+rejected)) FROM " + tables.getNavrhyTable() + " WHERE create_date > SYSDATE() - INTERVAL 1 DAY OR update_date > SYSDATE() - INTERVAL 1 DAY GROUP BY id ORDER BY (SUM(accepted+rejected)), create_date DESC");
             ResultSet rs =  stm.executeQuery();
             loadFormattedAdminList(rs, true);
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            updateAdminList();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -381,9 +377,6 @@ public class Navrhy extends CommandHelp {
                     adminList.add(jb.getJsonSegments());
                 }
             }
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            loadAdminList();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -398,9 +391,6 @@ public class Navrhy extends CommandHelp {
             PreparedStatement stm = db.getCon().prepareStatement("SELECT id, user_id, content, rejected, rejected_reason, accepted, admin_id, create_date, update_date, (SUM(accepted+rejected)) FROM " + tables.getNavrhyTable() + " GROUP BY id ORDER BY (SUM(accepted+rejected)), create_date DESC");
             ResultSet rs =  stm.executeQuery();
             loadFormattedAdminList(rs, false);
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            loadAdminList();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -476,9 +466,6 @@ public class Navrhy extends CommandHelp {
                 adminNameList.add(jb.getJsonSegments());
             }
             adminNameList.getList(page, null).toPlayer(player);
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            loadAdminNameList(playerName, player, page);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -620,9 +607,6 @@ public class Navrhy extends CommandHelp {
                 showList.add(jb.getJsonSegments());
             }
             showList.getList(page, null).toPlayer(player);
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            loadShowList(player, page);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -640,9 +624,6 @@ public class Navrhy extends CommandHelp {
             if(rs.next()) {
                 return rs.getInt(1);
             }
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            getNavrhId(userId, recordId);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -662,9 +643,6 @@ public class Navrhy extends CommandHelp {
             stm.setInt(5, 0);
             stm.setString(6, strUt.getCurrentFormattedDate());
             stm.execute();
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            addNavrh(userId, recordId, content);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -682,9 +660,6 @@ public class Navrhy extends CommandHelp {
             if(rs.next()) {
                 recordId = rs.getInt(1);
             }
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            return getMaxRecordId(player);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -799,9 +774,6 @@ public class Navrhy extends CommandHelp {
             stm.setString(2, strUt.getCurrentFormattedDate());
             stm.setInt(3, id);
             stm.execute();
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            acceptNavrh(id, adminId);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -818,9 +790,6 @@ public class Navrhy extends CommandHelp {
             stm.setString(3, rejectedReason);
             stm.setInt(4, id);
             stm.execute();
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            rejectNavrh(id, adminId, rejectedReason);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -835,9 +804,6 @@ public class Navrhy extends CommandHelp {
             stm.setInt(1, id);
             stm.execute();
             loadAdminList();
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            returnNavrh(id);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -854,9 +820,6 @@ public class Navrhy extends CommandHelp {
             stm.setInt(3, recordId);
             stm.execute();
             loadAdminList();
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            editNavrh(player, recordId, content);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -874,9 +837,6 @@ public class Navrhy extends CommandHelp {
             if(rs.next()) {
                 count = rs.getInt(1);
             }
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            return isNavrh(id);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -903,9 +863,6 @@ public class Navrhy extends CommandHelp {
             stm.setInt(2, playerManager.getUserId(player.getName()));
             stm.execute();
             loadAdminList();
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            deleteNavrh(player, recordId);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -924,12 +881,9 @@ public class Navrhy extends CommandHelp {
             if(rs.next()) {
                 sum = rs.getInt(1);
             }
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            return isCompleted(player, recordId);
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return (sum != 0);
+        return (sum == 0);
     }
 }

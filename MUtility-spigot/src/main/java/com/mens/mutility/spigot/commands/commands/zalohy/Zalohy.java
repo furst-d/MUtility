@@ -14,7 +14,6 @@ import com.mens.mutility.spigot.database.Database;
 import com.mens.mutility.spigot.database.DatabaseTables;
 import com.mens.mutility.spigot.utils.*;
 import com.mens.mutility.spigot.utils.confirmations.Confirmation;
-import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.WorldCreator;
@@ -99,7 +98,7 @@ public class Zalohy extends CommandHelp {
         final CommandData zobrazPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
         final CommandData manageID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.manage", CommandExecutors.PLAYER, t -> {
             int recordId = Integer.parseInt(t.getArgs()[1]);
-            if(!isCompleted((Player)t.getSender(), recordId)) {
+            if(isCompleted((Player) t.getSender(), recordId)) {
                 if(isZaloha((Player) t.getSender(), recordId, false)) {
                     loadManageList((Player)t.getSender(), recordId);
                 } else {
@@ -114,7 +113,7 @@ public class Zalohy extends CommandHelp {
         final CommandData deleteID = new CommandData(ArgumentTypes.INTEGER, TabCompleterTypes.NONE, "mutility.zalohy.delete", CommandExecutors.PLAYER, t -> {
             int recordId = Integer.parseInt(t.getArgs()[1]);
             if(isZaloha((Player)t.getSender(), recordId, false)) {
-                if(!isCompleted((Player)t.getSender(), recordId)) {
+                if(isCompleted((Player) t.getSender(), recordId)) {
                     Confirmation deleteConfirmation = new Confirmation(recordId, (Player) t.getSender(), "/zalohy delete confirm");
                     deleteConfirmation.setMessage(new JsonBuilder()
                             .addJsonSegment(prefix.getZalohyPrefix(true, true))
@@ -431,9 +430,6 @@ public class Zalohy extends CommandHelp {
             stm.setInt(1, recordId);
             stm.setInt(2, playerManager.getUserId(player.getName()));
             stm.execute();
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            deleteZaloha(player, recordId);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -616,9 +612,6 @@ public class Zalohy extends CommandHelp {
                         .getJsonSegments());
             }
             manageList.getList(1, null).toPlayer(player);
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            loadManageList(player, recordId);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -766,9 +759,6 @@ public class Zalohy extends CommandHelp {
                 showList.add(jb.getJsonSegments());
             }
             showList.getList(page, null).toPlayer(player);
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            loadShowList(player, page);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -872,9 +862,6 @@ public class Zalohy extends CommandHelp {
                 adminList.add(jb.getJsonSegments());
             }
             adminList.getList(page, null).toPlayer(player);
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            loadAdminList(player, page);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -1025,9 +1012,6 @@ public class Zalohy extends CommandHelp {
                 adminUserList.add(jb.getJsonSegments());
             }
             adminUserList.getList(page, null).toPlayer(player);
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            loadAdminUserList(playerName, player, page);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -1112,9 +1096,6 @@ public class Zalohy extends CommandHelp {
             if(rs.next()) {
                 count = rs.getInt(1);
             }
-        } catch (CommunicationsException e)  {
-            db.openConnection();
-            return isZaloha(player, id, global);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -1134,13 +1115,10 @@ public class Zalohy extends CommandHelp {
             if(rs.next()) {
                 sum = rs.getInt(1);
             }
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            return isCompleted(player, recordId);
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return (sum != 0);
+        return (sum == 0);
     }
 
     private int getMaxRecordId(Player player) {
@@ -1155,9 +1133,6 @@ public class Zalohy extends CommandHelp {
             if(rs.next()) {
                 maxRecordId = rs.getInt(1);
             }
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            return getMaxRecordId(player);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -1176,9 +1151,6 @@ public class Zalohy extends CommandHelp {
             if(rs.next()) {
                 buildingName = rs.getString(1);
             }
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            return getBuildingName(id);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -1205,9 +1177,6 @@ public class Zalohy extends CommandHelp {
             stm.setString(10, world);
             stm.setString(11, strUt.getCurrentFormattedDate());
             stm.execute();
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            insertZaloha(player, recordId, buildingName, x, y, z, world);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -1224,9 +1193,6 @@ public class Zalohy extends CommandHelp {
             stm.setString(2, strUt.getCurrentFormattedDate());
             stm.setInt(3, id);
             stm.execute();
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            completeZaloha(player, id);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -1244,9 +1210,6 @@ public class Zalohy extends CommandHelp {
             stm.setString(3, strUt.getCurrentFormattedDate());
             stm.setInt(4, id);
             stm.execute();
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            rejectZaloha(player, id, rejectedReason);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -1261,9 +1224,6 @@ public class Zalohy extends CommandHelp {
             stm = db.getCon().prepareStatement("UPDATE "+ tables.getZalohyTable() + " SET rejected = 0, completed = 0, rejected_reason = NULL, admin_id = NULL, update_date = NULL WHERE id= ? ");
             stm.setInt(1, id);
             stm.execute();
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            returnZaloha(id);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -1280,9 +1240,6 @@ public class Zalohy extends CommandHelp {
             stm.setInt(2, playerManager.getUserId(player.getName()));
             stm.setInt(3, recordId);
             stm.execute();
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            setX(player, recordId, x);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -1299,9 +1256,6 @@ public class Zalohy extends CommandHelp {
             stm.setInt(2, playerManager.getUserId(player.getName()));
             stm.setInt(3, recordId);
             stm.execute();
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            setY(player, recordId, y);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -1318,9 +1272,6 @@ public class Zalohy extends CommandHelp {
             stm.setInt(2, playerManager.getUserId(player.getName()));
             stm.setInt(3, recordId);
             stm.execute();
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            setZ(player, recordId, z);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -1337,9 +1288,6 @@ public class Zalohy extends CommandHelp {
             stm.setInt(2, playerManager.getUserId(player.getName()));
             stm.setInt(3, recordId);
             stm.execute();
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            setWorld(player, recordId, world);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -1356,9 +1304,6 @@ public class Zalohy extends CommandHelp {
             stm.setInt(2, playerManager.getUserId(player.getName()));
             stm.setInt(3, recordId);
             stm.execute();
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            setNote(player, recordId, note);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -1375,9 +1320,6 @@ public class Zalohy extends CommandHelp {
             stm.setInt(2, playerManager.getUserId(player.getName()));
             stm.setInt(3, recordId);
             stm.execute();
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            setBuildingName(player, recordId, buildingName);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -1410,9 +1352,6 @@ public class Zalohy extends CommandHelp {
             destination.setWorld(WorldCreator.name(world).createWorld());
             player.teleport(destination);
             player.sendMessage(prefix.getZalohyPrefix(true, false) + "Byl jsi teleportován k záloze " + colors.getPrimaryColor() + name + colors.getSecondaryColor() + "!");
-        } catch (CommunicationsException e) {
-            db.openConnection();
-            teleportPlayer(player, id);
         } catch (SQLException e) {
             e.printStackTrace();
         }

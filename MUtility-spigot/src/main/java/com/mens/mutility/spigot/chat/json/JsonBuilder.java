@@ -2,9 +2,11 @@ package com.mens.mutility.spigot.chat.json;
 
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.chat.ComponentSerializer;
-import net.minecraft.server.v1_16_R3.*;
+import net.minecraft.network.chat.IChatBaseComponent;
+import net.minecraft.network.protocol.game.PacketPlayOutChat;
+import net.minecraft.network.chat.ChatMessageType;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_17_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -155,8 +157,8 @@ public class JsonBuilder {
     }
 
     public void toPlayer(Player player) {
-        ((CraftPlayer) player).getHandle().playerConnection.sendPacket(
-                new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a(toString()), ChatMessageType.CHAT, player.getUniqueId()));
+        ((CraftPlayer) player).getHandle().b.sendPacket(
+                new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a(toString()), ChatMessageType.b, player.getUniqueId()));
     }
 
     public void toConsole() {
