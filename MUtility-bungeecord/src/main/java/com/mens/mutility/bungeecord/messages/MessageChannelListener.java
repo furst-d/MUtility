@@ -5,12 +5,17 @@ import com.mens.mutility.bungeecord.chat.PluginColors;
 import com.mens.mutility.bungeecord.chat.Prefix;
 import com.mens.mutility.bungeecord.chat.json.JsonBuilder;
 import com.mens.mutility.bungeecord.commands.anketa.Anketa;
+import com.mens.mutility.bungeecord.commands.mstavba.MStavbaVoteManager;
+import com.mens.mutility.bungeecord.discord.DiscordManager;
 import com.mens.mutility.bungeecord.requests.PortalRequest;
 import com.mens.mutility.bungeecord.requests.RandomTeleportRequest;
 import com.mens.mutility.bungeecord.requests.TeleportDataRequest;
 import com.mens.mutility.bungeecord.requests.TeleportRequest;
 import com.mens.mutility.bungeecord.utils.randomteleport.RandomTeleport;
 import com.mens.mutility.bungeecord.utils.randomteleport.ServerData;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -20,15 +25,20 @@ import net.md_5.bungee.api.scheduler.ScheduledTask;
 import net.md_5.bungee.chat.ComponentSerializer;
 import net.md_5.bungee.event.EventHandler;
 
+import java.awt.*;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 public class MessageChannelListener implements Listener {
     private final MUtilityBungeeCord plugin;
     private final MessageChannel messageChannel;
+    private final PluginColors colors;
+    private final DiscordManager discordManager;
     private Anketa survey;
     JsonBuilder surveyNotCreated;
     ServerInfo target;
@@ -42,15 +52,15 @@ public class MessageChannelListener implements Listener {
     public MessageChannelListener(MUtilityBungeeCord plugin) {
         this.plugin = plugin;
         messageChannel = new MessageChannel();
+        colors = new PluginColors();
+        discordManager = new DiscordManager();
         Prefix prefix = new Prefix();
-        PluginColors colors = new PluginColors();
         surveyNotCreated = new JsonBuilder()
                 .addJsonSegment(prefix.getAnketaPrefix(true, true))
                 .text(" Nejprve je nutné vytvořit anketu, použijte ")
                 .color(colors.getSecondaryColorHEX())
                 .text("/anketa vytvor [<Název ankety>]")
                 .color(colors.getPrimaryColorHEX());
-
         portalRequests = new ArrayList<>();
         teleportRequests = new ArrayList<>();
         rtRequests = new ArrayList<>();
@@ -219,6 +229,45 @@ public class MessageChannelListener implements Listener {
                         rtRequests.add(randomTeleportRequest);
                     }
                     break;
+
+                case "mens:discord-navrh-create":
+                    EmbedBuilder embedBuilder = new EmbedBuilder();
+                    embedBuilder.setTitle("Hráč " + stream.readUTF() + " přidal nový návrh");
+                    embedBuilder.setDescription(stream.readUTF());
+                    embedBuilder.setColor(Color.decode(colors.getPrimaryColorHEX()));
+                    embedBuilder.setFooter("Hlasujte kliknutím na jednu z reakcí");
+                    embedBuilder.setAuthor(stream.readUTF());
+                    discordManager.sendVoteEmbedMessage(discordManager.getChannelByName(plugin.getConfiguration().getString("Discord.Rooms.Vote")), embedBuilder.build());
+                    break;
+
+                case "mens:discord-navrh-edit":
+                    int id = Integer.parseInt(stream.readUTF());
+                    String adminNameNullable = stream.readUTF();
+                    String adminName = adminNameNullable.equals("null") ? null : adminNameNullable;
+                    String rejectReasonNullable = stream.readUTF();
+                    String rejectReason = rejectReasonNullable.equals("null") ? null : rejectReasonNullable;
+                    boolean returned = Boolean.parseBoolean(stream.readUTF());
+                    Color color;
+                    try {
+                        color = (Color)Class.forName("java.awt.Color").getField(stream.readUTF()).get(null);
+                        editStatusNavrhyDiscordEmbed(discordManager.getChannelByName(plugin.getConfiguration().getString("Discord.Rooms.Vote")), id, color, rejectReason, adminName, returned);
+                    } catch (Exception ignored) {
+                    }
+                    break;
+
+                case "mens:discord-navrh-delete":
+                    deleteNavrhyDiscordEmbed(discordManager.getChannelByName(plugin.getConfiguration().getString("Discord.Rooms.Vote")), Integer.parseInt(stream.readUTF()));
+                    break;
+
+                case "mens:discord-navrh-update":
+                    editNavrhyDiscordEmbed(discordManager.getChannelByName(plugin.getConfiguration().getString("Discord.Rooms.Vote")), Integer.parseInt(stream.readUTF()), stream.readUTF(), stream.readUTF());
+                    break;
+
+                case "mens:start-mstavba":
+                    MStavbaVoteManager manager = new MStavbaVoteManager(plugin);
+                    manager.setActive(true);
+                    manager.setSeasonId(Integer.parseInt(stream.readUTF()));
+                    break;
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -258,6 +307,76 @@ public class MessageChannelListener implements Listener {
             return plugin.getConfiguration().getBoolean("Servers.Event.LoadPlayerData");
         } else {
             return false;
+        }
+    }
+
+    private void editStatusNavrhyDiscordEmbed(net.dv8tion.jda.api.entities.MessageChannel channel, int id, Color color, String rejectReason, String adminName, boolean returned) {
+        Optional<Message> messageOpt = channel.getIterableHistory().stream().filter(x -> !x.getEmbeds().isEmpty()
+                && x.getEmbeds().get(0).getAuthor() != null
+                && Objects.equals(Objects.requireNonNull(x.getEmbeds().get(0).getAuthor()).getName(), String.valueOf(id))).findAny();
+        if(messageOpt.isPresent()) {
+            Message message = messageOpt.get();
+            MessageEmbed origEmbed = message.getEmbeds().get(0);
+            EmbedBuilder builder = new EmbedBuilder();
+            builder.setAuthor(Objects.requireNonNull(origEmbed.getAuthor()).getName());
+            builder.setDescription(origEmbed.getDescription());
+            builder.setTitle(origEmbed.getTitle());
+            builder.setColor(color);
+            List<MessageEmbed.Field> fields = origEmbed.getFields();
+            if(!fields.isEmpty()) {
+                fields.forEach(field -> {
+                    if(!Objects.equals(field.getName(), "Status")
+                            && !Objects.equals(field.getName(), "Důvod zamítnutí")
+                            && !Objects.equals(field.getName(), "Zamítnul(a)")
+                            && !Objects.equals(field.getName(), "Schválil(a)")) {
+                        builder.addField(field.getName(), field.getValue(), field.isInline());
+                    }
+                });
+            }
+            if(origEmbed.getFooter() != null) {
+                builder.setFooter(origEmbed.getFooter().getText());
+            }
+            if(!returned) {
+                if(rejectReason != null) {
+                    builder.addField("Status", "Zamítnuto", true);
+                    builder.addField("Důvod zamítnutí", rejectReason, true);
+                    builder.addField("Zamítnul(a)", adminName, false);
+                } else {
+                    builder.addField("Status", "Schváleno", true);
+                    builder.addField("Schválil(a)", adminName, true);
+                }
+            }
+            message.editMessageEmbeds(builder.build()).queue();
+        }
+    }
+
+    private void editNavrhyDiscordEmbed(net.dv8tion.jda.api.entities.MessageChannel channel, int id, String content, String name) {
+        Optional<Message> messageOpt = channel.getIterableHistory().stream().filter(x -> !x.getEmbeds().isEmpty()
+                && x.getEmbeds().get(0).getAuthor() != null
+                && Objects.equals(Objects.requireNonNull(x.getEmbeds().get(0).getAuthor()).getName(), String.valueOf(id))).findAny();
+        if(messageOpt.isPresent()) {
+            Message message = messageOpt.get();
+            MessageEmbed origEmbed = message.getEmbeds().get(0);
+            EmbedBuilder builder = new EmbedBuilder();
+            builder.setAuthor(Objects.requireNonNull(origEmbed.getAuthor()).getName());
+            builder.setDescription(content);
+            builder.setTitle("Hráč " + name + " upravil návrh!");
+            builder.setColor(Color.ORANGE);
+            builder.addField("Původní návrh", origEmbed.getDescription(), false);
+            if(origEmbed.getFooter() != null) {
+                builder.setFooter(origEmbed.getFooter().getText());
+            }
+            message.editMessageEmbeds(builder.build()).queue();
+        }
+    }
+
+    private void deleteNavrhyDiscordEmbed(net.dv8tion.jda.api.entities.MessageChannel channel, int id) {
+        Optional<Message> messageOpt = channel.getIterableHistory().stream().filter(x -> !x.getEmbeds().isEmpty()
+                && x.getEmbeds().get(0).getAuthor() != null
+                && Objects.equals(Objects.requireNonNull(x.getEmbeds().get(0).getAuthor()).getName(), String.valueOf(id))).findAny();
+        if(messageOpt.isPresent()) {
+            Message message = messageOpt.get();
+            message.delete().queue();
         }
     }
 }

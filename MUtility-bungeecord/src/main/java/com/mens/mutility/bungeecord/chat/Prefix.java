@@ -1,5 +1,7 @@
 package com.mens.mutility.bungeecord.chat;
 
+import com.mens.mutility.bungeecord.MUtilityBungeeCord;
+
 public class Prefix {
     private String prefixName;
     PluginColors colors = new PluginColors();
@@ -92,5 +94,9 @@ public class Prefix {
     public String getCustomPrefix(String prefix, boolean hexColor, boolean json) {
         setPrefixName(prefix);
         return getPrefix(hexColor, json);
+    }
+
+    public String getTablePrefix() {
+        return MUtilityBungeeCord.getInstance().getConfiguration().getString("MYSQL.Table prefix");
     }
 }

@@ -7,6 +7,14 @@
 ##                       ##
 ###########################
 
+MYSQL:
+  Table prefix: 'game_mutility_'
+  Host: '109.164.104.180'
+  Port: '3306'
+  Database: 'newkostkuj'
+  User: 'superadmin'
+  Password: 'kostkujjede'
+
 Servers:
   OverWorld 1:
     Name: 'server1'
@@ -146,6 +154,15 @@ RandomTeleport:
     X: 100
     Y: 102
     Z: 100
+
+Discord:
+  Token: 'ODY0NDY5OTkwOTcwMzU5ODA5.YO16ag.ezlD6gkLmcyRub3mok3dTG1CNFw'
+  Rooms:
+    Vote: 'admin-hlasovani'
+    Infoline: 'infolinka'
+  Emotes:
+    Accepted: 864514259258310657
+    Rejected: 864514280925560832
 
 Colors:
   Chat:

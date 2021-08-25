@@ -107,7 +107,7 @@ public class Anketa {
                     .toPlayer(player);
         } else {
             if(survey.isID(id)) {
-                if(!survey.hasVoted(player)) {
+                if(survey.hasVoted(player)) {
                     survey.vote(id, player);
                 } else {
                     new JsonBuilder()

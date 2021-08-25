@@ -25,18 +25,6 @@ public class MessageChannel implements Listener {
         plugin = MUtilitySpigot.getInstance();
     }
 
-    public void sendServer(Player player, String server) {
-        stream = new ByteArrayOutputStream();
-        output = new DataOutputStream(stream);
-        try {
-            output.writeUTF("Connect");
-            output.writeUTF(server);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        player.sendPluginMessage(plugin, "BungeeCord", stream.toByteArray());
-    }
-
     public void sendPortalInfoToBungeeCord(Player player, String channel, String world, double x, double y, double z) {
         stream = new ByteArrayOutputStream();
         output = new DataOutputStream(stream);
@@ -52,11 +40,14 @@ public class MessageChannel implements Listener {
         player.sendPluginMessage(plugin, "BungeeCord", stream.toByteArray());
     }
 
-    public void sendToBungeeCord(Player player, String channel) {
+    public void sendToBungeeCord(Player player, String channel, String... messages) {
         stream = new ByteArrayOutputStream();
         output = new DataOutputStream(stream);
         try {
             output.writeUTF(channel);
+            for(String messsage : messages) {
+                output.writeUTF(messsage);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

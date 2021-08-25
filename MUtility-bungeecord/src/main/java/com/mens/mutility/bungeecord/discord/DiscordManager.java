@@ -1,9 +1,11 @@
-package com.mens.mutility.spigot.discord;
+package com.mens.mutility.bungeecord.discord;
 
-import com.mens.mutility.spigot.MUtilitySpigot;
+import com.mens.mutility.bungeecord.MUtilityBungeeCord;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.User;
 
 import javax.security.auth.login.LoginException;
 import java.util.ArrayList;
@@ -11,7 +13,7 @@ import java.util.List;
 
 public class DiscordManager {
     private static JDA discordBot;
-    private MUtilitySpigot plugin;
+    private MUtilityBungeeCord plugin;
     private static final List<MyEmote> emotes = new ArrayList<>();
 
     public static JDA getDiscordBot() {
@@ -22,9 +24,9 @@ public class DiscordManager {
         return emotes;
     }
 
-    public static void startBot(MUtilitySpigot plugin) {
+    public static void startBot(MUtilityBungeeCord plugin) {
         try {
-            discordBot = JDABuilder.createDefault(plugin.getConfig().getString("Discord.Token"))
+            discordBot = JDABuilder.createDefault(plugin.getConfiguration().getString("Discord.Token"))
                     .addEventListeners(new DiscordEventListener(plugin))
                     .build();
         } catch (LoginException e) {

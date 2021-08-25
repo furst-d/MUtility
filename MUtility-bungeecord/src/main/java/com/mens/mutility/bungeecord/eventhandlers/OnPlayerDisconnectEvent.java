@@ -1,4 +1,4 @@
-package com.mens.mutility.bungeecord.events;
+package com.mens.mutility.bungeecord.eventhandlers;
 
 import com.mens.mutility.bungeecord.utils.Response;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;

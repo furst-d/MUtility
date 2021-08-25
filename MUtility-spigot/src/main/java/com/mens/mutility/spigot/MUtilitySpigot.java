@@ -17,7 +17,6 @@ import com.mens.mutility.spigot.commands.commands.zalohy.Zalohy;
 import com.mens.mutility.spigot.commands.system.CommandData;
 import com.mens.mutility.spigot.commands.system.CommandListener;
 import com.mens.mutility.spigot.database.Database;
-import com.mens.mutility.spigot.discord.DiscordManager;
 import com.mens.mutility.spigot.eventhandlers.*;
 import com.mens.mutility.spigot.messages.MessageChannelListener;
 import com.mens.mutility.spigot.utils.ServerInfo;
@@ -59,7 +58,6 @@ public final class MUtilitySpigot extends JavaPlugin {
         registerChannels();
         servers = new ArrayList<>();
         playerNames = new ArrayList<>();
-        DiscordManager.startBot(this);
         setMstavba();
     }
 
@@ -140,7 +138,6 @@ public final class MUtilitySpigot extends JavaPlugin {
         pm.registerEvents(new OnLeavingEndEvent(this), this);
         pm.registerEvents(new OnCommandPreprocessEvent(this), this);
         pm.registerEvents(new OnPlayerMoveEvent(this), this);
-        pm.registerEvents(new com.mens.mutility.spigot.commands.commands.mstavba.eventhandlers.OnPlayerJoinEvent(this), this);
     }
 
     /**
@@ -196,9 +193,5 @@ public final class MUtilitySpigot extends JavaPlugin {
     private void setMstavba() {
         MStavbaVoteManager manager = new MStavbaVoteManager(this);
         manager.synchronizeActive();
-        manager.deleteKeys();
-        if(manager.isActive()) {
-            manager.startTimer();
-        }
     }
 }

@@ -5,13 +5,11 @@ import com.mens.mutility.spigot.MUtilitySpigot;
 import com.mens.mutility.spigot.chat.PluginColors;
 import com.mens.mutility.spigot.chat.Prefix;
 import com.mens.mutility.spigot.chat.json.JsonBuilder;
+import com.mens.mutility.spigot.commands.commands.mstavba.MStavbaVoteManager;
 import com.mens.mutility.spigot.commands.commands.tpdata.Tpdata;
 import com.mens.mutility.spigot.inventory.TeleportData;
 import com.mens.mutility.spigot.portal.PortalManager;
-import com.mens.mutility.spigot.utils.AreaInfo;
-import com.mens.mutility.spigot.utils.BorderInfo;
-import com.mens.mutility.spigot.utils.Checker;
-import com.mens.mutility.spigot.utils.ServerInfo;
+import com.mens.mutility.spigot.utils.*;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.messaging.PluginMessageListener;
@@ -34,6 +32,7 @@ public class MessageChannelListener implements PluginMessageListener {
     private final Tpdata teleportDataManager;
     private final PluginColors colors;
     private final Prefix prefix;
+    private Player playerGlobal;
 
     /**
      * Konstruktor tridy
@@ -210,9 +209,12 @@ public class MessageChannelListener implements PluginMessageListener {
                                     .toString() ,true)
                             .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, "/spawn");
                     jb.toPlayer(player);
-                    /*loc = player.getLocation();
-                    loc.setX((int)(Math.random() * ((centerX + radius) - (centerX - radius)) + (centerX - radius)));*/
                     Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "spreadplayers " + centerX + " " + centerZ + " 500 " + radius + " false " + player.getName());
+                    break;
+
+                case "mens:stop-mstavba":
+                    MStavbaVoteManager manager = new MStavbaVoteManager(plugin);
+                    manager.setActive(false);
                     break;
             }
         } catch (IOException e) {

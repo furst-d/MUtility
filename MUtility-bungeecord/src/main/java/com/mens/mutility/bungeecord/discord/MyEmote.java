@@ -1,4 +1,4 @@
-package com.mens.mutility.spigot.discord;
+package com.mens.mutility.bungeecord.discord;
 
 import net.dv8tion.jda.api.entities.Emote;
 

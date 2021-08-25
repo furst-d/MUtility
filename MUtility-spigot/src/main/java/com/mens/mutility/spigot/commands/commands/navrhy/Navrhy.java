@@ -12,26 +12,20 @@ import com.mens.mutility.spigot.commands.system.enums.CommandExecutors;
 import com.mens.mutility.spigot.commands.system.enums.TabCompleterTypes;
 import com.mens.mutility.spigot.database.Database;
 import com.mens.mutility.spigot.database.DatabaseTables;
-import com.mens.mutility.spigot.discord.DiscordManager;
+import com.mens.mutility.spigot.messages.MessageChannel;
 import com.mens.mutility.spigot.utils.confirmations.Confirmation;
 import com.mens.mutility.spigot.utils.MyStringUtils;
 import com.mens.mutility.spigot.utils.PageList;
 import com.mens.mutility.spigot.utils.PlayerManager;
 import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.entity.Player;
 
-import java.awt.*;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 public class Navrhy extends CommandHelp {
@@ -48,7 +42,7 @@ public class Navrhy extends CommandHelp {
     private final MyStringUtils strUt;
     private final Errors errors;
     private final List<Confirmation> deleteConfirmationList;
-    private final DiscordManager discordManager;
+    private final MessageChannel messageChannel;
 
     public Navrhy(MUtilitySpigot plugin) {
         this.plugin = plugin;
@@ -65,7 +59,7 @@ public class Navrhy extends CommandHelp {
         strUt = new MyStringUtils();
         errors = new Errors();
         deleteConfirmationList = new ArrayList<>();
-        discordManager = new DiscordManager();
+        messageChannel = new MessageChannel();
     }
 
     /**
@@ -110,13 +104,7 @@ public class Navrhy extends CommandHelp {
             int recordId = getMaxRecordId((Player)t.getSender()) + 1;
             addNavrh(userId, recordId, content);
             t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false) + "Návrh byl přidán");
-            EmbedBuilder embedBuilder = new EmbedBuilder();
-            embedBuilder.setTitle("Hráč " + t.getSender().getName() + " přidal nový návrh");
-            embedBuilder.setDescription(content);
-            embedBuilder.setColor(Color.decode(colors.getPrimaryColorHEX()));
-            embedBuilder.setFooter("Hlasujte kliknutím na jednu z reakcí");
-            embedBuilder.setAuthor(String.valueOf(getNavrhId(userId, recordId)));
-            discordManager.sendVoteEmbedMessage(discordManager.getChannelByName(plugin.getConfig().getString("Discord.Rooms.Vote")), embedBuilder.build());
+            messageChannel.sendToBungeeCord((Player)t.getSender(), "mens:discord-navrh-create", t.getSender().getName(), content, String.valueOf(getNavrhId(userId, recordId)));
         });
         final CommandData adminName = new CommandData(ArgumentTypes.STRING, TabCompleterTypes.GLOBAL_ONLINE_PLAYERS, "mutility.navrhy.admin", CommandExecutors.PLAYER, t -> loadAdminNameList(t.getArgs()[1], (Player) t.getSender(), 1));
         final CommandData adminPage = new CommandData(ArgumentTypes.DEFAULT, "page", TabCompleterTypes.NONE);
@@ -126,7 +114,7 @@ public class Navrhy extends CommandHelp {
             if(isNavrh(id)) {
                 int userId = playerManager.getUserId(t.getSender().getName());
                 acceptNavrh(id, userId);
-                editStatusNavrhyDiscordEmbed(discordManager.getChannelByName(plugin.getConfig().getString("Discord.Rooms.Vote")), id, Color.GREEN, null, t.getSender().getName(), false);
+                messageChannel.sendToBungeeCord((Player)t.getSender(), "mens:discord-navrh-edit", String.valueOf(id), t.getSender().getName(), "null", "false", "green");
                 t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false) + "Návrh byl schválen");
             } else {
                 t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1], true, false));
@@ -137,7 +125,7 @@ public class Navrhy extends CommandHelp {
             int id = Integer.parseInt(t.getArgs()[1]);
             if(isNavrh(id)) {
                 returnNavrh(id);
-                editStatusNavrhyDiscordEmbed(discordManager.getChannelByName(plugin.getConfig().getString("Discord.Rooms.Vote")), id, Color.ORANGE, null, null, true);
+                messageChannel.sendToBungeeCord((Player)t.getSender(), "mens:discord-navrh-edit", String.valueOf(id), "null", "null", "true", "orange");
                 t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false) + "Návrh byl vrácen mezi neprojednané");
             } else {
                 t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1], true, false));
@@ -183,7 +171,7 @@ public class Navrhy extends CommandHelp {
             if(isNavrh(id)) {
                 int userId = playerManager.getUserId(t.getSender().getName());
                 rejectNavrh(id, userId, rejectedReason);
-                editStatusNavrhyDiscordEmbed(discordManager.getChannelByName(plugin.getConfig().getString("Discord.Rooms.Vote")), id, Color.RED, rejectedReason, t.getSender().getName(), false);
+                messageChannel.sendToBungeeCord((Player)t.getSender(), "mens:discord-navrh-edit", String.valueOf(id), t.getSender().getName(), rejectedReason, "false", "red");
                 t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false) + "Návrh byl zamítnut");
             } else {
                 t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1], true, false));
@@ -205,7 +193,7 @@ public class Navrhy extends CommandHelp {
                             int id = getNavrhId(playerManager.getUserId(t.getSender().getName()), recordId);
                             deleteNavrh((Player)t.getSender(), recordId);
                             t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false) + "Návrh byl smazán!");
-                            deleteNavrhyDiscordEmbed(discordManager.getChannelByName(plugin.getConfig().getString("Discord.Rooms.Vote")), id);
+                            messageChannel.sendToBungeeCord((Player)t.getSender(), "mens:discord-navrh-delete", String.valueOf(id));
                             break;
                         }
                     }
@@ -226,8 +214,7 @@ public class Navrhy extends CommandHelp {
                     String content = strUt.getStringFromArgs(t.getArgs(), 2);
                     editNavrh((Player)t.getSender(), recordId, content);
                     t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false) + "Návrh byl upraven");
-                    editNavrhyDiscordEmbed(discordManager.getChannelByName(plugin.getConfig().getString("Discord.Rooms.Vote")),
-                            getNavrhId(playerManager.getUserId(t.getSender().getName()), recordId), content, t.getSender().getName());
+                    messageChannel.sendToBungeeCord((Player)t.getSender(), "mens:discord-navrh-update", String.valueOf(getNavrhId(playerManager.getUserId(t.getSender().getName()), recordId)), content, t.getSender().getName());
                 } else {
                     t.getSender().sendMessage(prefix.getNavrhyPrefix(true, false)
                             + colors.getSecondaryColor() + "Návrh již není možné upravit");
@@ -399,76 +386,6 @@ public class Navrhy extends CommandHelp {
             loadAdminList();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
-        }
-    }
-
-    private void editNavrhyDiscordEmbed(MessageChannel channel, int id, String content, String name) {
-        Optional<Message> messageOpt = channel.getIterableHistory().stream().filter(x -> !x.getEmbeds().isEmpty()
-                && x.getEmbeds().get(0).getAuthor() != null
-                && Objects.equals(Objects.requireNonNull(x.getEmbeds().get(0).getAuthor()).getName(), String.valueOf(id))).findAny();
-        if(messageOpt.isPresent()) {
-            Message message = messageOpt.get();
-            MessageEmbed origEmbed = message.getEmbeds().get(0);
-            EmbedBuilder builder = new EmbedBuilder();
-            builder.setAuthor(Objects.requireNonNull(origEmbed.getAuthor()).getName());
-            builder.setDescription(content);
-            builder.setTitle("Hráč " + name + " upravil návrh!");
-            builder.setColor(Color.ORANGE);
-            builder.addField("Původní návrh", origEmbed.getDescription(), false);
-            if(origEmbed.getFooter() != null) {
-                builder.setFooter(origEmbed.getFooter().getText());
-            }
-            message.editMessageEmbeds(builder.build()).queue();
-        }
-    }
-
-    private void deleteNavrhyDiscordEmbed(MessageChannel channel, int id) {
-        Optional<Message> messageOpt = channel.getIterableHistory().stream().filter(x -> !x.getEmbeds().isEmpty()
-                && x.getEmbeds().get(0).getAuthor() != null
-                && Objects.equals(Objects.requireNonNull(x.getEmbeds().get(0).getAuthor()).getName(), String.valueOf(id))).findAny();
-        if(messageOpt.isPresent()) {
-            Message message = messageOpt.get();
-            message.delete().queue();
-        }
-    }
-
-    private void editStatusNavrhyDiscordEmbed(MessageChannel channel, int id, Color color, String rejectReason, String adminName, boolean returned) {
-        Optional<Message> messageOpt = channel.getIterableHistory().stream().filter(x -> !x.getEmbeds().isEmpty()
-                && x.getEmbeds().get(0).getAuthor() != null
-                && Objects.equals(Objects.requireNonNull(x.getEmbeds().get(0).getAuthor()).getName(), String.valueOf(id))).findAny();
-        if(messageOpt.isPresent()) {
-            Message message = messageOpt.get();
-            MessageEmbed origEmbed = message.getEmbeds().get(0);
-            EmbedBuilder builder = new EmbedBuilder();
-            builder.setAuthor(Objects.requireNonNull(origEmbed.getAuthor()).getName());
-            builder.setDescription(origEmbed.getDescription());
-            builder.setTitle(origEmbed.getTitle());
-            builder.setColor(color);
-            List<MessageEmbed.Field> fields = origEmbed.getFields();
-            if(!fields.isEmpty()) {
-                fields.forEach(field -> {
-                    if(!Objects.equals(field.getName(), "Status")
-                            && !Objects.equals(field.getName(), "Důvod zamítnutí")
-                            && !Objects.equals(field.getName(), "Zamítnul(a)")
-                            && !Objects.equals(field.getName(), "Schválil(a)")) {
-                        builder.addField(field.getName(), field.getValue(), field.isInline());
-                    }
-                });
-            }
-            if(origEmbed.getFooter() != null) {
-                builder.setFooter(origEmbed.getFooter().getText());
-            }
-            if(!returned) {
-                if(rejectReason != null) {
-                    builder.addField("Status", "Zamítnuto", true);
-                    builder.addField("Důvod zamítnutí", rejectReason, true);
-                    builder.addField("Zamítnul(a)", adminName, false);
-                } else {
-                    builder.addField("Status", "Schváleno", true);
-                    builder.addField("Schválil(a)", adminName, true);
-                }
-            }
-            message.editMessageEmbeds(builder.build()).queue();
         }
     }
 

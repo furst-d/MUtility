@@ -1,8 +1,11 @@
 package com.mens.mutility.bungeecord;
 
 import com.google.common.io.ByteStreams;
-import com.mens.mutility.bungeecord.events.OnPlayerDisconnectEvent;
-import com.mens.mutility.bungeecord.events.OnServerSwitchEvent;
+import com.mens.mutility.bungeecord.commands.mstavba.MStavbaVoteManager;
+import com.mens.mutility.bungeecord.database.Database;
+import com.mens.mutility.bungeecord.discord.DiscordManager;
+import com.mens.mutility.bungeecord.eventhandlers.OnPlayerDisconnectEvent;
+import com.mens.mutility.bungeecord.eventhandlers.OnServerSwitchEvent;
 import com.mens.mutility.bungeecord.messages.MessageChannelListener;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
@@ -15,6 +18,7 @@ public final class MUtilityBungeeCord extends Plugin {
 
     private static MUtilityBungeeCord instance;
     private Configuration configuration;
+    private Database db;
 
     /**
      * Spousteci metoda
@@ -27,6 +31,10 @@ public final class MUtilityBungeeCord extends Plugin {
         loadConfig("config.yml");
         loadEvents();
         registerChannels();
+        db = new Database(this);
+        db.openFirstConnection();
+        DiscordManager.startBot(this);
+        setMstavba();
     }
 
     /**
@@ -100,5 +108,18 @@ public final class MUtilityBungeeCord extends Plugin {
      */
     private void registerChannels() {
         getProxy().registerChannel("mens:mutility");
+    }
+
+    public Database getDb() {
+        return db;
+    }
+
+    private void setMstavba() {
+        MStavbaVoteManager manager = new MStavbaVoteManager(this);
+        manager.synchronizeActive();
+        manager.deleteKeys();
+        if(manager.isActive()) {
+            manager.startTimer();
+        }
     }
 }

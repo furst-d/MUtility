@@ -13,7 +13,6 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.scheduler.ScheduledTask;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -241,19 +240,18 @@ public class Survey {
     }
 
     public boolean hasVoted(ProxiedPlayer player) {
-        for (int i = 0; i < votes.size(); i++) {
-            if(votes.get(i).getPlayer().equals(player)) {
-                return true;
+        for (Vote vote : votes) {
+            if (vote.getPlayer().equals(player)) {
+                return false;
             }
         }
-        return false;
+        return true;
     }
 
     private void timer(int time, BossBar bar) {
         number = time;
         currentTime = time;
         st = plugin.getProxy().getScheduler().schedule(plugin, () -> {
-            //Převedu si zadanou hodnotu v sekundách na dny/hodiny/minuty/sekundy
             while(number > 0) {
                 if(number / 3600 > 0) {
                     number -= 3600;
@@ -306,17 +304,17 @@ public class Survey {
 
     private void sendSurvey() {
         for (ProxiedPlayer onlinePlayer : ProxyServer.getInstance().getPlayers()) {
-            if(!hasVoted(onlinePlayer)) {
+            if(hasVoted(onlinePlayer)) {
                 JsonBuilder jb = new JsonBuilder("\n                                                  \n")
                         .color(colors.getSecondaryColorHEX())
                         .effect(JsonBuilder.Effects.STRIKETHROUGH)
                         .text("\n  " + surveyName + "\n")
                         .color(colors.getPrimaryColorHEX())
                         .effect(JsonBuilder.Effects.BOLD);
-                for (int i = 0; i < options.size(); i++) {
+                for (Option option : options) {
                     String voteHover = new JsonBuilder(">> Kliknutím zahlasuj pro ")
                             .color(colors.getSecondaryColorHEX())
-                            .text(options.get(i).getOption())
+                            .text(option.getOption())
                             .color(colors.getPrimaryColorHEX())
                             .text(" <<")
                             .color(colors.getSecondaryColorHEX())
@@ -324,16 +322,16 @@ public class Survey {
                     jb.text("\n   [")
                             .color(colors.getSecondaryColorHEX())
                             .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, voteHover, true)
-                            .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, "/anketa vote " + options.get(i).getId())
+                            .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, "/anketa vote " + option.getId())
                             .text("✔")
                             .color(ChatColor.GREEN)
                             .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, voteHover, true)
-                            .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, "/anketa vote " + options.get(i).getId())
+                            .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, "/anketa vote " + option.getId())
                             .text("]")
                             .color(colors.getSecondaryColorHEX())
                             .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, voteHover, true)
-                            .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, "/anketa vote " + options.get(i).getId())
-                            .text(" - " + options.get(i).getOption())
+                            .clickEvent(JsonBuilder.ClickAction.RUN_COMMAND, "/anketa vote " + option.getId())
+                            .text(" - " + option.getOption())
                             .color(colors.getSecondaryColorHEX())
                             .getJsonSegments();
                 }
@@ -369,56 +367,56 @@ public class Survey {
                     boolean empty = true;
                     JsonBuilder votesHover = new JsonBuilder();
                     JsonBuilder temp = new JsonBuilder();
-                    for (int j = 0; j < votes.size(); j++) {
-                        if(i == 0) {
-                            if(options.get(options.size() - 1 - i).getNumberOfVotes() == options.get(options.size() - 2 - i).getNumberOfVotes()) {
+                    for (Vote vote : votes) {
+                        if (i == 0) {
+                            if (options.get(options.size() - 1 - i).getNumberOfVotes() == options.get(options.size() - 2 - i).getNumberOfVotes()) {
                                 temp = new JsonBuilder()
-                                        .text("\n   " + (i+1) + ". - " + options.get(options.size() - 1 - i).getOption())
+                                        .text("\n   " + (i + 1) + ". - " + options.get(options.size() - 1 - i).getOption())
                                         .color(colors.getSecondaryColorHEX())
                                         .text(" (➥" + options.get(options.size() - 1 - i).getNumberOfVotes() + ")")
                                         .color(colors.getSecondaryColorHEX());
-                                if(votes.get(j).getId() == options.get(options.size() - 1 - i).getId()) {
+                                if (vote.getId() == options.get(options.size() - 1 - i).getId()) {
                                     if (empty) {
                                         empty = false;
-                                        votesHover.text("- " + votes.get(j).getPlayer().getName())
+                                        votesHover.text("- " + vote.getPlayer().getName())
                                                 .color(colors.getSecondaryColorHEX());
                                     } else {
-                                        votesHover.text("\n- " + votes.get(j).getPlayer().getName())
+                                        votesHover.text("\n- " + vote.getPlayer().getName())
                                                 .color(colors.getSecondaryColorHEX());
                                     }
                                 }
                             } else {
                                 temp = new JsonBuilder()
-                                        .text("\n   " + (i+1) + ". - ")
+                                        .text("\n   " + (i + 1) + ". - ")
                                         .color(colors.getSecondaryColorHEX())
                                         .text(options.get(options.size() - 1 - i).getOption())
                                         .color(ChatColor.GREEN)
                                         .text(" (➥" + options.get(options.size() - 1 - i).getNumberOfVotes() + ")")
                                         .color(ChatColor.GREEN);
-                                if(votes.get(j).getId() == options.get(options.size() - 1 - i).getId()) {
+                                if (vote.getId() == options.get(options.size() - 1 - i).getId()) {
                                     if (empty) {
                                         empty = false;
-                                        votesHover.text("- " + votes.get(j).getPlayer().getName())
+                                        votesHover.text("- " + vote.getPlayer().getName())
                                                 .color(ChatColor.GREEN);
                                     } else {
-                                        votesHover.text("\n- " + votes.get(j).getPlayer().getName())
+                                        votesHover.text("\n- " + vote.getPlayer().getName())
                                                 .color(ChatColor.GREEN);
                                     }
                                 }
                             }
                         } else {
                             temp = new JsonBuilder()
-                                    .text("\n   " + (i+1) + ". - " + options.get(options.size() - 1 - i).getOption())
+                                    .text("\n   " + (i + 1) + ". - " + options.get(options.size() - 1 - i).getOption())
                                     .color(colors.getSecondaryColorHEX())
                                     .text(" (➥" + options.get(options.size() - 1 - i).getNumberOfVotes() + ")")
                                     .color(colors.getSecondaryColorHEX());
-                            if(votes.get(j).getId() == options.get(options.size() - 1 - i).getId()) {
+                            if (vote.getId() == options.get(options.size() - 1 - i).getId()) {
                                 if (empty) {
                                     empty = false;
-                                    votesHover.text("- " + votes.get(j).getPlayer().getName())
+                                    votesHover.text("- " + vote.getPlayer().getName())
                                             .color(colors.getSecondaryColorHEX());
                                 } else {
-                                    votesHover.text("\n- " + votes.get(j).getPlayer().getName())
+                                    votesHover.text("\n- " + vote.getPlayer().getName())
                                             .color(colors.getSecondaryColorHEX());
                                 }
                             }

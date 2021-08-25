@@ -1,6 +1,7 @@
-package com.mens.mutility.bungeecord.events;
+package com.mens.mutility.bungeecord.eventhandlers;
 
 import com.mens.mutility.bungeecord.MUtilityBungeeCord;
+import com.mens.mutility.bungeecord.commands.mstavba.MStavbaVoteManager;
 import com.mens.mutility.bungeecord.messages.MessageChannel;
 import com.mens.mutility.bungeecord.messages.MessageChannelListener;
 import com.mens.mutility.bungeecord.requests.PortalRequest;
@@ -8,8 +9,7 @@ import com.mens.mutility.bungeecord.requests.RandomTeleportRequest;
 import com.mens.mutility.bungeecord.requests.TeleportDataRequest;
 import com.mens.mutility.bungeecord.requests.TeleportRequest;
 import com.mens.mutility.bungeecord.utils.Response;
-import net.md_5.bungee.api.config.ServerInfo;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
+import com.mens.mutility.bungeecord.utils.Timer;
 import net.md_5.bungee.api.event.ServerSwitchEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.scheduler.ScheduledTask;
@@ -78,6 +78,14 @@ public class OnServerSwitchEvent implements Listener {
                 messageChannel.sendPortalInfoToServer(request.getPlayer(), subChannel, request.getX(), request.getY(), request.getZ(), request.isLoadTeleportData());
                 MessageChannelListener.portalRequests.remove(request);
             }
+        } else {
+            MStavbaVoteManager manager = new MStavbaVoteManager(plugin);
+            if(manager.isActive()) {
+                Timer timer = new Timer();
+                timer.setOnFinish((sec, tt) -> manager.createVoteLink(event.getPlayer()));
+                timer.startTimer(20);
+            }
+            messageChannel.sendToServer(event.getPlayer(), "mens:mstavba-request");
         }
     }
 }

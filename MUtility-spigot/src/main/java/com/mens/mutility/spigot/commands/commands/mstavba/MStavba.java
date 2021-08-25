@@ -11,6 +11,7 @@ import com.mens.mutility.spigot.commands.system.enums.CommandExecutors;
 import com.mens.mutility.spigot.commands.system.enums.TabCompleterTypes;
 import com.mens.mutility.spigot.database.Database;
 import com.mens.mutility.spigot.database.DatabaseTables;
+import com.mens.mutility.spigot.messages.MessageChannel;
 import com.mens.mutility.spigot.utils.MyStringUtils;
 import com.mens.mutility.spigot.utils.PageList;
 import com.mens.mutility.spigot.utils.PlayerManager;
@@ -35,6 +36,7 @@ public class MStavba extends CommandHelp {
     private final DatabaseTables tables;
     private final PlayerManager playerManager;
     private final MyStringUtils strUt;
+    private final MessageChannel messageChannel;
 
     public MStavba(MUtilitySpigot plugin) {
         this.plugin = plugin;
@@ -46,6 +48,7 @@ public class MStavba extends CommandHelp {
         tables = new DatabaseTables();
         playerManager = new PlayerManager();
         strUt = new MyStringUtils();
+        messageChannel = new MessageChannel();
     }
 
     /**
@@ -133,7 +136,7 @@ public class MStavba extends CommandHelp {
             MStavbaVoteManager manager = new MStavbaVoteManager(plugin);
             manager.setActive(true);
             manager.setSeasonId(seasonId);
-            manager.startTimer();
+            messageChannel.sendToBungeeCord((Player)t.getSender(), "mens:start-mstavba", String.valueOf(seasonId));
             t.getSender().sendMessage(prefix.getStavbaPrefix(true, false) + "Stavba měsíce byla spuštěna");
         });
 
