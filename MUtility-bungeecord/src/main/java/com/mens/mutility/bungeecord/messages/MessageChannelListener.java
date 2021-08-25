@@ -267,6 +267,7 @@ public class MessageChannelListener implements Listener {
                     MStavbaVoteManager manager = new MStavbaVoteManager(plugin);
                     manager.setActive(true);
                     manager.setSeasonId(Integer.parseInt(stream.readUTF()));
+                    manager.startTimer();
                     break;
             }
         } catch (IOException e) {
