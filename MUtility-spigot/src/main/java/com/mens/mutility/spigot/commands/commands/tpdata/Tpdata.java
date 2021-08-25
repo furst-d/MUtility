@@ -15,6 +15,7 @@ import com.mens.mutility.spigot.database.Database;
 import com.mens.mutility.spigot.database.DatabaseTables;
 import com.mens.mutility.spigot.gui.GUIManager;
 import com.mens.mutility.spigot.inventory.InventoryManager;
+import com.mens.mutility.spigot.inventory.InventoryNamePair;
 import com.mens.mutility.spigot.inventory.InventoryPair;
 import com.mens.mutility.spigot.inventory.TeleportData;
 import com.mens.mutility.spigot.utils.ServerInfo;
@@ -23,7 +24,6 @@ import com.mens.mutility.spigot.utils.MyStringUtils;
 import com.mens.mutility.spigot.utils.PageList;
 import com.mens.mutility.spigot.utils.PlayerManager;
 import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
-import javafx.util.Pair;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -165,9 +165,9 @@ public class Tpdata extends CommandHelp {
             int id = Integer.parseInt(t.getArgs()[2]);
             if(isData(id)) {
                 InventoryManager invManager = new InventoryManager();
-                Pair<String, String> invData = getInventory((Player)t.getSender(), id);
-                InventoryPair invPair = invManager.getInventoryAsItemStack(invManager.toJsonObject(invData.getValue()));
-                GUIManager guiManager = new GUIManager(plugin, 45, colors.getPrimaryColor()  + "§l" + invData.getKey());
+                InventoryNamePair invData = getInventory((Player)t.getSender(), id);
+                InventoryPair invPair = invManager.getInventoryAsItemStack(invManager.toJsonObject(invData.getInventory()));
+                GUIManager guiManager = new GUIManager(plugin, 45, colors.getPrimaryColor()  + "§l" + invData.getName());
 
                 for (int i = 0; i < invPair.getItems().size(); i++) {
                     ItemStack item = invPair.getItems().get(i);
@@ -613,7 +613,7 @@ public class Tpdata extends CommandHelp {
         }
     }
 
-    private Pair<String, String> getInventory(Player player, int id) {
+    private InventoryNamePair getInventory(Player player, int id) {
         String inventory = "";
         String inventory_name = null;
         try {
@@ -633,7 +633,7 @@ public class Tpdata extends CommandHelp {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return new Pair<>(inventory_name, inventory);
+        return new InventoryNamePair(inventory_name, inventory);
     }
 
     private boolean isData(int id) {

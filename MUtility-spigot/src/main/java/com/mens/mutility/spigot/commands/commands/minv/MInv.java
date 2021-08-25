@@ -15,11 +15,11 @@ import com.mens.mutility.spigot.database.Database;
 import com.mens.mutility.spigot.database.DatabaseTables;
 import com.mens.mutility.spigot.gui.GUIManager;
 import com.mens.mutility.spigot.inventory.InventoryManager;
+import com.mens.mutility.spigot.inventory.InventoryNamePair;
 import com.mens.mutility.spigot.inventory.InventoryPair;
 import com.mens.mutility.spigot.utils.*;
 import com.mens.mutility.spigot.utils.confirmations.Confirmation;
 import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
-import javafx.util.Pair;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -105,12 +105,12 @@ public class MInv extends CommandHelp {
             int id_user_record = Integer.parseInt(t.getArgs()[1]);
             if(isInventory((Player)t.getSender(), id_user_record)) {
                 InventoryManager invManager = new InventoryManager();
-                Pair<String, String> inventoryInfo = getInventory((Player) t.getSender(), id_user_record);
-                invManager.loadInventory((Player) t.getSender(), invManager.toJsonObject(inventoryInfo.getValue()));
-                if(inventoryInfo.getKey() == null) {
+                InventoryNamePair inventoryInfo = getInventory((Player) t.getSender(), id_user_record);
+                invManager.loadInventory((Player) t.getSender(), invManager.toJsonObject(inventoryInfo.getInventory()));
+                if(inventoryInfo.getName() == null) {
                     t.getSender().sendMessage(prefix.getInventoryPrefix(true, false) + "Inventář úspěšně načten");
                 } else {
-                    t.getSender().sendMessage(prefix.getInventoryPrefix(true, false) + "Inventář " + colors.getPrimaryColor() + inventoryInfo.getKey() + colors.getSecondaryColor() + " úspěšně načten");
+                    t.getSender().sendMessage(prefix.getInventoryPrefix(true, false) + "Inventář " + colors.getPrimaryColor() + inventoryInfo.getName() + colors.getSecondaryColor() + " úspěšně načten");
                 }
             } else {
                 t.getSender().sendMessage(prefix.getInventoryPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1], true, false));
@@ -124,7 +124,7 @@ public class MInv extends CommandHelp {
                             .addJsonSegment(prefix.getInventoryPrefix(true, true))
                             .text(": Opravdu si přejete odstranit inventář ")
                             .color(colors.getSecondaryColorHEX())
-                            .text(getInventory((Player) t.getSender(), id_user_record).getKey())
+                            .text(getInventory((Player) t.getSender(), id_user_record).getName())
                             .color(colors.getPrimaryColorHEX())
                             .text("?")
                             .color(colors.getSecondaryColorHEX()));
@@ -147,9 +147,9 @@ public class MInv extends CommandHelp {
             int id_user_record = Integer.parseInt(t.getArgs()[1]);
             if(isInventory((Player) t.getSender(), id_user_record)) {
                 InventoryManager invManager = new InventoryManager();
-                Pair<String, String> invData = getInventory((Player)t.getSender(), id_user_record);
-                InventoryPair invPair = invManager.getInventoryAsItemStack(invManager.toJsonObject(invData.getValue()));
-                GUIManager guiManager = new GUIManager(plugin, 45, colors.getPrimaryColor()  + "§l" + invData.getKey());
+                InventoryNamePair invData = getInventory((Player)t.getSender(), id_user_record);
+                InventoryPair invPair = invManager.getInventoryAsItemStack(invManager.toJsonObject(invData.getInventory()));
+                GUIManager guiManager = new GUIManager(plugin, 45, colors.getPrimaryColor()  + "§l" + invData.getName());
 
                 for (int i = 0; i < invPair.getItems().size(); i++) {
                     ItemStack item = invPair.getItems().get(i);
@@ -195,9 +195,9 @@ public class MInv extends CommandHelp {
             int id_user_record = Integer.parseInt(t.getArgs()[1]);
             if(isInventory((Player)t.getSender(), id_user_record)) {
                 InventoryManager invManager = new InventoryManager();
-                Pair<String, String> inventoryInfo = getInventory((Player) t.getSender(), id_user_record);
+                InventoryNamePair inventoryInfo = getInventory((Player) t.getSender(), id_user_record);
                 updateInventory((Player)t.getSender(), id_user_record, invManager.getInventory((Player)t.getSender()));
-                t.getSender().sendMessage(prefix.getInventoryPrefix(true, false) + "Inventář " + colors.getPrimaryColor() + inventoryInfo.getKey() + colors.getSecondaryColor() + " úspěšně přepsán");
+                t.getSender().sendMessage(prefix.getInventoryPrefix(true, false) + "Inventář " + colors.getPrimaryColor() + inventoryInfo.getName() + colors.getSecondaryColor() + " úspěšně přepsán");
             } else {
                 t.getSender().sendMessage(prefix.getInventoryPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1], true, false));
             }
@@ -207,7 +207,7 @@ public class MInv extends CommandHelp {
             int id_user_record = Integer.parseInt(t.getArgs()[2]);
             if(isInventory((Player)t.getSender(), id_user_record)) {
                 boolean valid = false;
-                String inventoryName = getInventory((Player) t.getSender(), id_user_record).getKey();
+                String inventoryName = getInventory((Player) t.getSender(), id_user_record).getName();
                 for (int i = deleteConfirmationList.size() - 1; i >= 0; i--) {
                     if(deleteConfirmationList.get(i).getId() == id_user_record
                             && deleteConfirmationList.get(i).getPlayer().getName().equals(t.getSender().getName())) {
@@ -238,8 +238,8 @@ public class MInv extends CommandHelp {
             String inventoryName = strUt.getStringFromArgs(t.getArgs(), 3);
             if(isInventory((Player)t.getSender(), id_user_record)) {
                 updateInventoryName((Player)t.getSender(), id_user_record, inventoryName);
-                Pair<String, String> inventoryInfo = getInventory((Player) t.getSender(), id_user_record);
-                t.getSender().sendMessage(prefix.getInventoryPrefix(true, false) + "Jméno inventáře úspěšně nastaveno na " + colors.getPrimaryColor() + inventoryInfo.getKey());
+                InventoryNamePair inventoryInfo = getInventory((Player) t.getSender(), id_user_record);
+                t.getSender().sendMessage(prefix.getInventoryPrefix(true, false) + "Jméno inventáře úspěšně nastaveno na " + colors.getPrimaryColor() + inventoryInfo.getName());
             } else {
                 t.getSender().sendMessage(prefix.getInventoryPrefix(true, false) + errors.errWrongArgument(t.getArgs()[1], true, false));
             }
@@ -621,7 +621,7 @@ public class MInv extends CommandHelp {
         return (count != 0);
     }
 
-    private Pair<String, String> getInventory(Player player, int id_user_record) {
+    private InventoryNamePair getInventory(Player player, int id_user_record) {
         String inventory = "";
         String inventory_name = null;
         try {
@@ -642,7 +642,7 @@ public class MInv extends CommandHelp {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return new Pair<>(inventory_name, inventory);
+        return new InventoryNamePair(inventory_name, inventory);
     }
 
     private void updateInventoryName(Player player, int id_user_record, String inventory_name) {
