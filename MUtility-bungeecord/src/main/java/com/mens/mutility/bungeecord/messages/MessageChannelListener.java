@@ -269,6 +269,10 @@ public class MessageChannelListener implements Listener {
                     manager.setSeasonId(Integer.parseInt(stream.readUTF()));
                     manager.startTimer();
                     break;
+
+                case "mens:entity-portal-request":
+                    //TODO
+                    break;
             }
         } catch (IOException e) {
             e.printStackTrace();
