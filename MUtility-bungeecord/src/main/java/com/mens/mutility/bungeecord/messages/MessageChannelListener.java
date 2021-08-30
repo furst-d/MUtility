@@ -7,10 +7,7 @@ import com.mens.mutility.bungeecord.chat.json.JsonBuilder;
 import com.mens.mutility.bungeecord.commands.anketa.Anketa;
 import com.mens.mutility.bungeecord.commands.mstavba.MStavbaVoteManager;
 import com.mens.mutility.bungeecord.discord.DiscordManager;
-import com.mens.mutility.bungeecord.requests.PortalRequest;
-import com.mens.mutility.bungeecord.requests.RandomTeleportRequest;
-import com.mens.mutility.bungeecord.requests.TeleportDataRequest;
-import com.mens.mutility.bungeecord.requests.TeleportRequest;
+import com.mens.mutility.bungeecord.requests.*;
 import com.mens.mutility.bungeecord.utils.randomteleport.RandomTeleport;
 import com.mens.mutility.bungeecord.utils.randomteleport.ServerData;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -48,6 +45,7 @@ public class MessageChannelListener implements Listener {
     public static List<TeleportRequest> teleportRequests;
     public static List<RandomTeleportRequest> rtRequests;
     public static List<TeleportDataRequest> teleportDataRequests;
+    public static List<EntityPortalRequest> entityPortalRequests;
 
     public MessageChannelListener(MUtilityBungeeCord plugin) {
         this.plugin = plugin;
@@ -65,6 +63,7 @@ public class MessageChannelListener implements Listener {
         teleportRequests = new ArrayList<>();
         rtRequests = new ArrayList<>();
         teleportDataRequests = new ArrayList<>();
+        entityPortalRequests = new ArrayList<>();
     }
 
     @EventHandler
@@ -271,7 +270,47 @@ public class MessageChannelListener implements Listener {
                     break;
 
                 case "mens:entity-portal-request":
-                    //TODO
+                    String eWorld = stream.readUTF();
+                    double eX = Double.parseDouble(stream.readUTF());
+                    double eY = Double.parseDouble(stream.readUTF());
+                    double eZ = Double.parseDouble(stream.readUTF());
+                    String eType = stream.readUTF();
+                    String eNBT = stream.readUTF();
+                    switch(eWorld) {
+                        case "overworld":
+                            ServerInfo target = getServerByCoords(eX, eZ);
+                            if(target != null) {
+                                EntityPortalRequest request = new EntityPortalRequest(
+                                        eType,
+                                        eNBT,
+                                        target,
+                                        eX,
+                                        eY,
+                                        eZ,
+                                        "world");
+                                if(request.getServer().getPlayers().isEmpty()) {
+                                    entityPortalRequests.add(request);
+                                } else {
+                                    messageChannel.sendToServer(request.getServer(), "mens:send-entity-to-overworld", String.valueOf(eX), String.valueOf(eY), String.valueOf(eZ), eType, eNBT);
+                                }
+                            }
+                            break;
+                        case "nether":
+                            EntityPortalRequest request = new EntityPortalRequest(
+                                    eType,
+                                    eNBT,
+                                    ProxyServer.getInstance().getServerInfo(plugin.getConfiguration().getString("Servers.Nether.Name")),
+                                    eX,
+                                    eY,
+                                    eZ,
+                                    "world_nether");
+                            if(request.getServer().getPlayers().isEmpty()) {
+                                entityPortalRequests.add(request);
+                            } else {
+                                messageChannel.sendToServer(request.getServer(), "mens:send-entity-to-nether", String.valueOf(eX), String.valueOf(eY), String.valueOf(eZ), eType, eNBT);
+                            }
+                            break;
+                    }
                     break;
             }
         } catch (IOException e) {

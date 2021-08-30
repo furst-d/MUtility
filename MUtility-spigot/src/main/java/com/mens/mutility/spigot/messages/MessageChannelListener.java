@@ -11,6 +11,7 @@ import com.mens.mutility.spigot.inventory.TeleportData;
 import com.mens.mutility.spigot.portal.PortalManager;
 import com.mens.mutility.spigot.utils.*;
 import org.bukkit.*;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 
@@ -21,6 +22,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Objects;
+import java.util.Optional;
 
 
 /**
@@ -216,6 +218,69 @@ public class MessageChannelListener implements PluginMessageListener {
                     MStavbaVoteManager manager = new MStavbaVoteManager(plugin);
                     manager.setActive(false);
                     break;
+
+                case "mens:send-entity-to-nether":
+                    loc = player.getLocation();
+                    double eXNe = Double.parseDouble(stream.readUTF());
+                    double eYNe = Double.parseDouble(stream.readUTF());
+                    double eZNe = Double.parseDouble(stream.readUTF());
+                    String eTypeNe = stream.readUTF();
+                    String eNBTNe = stream.readUTF();
+                    String eWorldNe = "world_nether";
+                    loc.setX(eXNe);
+                    loc.setY(eYNe);
+                    loc.setZ(eZNe);
+                    loc.setWorld(WorldCreator.name(eWorldNe).createWorld());
+                    pm = new PortalManager(player, loc);
+                    pm.findPortal();
+                    pm.createPortal();
+                    if(pm.isPrepared()) {
+                        Location portalLocation = pm.getPortalLocation();
+                        eNBTNe = eNBTNe.replace("Pos:[" + eXNe + "d," + eYNe + "d," + eZNe + "d]", "Pos:[" + portalLocation.getX() + "d," + portalLocation.getY() + "d," + portalLocation.getZ() + "d]");
+                        Optional<EntityType> entityTypeOpt = Arrays.stream(EntityType.values()).filter(et -> et.name().equals(eTypeNe)).findFirst();
+                        if(entityTypeOpt.isPresent()) {
+                            if(entityTypeOpt.get().getEntityClass() != null) {
+                                String finalENBTNe = eNBTNe;
+                                Objects.requireNonNull(pm.getPortalLocation().getWorld()).spawn(loc, entityTypeOpt.get().getEntityClass(), en -> {
+                                    NBTEditor editor = new NBTEditor();
+                                    editor.setNBT(en, finalENBTNe);
+                                });
+                            }
+                        }
+                    }
+                    break;
+
+                case "mens:send-entity-to-overworld":
+                    loc = player.getLocation();
+                    double eXOw = Double.parseDouble(stream.readUTF());
+                    double eYOw = Double.parseDouble(stream.readUTF());
+                    double eZOw = Double.parseDouble(stream.readUTF());
+                    String eTypeOw = stream.readUTF();
+                    String eNBTOw = stream.readUTF();
+                    String eWorldOw = "world";
+                    loc.setX(eXOw);
+                    loc.setY(eYOw);
+                    loc.setZ(eZOw);
+                    loc.setWorld(WorldCreator.name(eWorldOw).createWorld());
+                    pm = new PortalManager(player, loc);
+                    pm.findPortal();
+                    pm.createPortal();
+                    if(pm.isPrepared()) {
+                        Location portalLocation = pm.getPortalLocation();
+                        eNBTOw = eNBTOw.replace("Pos:[" + eXOw + "d," + eYOw + "d," + eZOw + "d]", "Pos:[" + portalLocation.getX() + "d," + portalLocation.getY() + "d," + portalLocation.getZ() + "d]");
+                        Optional<EntityType> entityTypeOpt = Arrays.stream(EntityType.values()).filter(et -> et.name().equals(eTypeOw)).findFirst();
+                        if(entityTypeOpt.isPresent()) {
+                            if(entityTypeOpt.get().getEntityClass() != null) {
+                                String finalENBTOw = eNBTOw;
+                                Objects.requireNonNull(pm.getPortalLocation().getWorld()).spawn(loc, entityTypeOpt.get().getEntityClass(), en -> {
+                                    NBTEditor editor = new NBTEditor();
+                                    editor.setNBT(en, finalENBTOw);
+                                });
+                            }
+                        }
+                    }
+                    break;
+
             }
         } catch (IOException e) {
             e.printStackTrace();

@@ -4,10 +4,7 @@ import com.mens.mutility.bungeecord.MUtilityBungeeCord;
 import com.mens.mutility.bungeecord.commands.mstavba.MStavbaVoteManager;
 import com.mens.mutility.bungeecord.messages.MessageChannel;
 import com.mens.mutility.bungeecord.messages.MessageChannelListener;
-import com.mens.mutility.bungeecord.requests.PortalRequest;
-import com.mens.mutility.bungeecord.requests.RandomTeleportRequest;
-import com.mens.mutility.bungeecord.requests.TeleportDataRequest;
-import com.mens.mutility.bungeecord.requests.TeleportRequest;
+import com.mens.mutility.bungeecord.requests.*;
 import com.mens.mutility.bungeecord.utils.Response;
 import com.mens.mutility.bungeecord.utils.Timer;
 import net.md_5.bungee.api.event.ServerSwitchEvent;
@@ -77,6 +74,22 @@ public class OnServerSwitchEvent implements Listener {
                 }
                 messageChannel.sendPortalInfoToServer(request.getPlayer(), subChannel, request.getX(), request.getY(), request.getZ(), request.isLoadTeleportData());
                 MessageChannelListener.portalRequests.remove(request);
+            }
+
+            Optional<EntityPortalRequest> optEntityPortalRequests = MessageChannelListener.entityPortalRequests.stream().filter(request -> request.getServer().getName().equals(event.getPlayer().getServer().getInfo().getName())).findFirst();
+            if(optEntityPortalRequests.isPresent()) {
+                EntityPortalRequest request = optEntityPortalRequests.get();
+                String subChannel = "mens:send-entity-to-";
+                switch (request.getWorld()) {
+                    case "world":
+                        subChannel += "overworld";
+                        break;
+                    case "world_nether":
+                        subChannel += "nether";
+                        break;
+                }
+                messageChannel.sendToServer(request.getServer(), subChannel, String.valueOf(request.getX()), String.valueOf(request.getY()), String.valueOf(request.getZ()), request.getEntityTypeName(), request.getNbt());
+                MessageChannelListener.entityPortalRequests.remove(request);
             }
         } else {
             MStavbaVoteManager manager = new MStavbaVoteManager(plugin);
