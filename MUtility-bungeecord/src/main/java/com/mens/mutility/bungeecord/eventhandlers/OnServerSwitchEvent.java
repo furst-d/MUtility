@@ -12,8 +12,10 @@ import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.scheduler.ScheduledTask;
 import net.md_5.bungee.event.EventHandler;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class OnServerSwitchEvent implements Listener {
     private final MUtilityBungeeCord plugin;
@@ -76,9 +78,8 @@ public class OnServerSwitchEvent implements Listener {
                 MessageChannelListener.portalRequests.remove(request);
             }
 
-            Optional<EntityPortalRequest> optEntityPortalRequests = MessageChannelListener.entityPortalRequests.stream().filter(request -> request.getServer().getName().equals(event.getPlayer().getServer().getInfo().getName())).findFirst();
-            if(optEntityPortalRequests.isPresent()) {
-                EntityPortalRequest request = optEntityPortalRequests.get();
+            List<EntityPortalRequest> requests = MessageChannelListener.entityPortalRequests.stream().filter(request -> request.getServer().getName().equals(event.getPlayer().getServer().getInfo().getName())).collect(Collectors.toList());
+            for(EntityPortalRequest request : requests) {
                 String subChannel = "mens:send-entity-to-";
                 switch (request.getWorld()) {
                     case "world":
