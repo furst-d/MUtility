@@ -98,6 +98,11 @@ public class Prefix {
         return getPrefix(hexColor, json);
     }
 
+    public String getMParticlePrefix(boolean hexColor, boolean json) {
+        setPrefixName("M-Particle");
+        return getPrefix(hexColor, json);
+    }
+
     public String getCustomPrefix(String prefix, boolean hexColor, boolean json) {
         setPrefixName(prefix);
         return getPrefix(hexColor, json);

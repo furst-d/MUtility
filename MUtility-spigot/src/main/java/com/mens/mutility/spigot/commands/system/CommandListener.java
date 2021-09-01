@@ -3,6 +3,10 @@ package com.mens.mutility.spigot.commands.system;
 import com.mens.mutility.spigot.MUtilitySpigot;
 import com.mens.mutility.spigot.chat.Errors;
 import com.mens.mutility.spigot.chat.Prefix;
+import com.mens.mutility.spigot.commands.commands.mparticle.enums.Colors;
+import com.mens.mutility.spigot.commands.commands.mparticle.enums.CustomStyles;
+import com.mens.mutility.spigot.commands.commands.mparticle.enums.Particles;
+import com.mens.mutility.spigot.commands.commands.mparticle.enums.Styles;
 import com.mens.mutility.spigot.commands.system.enums.ArgumentTypes;
 import com.mens.mutility.spigot.commands.system.enums.TabCompleterTypes;
 import com.mens.mutility.spigot.utils.Checker;
@@ -292,6 +296,7 @@ public class CommandListener implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(@Nonnull CommandSender sender, @Nonnull Command command, @Nonnull String alias, @Nonnull String[] args) {
+        boolean found = false;
         List<String> arguments = new ArrayList<>();
         Player player = (Player) sender;
         List<CommandData> commands = plugin.getCommands();
@@ -303,13 +308,16 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                 List<CommandData> subcommands = commandData.getNext();
                 for (int i = 0; i < args.length; i++) {
                     for (CommandData subcommand: subcommands) {
-                        if(checkSubcommand(sender, args, prefixStr, subcommand, i)) {
-                            if(subcommand.getArgumentType() == ArgumentTypes.STRINGINF) {
-                                i = args.length -1;
-                            } else {
-                                subcommands = subcommand.getNext();
+                            if(checkSubcommand(sender, args, prefixStr, subcommand, i)) {
+                                if(subcommand.getArgumentType() == ArgumentTypes.STRINGINF) {
+                                    i = args.length -1;
+                                } else {
+                                    subcommands = subcommand.getNext();
+                                    found = true;
+                                }
                             }
-                        }
+
+
                         // Pokud se jedná o poslední podpříkaz
                         if(i == args.length -1) {
                             if(subcommand.getTc() != TabCompleterTypes.NONE) {
@@ -401,9 +409,41 @@ public class CommandListener implements CommandExecutor, TabCompleter {
                                                 }
                                             }
                                             break;
+                                        case PARTICLES:
+                                            for(Particles particle : Particles.values()) {
+                                                if(!particle.getName().equalsIgnoreCase("redstone") && particle.getName().contains(args[i])) {
+                                                    arguments.add(particle.getName());
+                                                }
+                                            }
+                                            break;
+                                        case PARTICLE_STYLES:
+                                            for(Styles style : Styles.values()) {
+                                                if(!style.getName().equalsIgnoreCase("vlastni") && style.getName().contains(args[i])) {
+                                                    arguments.add(style.getName());
+                                                }
+                                            }
+                                            break;
+                                        case PARTICLE_COLORS:
+                                            for(Colors color : Colors.values()) {
+                                                if(color.getName().contains(args[i])) {
+                                                    arguments.add(color.getName());
+                                                }
+                                            }
+                                            break;
+                                        case CUSTOM_STYLES:
+                                            for(CustomStyles style : CustomStyles.values()) {
+                                                if(style.getName().contains(args[i])) {
+                                                    arguments.add(style.getName());
+                                                }
+                                            }
+                                            break;
                                     }
                                 }
                             }
+                        }
+                        if(found) {
+                            found = false;
+                            break;
                         }
                     }
                 }

@@ -3,6 +3,7 @@ package com.mens.mutility.spigot;
 import com.mens.mutility.spigot.commands.commands.cc.CC;
 import com.mens.mutility.spigot.commands.commands.event.programmed.finder.eventhandlers.OnPlayerInteractEvent;
 import com.mens.mutility.spigot.commands.commands.event.programmed.graveyard.eventhandlers.OnBlockBreakEvent;
+import com.mens.mutility.spigot.commands.commands.mparticle.MParticle;
 import com.mens.mutility.spigot.commands.commands.mstavba.MStavbaVoteManager;
 import com.mens.mutility.spigot.commands.commands.anketa.Anketa;
 import com.mens.mutility.spigot.commands.commands.minv.MInv;
@@ -109,6 +110,7 @@ public final class MUtilitySpigot extends JavaPlugin {
         commands.add(new Tpdata(this).create());
         commands.add(new RandomTeleport(this).create());
         commands.add(new CC(this).create());
+        commands.add(new MParticle(this).create());
 
         CommandListener commandListener = new CommandListener(this);
         Objects.requireNonNull(getCommand("mutility")).setExecutor(commandListener);
@@ -124,6 +126,7 @@ public final class MUtilitySpigot extends JavaPlugin {
         Objects.requireNonNull(getCommand("randomteleport")).setExecutor(commandListener);
         Objects.requireNonNull(getCommand("rt")).setExecutor(commandListener);
         Objects.requireNonNull(getCommand("cc")).setExecutor(commandListener);
+        Objects.requireNonNull(getCommand("mparticle")).setExecutor(commandListener);
     }
 
     /**

@@ -90,6 +90,8 @@ public class Database {
         stm.execute();
         stm = con.prepareStatement("CREATE TABLE IF NOT EXISTS " + tables.getTeleportDataTable() + "(id INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT, user_id int(8) NOT NULL, inventory longtext NOT NULL, fromX double NOT NULL, fromY double NOT NULL, fromZ double NOT NULL, fromWorld varchar(255) NOT NULL, fromServer varchar(255) NOT NULL, toX double, toY double, toZ double, toWorld varchar(255), toServer varchar(255), gamemode varchar(30) NOT NULL, exp float NOT NULL, level int(8) NOT NULL, hunger int(2) NOT NULL, health double NOT NULL, fly int(1) NOT NULL, effects longtext, created_date datetime NOT NULL, completed int(1) NOT NULL, FOREIGN KEY (user_id) REFERENCES web_users(id) ON UPDATE CASCADE ON DELETE CASCADE)");
         stm.execute();
+        stm = con.prepareStatement("CREATE TABLE IF NOT EXISTS " + tables.getMParticleTable() + "(id INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT, user_id int(8) NOT NULL, record_id int(4) NOT NULL, style varchar(30) NOT NULL, custom_style varchar(50), particle varchar(100), particle_name varchar(255), selected int(1) NOT NULL, color int(1) NOT NULL, red int(3), green int(3), blue int(3), place int(1) NOT NULL, posX double, posY double, posZ double, world varchar(255), server varchar(255), pitch double, yaw double, FOREIGN KEY (user_id) REFERENCES web_users(id) ON UPDATE CASCADE ON DELETE CASCADE)");
+        stm.execute();
         ProxyServer.getInstance().getConsole().sendMessage(new TextComponent(prefix.getMutilityPrefix(false, false) + "Chybejici tabulky vytvoreny!"));
     }
 }

@@ -48,4 +48,8 @@ public class DatabaseTables {
     public String getTeleportDataTable() {
         return getTable("teleport_data");
     }
+
+    public String getMParticleTable() {
+        return getTable("mparticle");
+    }
 }

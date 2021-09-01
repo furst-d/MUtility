@@ -31,6 +31,8 @@ commands:
     description: Nahodny teleport
   cc:
     description: Sprava Craft-Coinu
+  mparticle:
+    description: Sprava particlu
 permissions:
   mutility.help:
     default: op
@@ -191,6 +193,45 @@ permissions:
   mutility.cc.status:
     default: op
     description: Zobrazeni statusu Craft-Coinu
+  mutility.mparticle.help:
+    default: op
+    description: Napoveda k M-Particle
+  mutility.mparticle.create:
+    default: op
+    description: Vytvoreni hracovych particlu
+  mutility.mparticle.create.place:
+    default: op
+    description: Vytvoreni globalnich particlu
+  mutility.mparticle.list:
+    default: op
+    description: Seznam hracovych particlu
+  mutility.mparticle.list.place:
+    default: op
+    description: Seznam globalnich particlu
+  mutility.mparticle.start:
+    default: op
+    description: Zapnuti hracovych particlu
+  mutility.mparticle.start.place:
+    default: op
+    description: Zapnuti globalnich particlu
+  mutility.mparticle.stop:
+    default: op
+    description: Vypnuti hracovych particlu
+  mutility.mparticle.stop.place:
+    default: op
+    description: Vypnuti globalnich particlu
+  mutility.mparticle.delete:
+    default: op
+    description: Smazani hracovych particlu
+  mutility.mparticle.delete.place:
+    default: op
+    description: Smazani globalnich particlu
+  mutility.mparticle.manage:
+    default: op
+    description: Uprava hracovych particlu
+  mutility.mparticle.manage.place:
+    default: op
+    description: Uprava globalnich particlu
 
 
 
