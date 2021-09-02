@@ -500,7 +500,6 @@ public class MInv extends CommandHelp {
                 db.openConnection();
             }
             PreparedStatement stm;
-            ResultSet rs;
             if(quickSave) {
                 if(getQuickSaveCount(player) == 0) {
                     stm = db.getCon().prepareStatement("INSERT INTO " + tables.getInventoryTable() + " (user_id, id_user_record, inventory) VALUE (?, ?, ?)");
@@ -531,7 +530,6 @@ public class MInv extends CommandHelp {
                 db.openConnection();
             }
             PreparedStatement stm;
-            ResultSet rs;
             stm = db.getCon().prepareStatement("UPDATE " + tables.getInventoryTable() + " SET inventory = ? WHERE id_user_record = ? AND user_id = ?");
             stm.setString(1, inventory.toString());
             stm.setInt(2, id_user_record);
@@ -626,7 +624,6 @@ public class MInv extends CommandHelp {
                 db.openConnection();
             }
             PreparedStatement stm;
-            ResultSet rs;
             stm = db.getCon().prepareStatement("UPDATE " + tables.getInventoryTable() + " SET inventory_name = ? WHERE id_user_record = ? AND user_id = ?");
             stm.setString(1, inventory_name);
             stm.setInt(2, id_user_record);
@@ -643,7 +640,6 @@ public class MInv extends CommandHelp {
                 db.openConnection();
             }
             PreparedStatement stm;
-            ResultSet rs;
             stm = db.getCon().prepareStatement("DELETE FROM " + tables.getInventoryTable() + " WHERE id_user_record = ? AND user_id = ?");
             stm.setInt(1, id_user_record);
             stm.setInt(2, playerManager.getUserId(player.getName()));

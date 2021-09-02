@@ -44,7 +44,6 @@ public class MyStringUtils {
     public String getCurrentFormattedDate() {
         LocalDateTime myDateObj = LocalDateTime.now();
         DateTimeFormatter myFormatObj = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        String date = myDateObj.format(myFormatObj);
         return myDateObj.format(myFormatObj);
     }
 }

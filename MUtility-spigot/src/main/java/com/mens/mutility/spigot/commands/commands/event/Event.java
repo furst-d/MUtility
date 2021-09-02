@@ -1031,7 +1031,6 @@ public class Event extends CommandHelp {
             if(!db.getCon().isValid(0)) {
                 db.openConnection();
             }
-            EventData data;
             PreparedStatement stm = db.getCon().prepareStatement("UPDATE " + tables.getEventsTable() + " SET event_name = ?, tpX = ?, tpY = ?, tpZ = ?, world = ?, server = ?, objective = ?, note = ? WHERE id = ?");
             stm.setString(1, eventData.getName());
             stm.setFloat(2, eventData.getTpX());

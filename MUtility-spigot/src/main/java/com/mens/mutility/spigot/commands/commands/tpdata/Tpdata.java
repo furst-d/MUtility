@@ -164,7 +164,7 @@ public class Tpdata extends CommandHelp {
             int id = Integer.parseInt(t.getArgs()[2]);
             if(isData(id)) {
                 InventoryManager invManager = new InventoryManager();
-                InventoryNamePair invData = getInventory((Player)t.getSender(), id);
+                InventoryNamePair invData = getInventory(id);
                 InventoryPair invPair = invManager.getInventoryAsItemStack(invManager.toJsonObject(invData.getInventory()));
                 GUIManager guiManager = new GUIManager(plugin, 45, colors.getPrimaryColor()  + "§l" + invData.getName());
 
@@ -377,7 +377,6 @@ public class Tpdata extends CommandHelp {
                     .toString();
             int id;
             int userID;
-            String inventory;
             double fromX;
             double fromY;
             double fromZ;
@@ -600,7 +599,7 @@ public class Tpdata extends CommandHelp {
         }
     }
 
-    private InventoryNamePair getInventory(Player player, int id) {
+    private InventoryNamePair getInventory(int id) {
         String inventory = "";
         String inventory_name = null;
         try {
@@ -688,7 +687,7 @@ public class Tpdata extends CommandHelp {
         }
     }
 
-    public void deleteOldPlayerData(Player player, int days) {
+    public void deleteOldData(int days) {
         try {
             if(!db.getCon().isValid(0)) {
                 db.openConnection();
@@ -739,12 +738,10 @@ public class Tpdata extends CommandHelp {
             if(!db.getCon().isValid(0)) {
                 db.openConnection();
             }
-            int health;
-            boolean fly;
             Collection<PotionEffect> effects;
             if(rs.next()) {
                 effects = new ArrayList<>();
-                TeleportData data = new TeleportData(plugin);
+                TeleportData data = new TeleportData();
                 data.setId(rs.getInt(1));
                 data.setInventory(rs.getString(2));
                 data.setGamemode(rs.getString(3));

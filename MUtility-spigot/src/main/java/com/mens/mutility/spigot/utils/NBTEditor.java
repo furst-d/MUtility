@@ -6,6 +6,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import org.bukkit.craftbukkit.v1_17_R1.entity.CraftEntity;
 import org.bukkit.entity.Entity;
 
+@SuppressWarnings("unused")
 public class NBTEditor {
     public String getNBT(Entity e) {
         net.minecraft.world.entity.Entity nms = ((CraftEntity) e).getHandle();

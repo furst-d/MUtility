@@ -20,10 +20,6 @@ public class YamlFile {
         loadData();
     }
 
-    public File getFile() {
-        return file;
-    }
-
     private void createFiles() {
         if(!file.exists()) {
             file.getParentFile().mkdirs();

@@ -318,7 +318,6 @@ public class Navrhy extends CommandHelp {
                     .toString();
             int id;
             int userId;
-            int recordId;
             String content;
             int rejected;
             String rejectedReason;
@@ -338,7 +337,7 @@ public class Navrhy extends CommandHelp {
                 updateDate = rs.getString(9);
                 completed = rs.getInt(10);
                 JsonBuilder hoverInfo = getNavrhInfoHover(rejected, accepted, adminId, rejectedReason, content, createDate, updateDate);
-                JsonBuilder jb = getAdminButtons(hoverInfo, completed, rejected, accepted, id, adminId, rejectedReason, content, createDate, updateDate, acceptHover, rejectHover, returnHover);
+                JsonBuilder jb = getAdminButtons(hoverInfo, completed, id, acceptHover, rejectHover, returnHover);
                 String username = playerManager.getUsername(userId);
                 jb.text(username);
                 if(accepted == 0 && rejected == 0) {
@@ -429,7 +428,6 @@ public class Navrhy extends CommandHelp {
                     .color(colors.getSecondaryColorHEX())
                     .toString();
             int id;
-            int recordId;
             String content;
             int rejected;
             String rejectedReason;
@@ -449,7 +447,7 @@ public class Navrhy extends CommandHelp {
                 updateDate = rs.getString(8);
                 completed = rs.getInt(9);
                 JsonBuilder hoverInfo = getNavrhInfoHover(rejected, accepted, adminId, rejectedReason, content, createDate, updateDate);
-                JsonBuilder jb = getAdminButtons(hoverInfo, completed, rejected, accepted, id, adminId, rejectedReason, content, createDate, updateDate, acceptHover, rejectHover, returnHover);
+                JsonBuilder jb = getAdminButtons(hoverInfo, completed, id, acceptHover, rejectHover, returnHover);
                 if(content.length() > 30) {
                     jb.text(content.substring(0, 29) + "...");
                 } else {
@@ -708,7 +706,7 @@ public class Navrhy extends CommandHelp {
         return hoverInfo;
     }
 
-    private JsonBuilder getAdminButtons(JsonBuilder hoverInfo, int completed, int rejected, int accepted, int id, int adminId, String rejectedReason, String content, String createDate, String updateDate, String acceptHover, String rejectHover, String returnHover) {
+    private JsonBuilder getAdminButtons(JsonBuilder hoverInfo, int completed, int id, String acceptHover, String rejectHover, String returnHover) {
         JsonBuilder jb = new JsonBuilder();
         if(completed == 0) {
             jb.text("[")
@@ -853,7 +851,6 @@ public class Navrhy extends CommandHelp {
                 db.openConnection();
             }
             PreparedStatement stm;
-            ResultSet rs;
             stm = db.getCon().prepareStatement("DELETE FROM " + tables.getNavrhyTable() + " WHERE record_id = ? AND user_id = ?");
             stm.setInt(1, recordId);
             stm.setInt(2, playerManager.getUserId(player.getName()));

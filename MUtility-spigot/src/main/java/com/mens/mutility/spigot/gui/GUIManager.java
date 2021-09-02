@@ -12,17 +12,13 @@ import org.bukkit.inventory.ItemStack;
 
 public class GUIManager implements Listener {
     private final Inventory inventory;
-    private boolean movable;
+    private final boolean movable;
 
     public GUIManager(MUtilitySpigot plugin, int size, String inventoryName) {
         plugin.getPm().registerEvents(this, plugin);
         PluginColors colors = new PluginColors();
         inventory = Bukkit.createInventory(null, size, colors.getPrimaryColor() + inventoryName);
         movable = false;
-    }
-
-    public void setMovable(boolean movable) {
-        this.movable = movable;
     }
 
     public void addItem(ItemStack item, int slot) {

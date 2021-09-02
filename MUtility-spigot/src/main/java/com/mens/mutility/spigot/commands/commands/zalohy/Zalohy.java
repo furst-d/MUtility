@@ -421,7 +421,6 @@ public class Zalohy extends CommandHelp {
                 db.openConnection();
             }
             PreparedStatement stm;
-            ResultSet rs;
             stm = db.getCon().prepareStatement("DELETE FROM " + tables.getZalohyTable() + " WHERE record_id = ? AND user_id = ?");
             stm.setInt(1, recordId);
             stm.setInt(2, playerManager.getUserId(player.getName()));

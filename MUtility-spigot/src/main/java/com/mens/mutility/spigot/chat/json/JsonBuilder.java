@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-
+@SuppressWarnings("unused")
 public class JsonBuilder {
 
     public enum ClickAction {

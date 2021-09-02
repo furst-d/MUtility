@@ -35,7 +35,7 @@ public class RandomTeleport extends CommandHelp {
         final CommandData rt = new CommandData("randomteleport", "rt", "Random teleport", "mutility.rt.help", CommandExecutors.PLAYER, t -> {
             Player player = (Player) t.getSender();
             teleportDataManager.saveData(player, player.getLocation().getX(), player.getLocation().getY(), player.getLocation().getZ(), Objects.requireNonNull(player.getLocation().getWorld()).getName());
-            teleportDataManager.deleteOldPlayerData(player, 30);
+            teleportDataManager.deleteOldData(30);
             messageChannel.sendToBungeeCord(player, "mens:random-teleport", player.getName());
         });
 

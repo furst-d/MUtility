@@ -50,8 +50,4 @@ public class Timer {
             }
         },0,1000);
     }
-
-    public void stopTimer() {
-        running = false;
-    }
 }

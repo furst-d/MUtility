@@ -40,7 +40,6 @@ public final class MUtilitySpigot extends JavaPlugin {
 
     private YamlFile events;
     private YamlFile joinEffects;
-    private YamlFile messages;
 
     /**
      * Spousteci metoda
@@ -133,7 +132,7 @@ public final class MUtilitySpigot extends JavaPlugin {
      * Metoda pro registraci eventu
      */
     private void loadEvents() {
-        pm.registerEvents(new OnEntityPortalEvent(this), this);
+        pm.registerEvents(new OnEntityPortalEvent(), this);
         pm.registerEvents(new OnPlayerPortalEvent(this), this);
         pm.registerEvents(new OnPlayerJoinEvent(this), this);
         pm.registerEvents(new OnPlayerInteractEvent(this), this);

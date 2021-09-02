@@ -9,9 +9,6 @@ import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.Collections;
-import java.util.Comparator;
-
 public abstract class CommandHelp {
     private final PluginColors colors;
 

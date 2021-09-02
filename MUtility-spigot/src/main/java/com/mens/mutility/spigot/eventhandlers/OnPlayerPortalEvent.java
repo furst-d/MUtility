@@ -49,7 +49,7 @@ public class OnPlayerPortalEvent implements Listener {
                     Timer timer = new Timer();
                     timer.setOnFinish((sec, tt) -> conectingPlayers.removeIf(playerLoc -> playerLoc.getName().equals(player.getName())));
                     teleportDataManager.saveData(player, x, y, z, world);
-                    teleportDataManager.deleteOldPlayerData(player, 30);
+                    teleportDataManager.deleteOldData( 30);
                     messageChannel.sendPortalInfoToBungeeCord(player, "mens:portalRequest", "end", 0, 0, 0);
                     timer.startTimer(5);
                 }

@@ -18,7 +18,6 @@ import java.time.format.DateTimeFormatter;
 public class MStavbaVoteManager {
     private static boolean active;
     private static int seasonId;
-    private static final Timer timer = new Timer();
 
     private final Database db;
     private final DatabaseTables tables;

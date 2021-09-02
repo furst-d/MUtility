@@ -1,7 +1,6 @@
 package com.mens.mutility.spigot.eventhandlers;
 
 import com.google.common.collect.Iterables;
-import com.mens.mutility.spigot.MUtilitySpigot;
 import com.mens.mutility.spigot.messages.MessageChannel;
 import com.mens.mutility.spigot.utils.NBTEditor;
 import org.bukkit.Bukkit;
@@ -17,7 +16,7 @@ import java.util.Objects;
 public class OnEntityPortalEvent implements Listener {
     private final MessageChannel messageChannel;
 
-    public OnEntityPortalEvent(MUtilitySpigot plugin) {
+    public OnEntityPortalEvent() {
         messageChannel = new MessageChannel();
     }
 

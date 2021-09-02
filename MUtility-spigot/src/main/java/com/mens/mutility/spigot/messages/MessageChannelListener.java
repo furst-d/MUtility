@@ -29,12 +29,10 @@ import java.util.Optional;
  * Trida zajistujici komunikaci mezi pluginy na serverech v ramci BungeeCord
  */
 public class MessageChannelListener implements PluginMessageListener {
-
     private final MUtilitySpigot plugin;
     private final Tpdata teleportDataManager;
     private final PluginColors colors;
     private final Prefix prefix;
-    private Player playerGlobal;
 
     /**
      * Konstruktor tridy
