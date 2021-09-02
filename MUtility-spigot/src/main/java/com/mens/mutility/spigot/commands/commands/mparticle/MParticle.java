@@ -11,6 +11,7 @@ import com.mens.mutility.spigot.commands.system.enums.TabCompleterTypes;
 import com.mens.mutility.spigot.database.Database;
 import com.mens.mutility.spigot.database.DatabaseTables;
 import com.mens.mutility.spigot.messages.MessageChannel;
+import com.mens.mutility.spigot.utils.Checker;
 import com.mens.mutility.spigot.utils.PageList;
 import com.mens.mutility.spigot.utils.PlayerManager;
 import org.bukkit.entity.Player;
@@ -26,6 +27,7 @@ public class MParticle extends CommandHelp {
     private final MessageChannel messageChannel;
     private final Prefix prefix;
     private final PluginColors colors;
+    private final Checker checker;
 
     public MParticle(MUtilitySpigot plugin) {
         this.plugin = plugin;
@@ -35,6 +37,7 @@ public class MParticle extends CommandHelp {
         helpList = new PageList(10, prefix.getMParticlePrefix(true, true).replace("]", " - nápověda]"), "/mparticle");
         messageChannel = new MessageChannel();
         colors = new PluginColors();
+        checker = new Checker();
     }
 
     /**
@@ -136,7 +139,15 @@ public class MParticle extends CommandHelp {
         final CommandData createOnPlayerStyleParticle = new CommandData(ArgumentTypes.STRING, TabCompleterTypes.PARTICLES, "mutility.mparticle.create", CommandExecutors.PLAYER, t -> {
             String style = t.getArgs()[2];
             String particle = t.getArgs()[3];
+            if(checker.checkParticleStyle(style)) {
+                if(checker.checkParticle(particle)) {
 
+                } else {
+
+                }
+            } else {
+
+            }
         });
         final CommandData createOnPlayerCustomStyle = new CommandData(ArgumentTypes.STRING, TabCompleterTypes.CUSTOM_STYLES, "mutility.mparticle.create");
         final CommandData createOnPlaceStyleRedstone = new CommandData(ArgumentTypes.DEFAULT, "redstone", TabCompleterTypes.DEFAULT, "mutility.mparticle.create.place");

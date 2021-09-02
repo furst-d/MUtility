@@ -118,7 +118,7 @@ public class MessageChannelListener implements PluginMessageListener {
                 case "mens:permissionRequest":
                     String permission = stream.readUTF();
                     String returnChannel = stream.readUTF();
-                    Checker checker = new Checker(plugin);
+                    Checker checker = new Checker();
                     StringBuilder permPlayers = new StringBuilder();
                     for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                         if(checker.checkPermissions(onlinePlayer, permission)) {

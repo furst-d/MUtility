@@ -15,7 +15,7 @@ public class FogBossbar {
 
     public FogBossbar(MUtilitySpigot plugin) {
         bar = Bukkit.createBossBar("", BarColor.PURPLE, BarStyle.SOLID);
-        checker = new Checker(plugin);
+        checker = new Checker();
         enabled = true;
     }
 

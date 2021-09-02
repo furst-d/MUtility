@@ -17,7 +17,7 @@ public class OnBlockBreakEvent implements Listener {
 
     public OnBlockBreakEvent(MUtilitySpigot plugin) {
         this.plugin = plugin;
-        checker = new Checker(plugin);
+        checker = new Checker();
     }
 
     @EventHandler

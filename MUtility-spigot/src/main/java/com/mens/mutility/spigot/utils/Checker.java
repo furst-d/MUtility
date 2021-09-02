@@ -19,8 +19,8 @@ import java.util.Objects;
 public class Checker {
     private final MUtilitySpigot plugin;
 
-    public Checker(MUtilitySpigot plugin) {
-        this.plugin = plugin;
+    public Checker() {
+        this.plugin = MUtilitySpigot.getInstance();
     }
 
     public boolean checkInt(String number) {

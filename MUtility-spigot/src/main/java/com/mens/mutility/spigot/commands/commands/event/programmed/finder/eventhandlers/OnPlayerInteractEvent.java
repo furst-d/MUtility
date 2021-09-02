@@ -25,7 +25,7 @@ public class OnPlayerInteractEvent implements Listener {
 
     public OnPlayerInteractEvent(MUtilitySpigot plugin) {
         this.plugin = plugin;
-        checker = new Checker(plugin);
+        checker = new Checker();
         prefix = new Prefix();
         colors = new PluginColors();
         ccManager = new CraftCoinManager();

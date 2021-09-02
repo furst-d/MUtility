@@ -59,7 +59,7 @@ public class Zalohy extends CommandHelp {
         colors = new PluginColors();
         strUt = new MyStringUtils();
         errors = new Errors();
-        checker = new Checker(plugin);
+        checker = new Checker();
         deleteConfirmationList = new ArrayList<>();
     }
 

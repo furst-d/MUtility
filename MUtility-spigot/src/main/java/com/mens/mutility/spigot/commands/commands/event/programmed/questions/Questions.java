@@ -37,7 +37,7 @@ public class Questions {
     public Questions(MUtilitySpigot plugin) {
         stillPlaying = new ArrayList<>();
         badAnswer = new ArrayList<>();
-        checker = new Checker(plugin);
+        checker = new Checker();
         colors = new PluginColors();
         prefix = new Prefix();
 

@@ -62,7 +62,7 @@ public class Event extends CommandHelp {
         questions = new Questions(plugin);
         finder = new EventFinder(plugin, "Hledacka");
         graveyard = new EventFinder(plugin, "Hrbitov");
-        checker = new Checker(plugin);
+        checker = new Checker();
         tables = new DatabaseTables();
     }
 

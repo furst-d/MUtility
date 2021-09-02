@@ -37,7 +37,7 @@ public class CommandListener implements CommandExecutor, TabCompleter {
 
     public CommandListener(MUtilitySpigot plugin) {
         this.plugin = plugin;
-        checker = new Checker(plugin);
+        checker = new Checker();
         errors = new Errors();
         error = false;
         prefix = new Prefix();
