@@ -15,10 +15,6 @@ public class Vote {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public ProxiedPlayer getPlayer() {
         return player;
     }

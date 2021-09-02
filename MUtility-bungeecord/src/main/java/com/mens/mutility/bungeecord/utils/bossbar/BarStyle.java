@@ -1,5 +1,6 @@
 package com.mens.mutility.bungeecord.utils.bossbar;
 
+@SuppressWarnings("unused")
 public enum BarStyle {
     SOLID,
     SEGMENTED_6,

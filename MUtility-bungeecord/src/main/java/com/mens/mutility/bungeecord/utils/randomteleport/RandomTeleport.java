@@ -39,10 +39,10 @@ public class RandomTeleport {
         ServerInfo ow2 = ProxyServer.getInstance().getServerInfo(plugin.getConfiguration().getString("Servers.OverWorld 2.Name"));
         ServerInfo ow3 = ProxyServer.getInstance().getServerInfo(plugin.getConfiguration().getString("Servers.OverWorld 3.Name"));
         ServerInfo ow4 = ProxyServer.getInstance().getServerInfo(plugin.getConfiguration().getString("Servers.OverWorld 4.Name"));
-        servers.add(new ServerData(ow1, plugin.getConfiguration().getString("Servers.OverWorld 1.Name"), ow1.getPlayers().size(), plugin.getConfiguration().getInt("Servers.OverWorld 1.Center.X"), plugin.getConfiguration().getInt("Servers.OverWorld 1.Center.Z"), plugin.getConfiguration().getInt("Servers.OverWorld 1.Radius") - 5000, true));
-        servers.add(new ServerData(ow2, plugin.getConfiguration().getString("Servers.OverWorld 2.Name"), ow2.getPlayers().size(), plugin.getConfiguration().getInt("Servers.OverWorld 2.Center.X"), plugin.getConfiguration().getInt("Servers.OverWorld 2.Center.Z"), plugin.getConfiguration().getInt("Servers.OverWorld 2.Radius") - 5000, true));
-        servers.add(new ServerData(ow3, plugin.getConfiguration().getString("Servers.OverWorld 3.Name"), ow3.getPlayers().size(), plugin.getConfiguration().getInt("Servers.OverWorld 3.Center.X"), plugin.getConfiguration().getInt("Servers.OverWorld 3.Center.Z"), plugin.getConfiguration().getInt("Servers.OverWorld 3.Radius") - 5000, true));
-        servers.add(new ServerData(ow4, plugin.getConfiguration().getString("Servers.OverWorld 4.Name"), ow4.getPlayers().size(), plugin.getConfiguration().getInt("Servers.OverWorld 4.Center.X"), plugin.getConfiguration().getInt("Servers.OverWorld 4.Center.Z"), plugin.getConfiguration().getInt("Servers.OverWorld 4.Radius") - 5000, true));
+        servers.add(new ServerData(ow1, ow1.getPlayers().size(), plugin.getConfiguration().getInt("Servers.OverWorld 1.Center.X"), plugin.getConfiguration().getInt("Servers.OverWorld 1.Center.Z"), plugin.getConfiguration().getInt("Servers.OverWorld 1.Radius") - 5000, true));
+        servers.add(new ServerData(ow2, ow2.getPlayers().size(), plugin.getConfiguration().getInt("Servers.OverWorld 2.Center.X"), plugin.getConfiguration().getInt("Servers.OverWorld 2.Center.Z"), plugin.getConfiguration().getInt("Servers.OverWorld 2.Radius") - 5000, true));
+        servers.add(new ServerData(ow3, ow3.getPlayers().size(), plugin.getConfiguration().getInt("Servers.OverWorld 3.Center.X"), plugin.getConfiguration().getInt("Servers.OverWorld 3.Center.Z"), plugin.getConfiguration().getInt("Servers.OverWorld 3.Radius") - 5000, true));
+        servers.add(new ServerData(ow4, ow4.getPlayers().size(), plugin.getConfiguration().getInt("Servers.OverWorld 4.Center.X"), plugin.getConfiguration().getInt("Servers.OverWorld 4.Center.Z"), plugin.getConfiguration().getInt("Servers.OverWorld 4.Radius") - 5000, true));
         return servers;
     }
 }

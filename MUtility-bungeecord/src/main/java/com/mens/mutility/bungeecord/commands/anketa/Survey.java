@@ -19,27 +19,20 @@ import java.util.concurrent.TimeUnit;
 
 public class Survey {
     private MUtilityBungeeCord plugin;
-    private final Prefix prefix;
     private final PluginColors colors;
     private String surveyName;
-    private List<Option> options;
-    private List<BossBar> bossBars;
-    private List<Vote> votes;
-    private List<String> permissedPlayers;
+    private final List<Option> options;
+    private final List<BossBar> bossBars;
+    private final List<Vote> votes;
+    private final List<String> permissedPlayers;
     private boolean isRunning;
     private int maxIndex;
 
-    private int minute;
-    private int second;
-    private int tick;
-    private int number;
-    private int hour;
-    private int currentTime;
+        private int currentTime;
     private ScheduledTask st;
 
     public Survey() {
         plugin = MUtilityBungeeCord.getInstance();
-        prefix = new Prefix();
         colors = new PluginColors();
         surveyName = "";
         options = new ArrayList<>();
@@ -48,7 +41,6 @@ public class Survey {
         permissedPlayers = new ArrayList<>();
         isRunning = false;
         maxIndex = 0;
-        tick = 20;
     }
 
     public MUtilityBungeeCord getPlugin() {
@@ -59,18 +51,6 @@ public class Survey {
         this.plugin = plugin;
     }
 
-    public Prefix getPrefix() {
-        return prefix;
-    }
-
-    public PluginColors getColors() {
-        return colors;
-    }
-
-    public String getSurveyName() {
-        return surveyName;
-    }
-
     public void setSurveyName(String surveyName) {
         this.surveyName = surveyName;
     }
@@ -79,32 +59,12 @@ public class Survey {
         return options;
     }
 
-    public void setOptions(List<Option> options) {
-        this.options = options;
-    }
-
-    public List<BossBar> getBossBars() {
-        return bossBars;
-    }
-
-    public void setBossBars(List<BossBar> bossBars) {
-        this.bossBars = bossBars;
-    }
-
     public List<Vote> getVotes() {
         return votes;
     }
 
-    public void setVotes(List<Vote> votes) {
-        this.votes = votes;
-    }
-
     public List<String> getPermissedPlayers() {
         return permissedPlayers;
-    }
-
-    public void setPermissedPlayers(List<String> permissedPlayers) {
-        this.permissedPlayers = permissedPlayers;
     }
 
     public boolean isRunning() {
@@ -121,62 +81,6 @@ public class Survey {
 
     public void setMaxIndex(int maxIndex) {
         this.maxIndex = maxIndex;
-    }
-
-    public int getMinute() {
-        return minute;
-    }
-
-    public void setMinute(int minute) {
-        this.minute = minute;
-    }
-
-    public int getSecond() {
-        return second;
-    }
-
-    public void setSecond(int second) {
-        this.second = second;
-    }
-
-    public int getTick() {
-        return tick;
-    }
-
-    public void setTick(int tick) {
-        this.tick = tick;
-    }
-
-    public int getNumber() {
-        return number;
-    }
-
-    public void setNumber(int number) {
-        this.number = number;
-    }
-
-    public int getHour() {
-        return hour;
-    }
-
-    public void setHour(int hour) {
-        this.hour = hour;
-    }
-
-    public int getCurrentTime() {
-        return currentTime;
-    }
-
-    public void setCurrentTime(int currentTime) {
-        this.currentTime = currentTime;
-    }
-
-    public ScheduledTask getSt() {
-        return st;
-    }
-
-    public void setSt(ScheduledTask st) {
-        this.st = st;
     }
 
     public void start(int time, String unit) {
@@ -249,35 +153,9 @@ public class Survey {
     }
 
     private void timer(int time, BossBar bar) {
-        number = time;
         currentTime = time;
         st = plugin.getProxy().getScheduler().schedule(plugin, () -> {
-            while(number > 0) {
-                if(number / 3600 > 0) {
-                    number -= 3600;
-                    hour++;
-                }
-                else if(number / 60 > 0) {
-                    number -= 60;
-                    minute++;
-                }
-                else {
-                    second++;
-                    number--;
-                }
-            }
-
-            second--;
             currentTime--;
-            if(second < 0) {
-                minute--;
-                second = 59;
-
-                if(minute < 0) {
-                    hour--;
-                    minute = 59;
-                }
-            }
             // Pošli každé 2 minuty a 20 sekund před koncem
             if(((currentTime % 120 == 0) && (time - currentTime > 120)) || ((currentTime == 20) && (time - currentTime > 60))) {
                 sendSurvey();

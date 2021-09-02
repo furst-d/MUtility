@@ -4,16 +4,14 @@ import net.md_5.bungee.api.config.ServerInfo;
 
 public class ServerData {
     private final ServerInfo server;
-    private final String name;
     private final int playerCount;
     private final double centerX;
     private final double centerZ;
     private final int radius;
     private final boolean loadTeleportData;
 
-    public ServerData(ServerInfo server, String name, int playerCount, double centerX, double centerZ, int radius, boolean loadTeleportData) {
+    public ServerData(ServerInfo server, int playerCount, double centerX, double centerZ, int radius, boolean loadTeleportData) {
         this.server = server;
-        this.name = name;
         this.playerCount = playerCount;
         this.centerX = centerX;
         this.centerZ = centerZ;
@@ -23,10 +21,6 @@ public class ServerData {
 
     public ServerInfo getServer() {
         return server;
-    }
-
-    public String getName() {
-        return name;
     }
 
     public int getPlayerCount() {

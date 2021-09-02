@@ -1,16 +1,19 @@
 package com.mens.mutility.spigot.utils;
 
 import com.mens.mutility.spigot.MUtilitySpigot;
+import com.mens.mutility.spigot.commands.commands.mparticle.enums.CustomStyles;
+import com.mens.mutility.spigot.commands.commands.mparticle.enums.Particles;
+import com.mens.mutility.spigot.commands.commands.mparticle.enums.Styles;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Arrays;
 import java.util.Objects;
 
 public class Checker {
@@ -124,29 +127,26 @@ public class Checker {
     }
 
     public boolean checkBlock(String block) {
-        for(Material m : Material.values()){
-            if(m.toString().toLowerCase().equalsIgnoreCase(block)) {
-                return true;
-            }
-        }
-        return false;
+        return Arrays.stream(Material.values()).anyMatch(material -> material.toString().toLowerCase().equalsIgnoreCase(block));
     }
 
     public boolean checkWorld(String worldName) {
-        for(World world : Bukkit.getWorlds()){
-            if(world.getName().equalsIgnoreCase(worldName)) {
-                return true;
-            }
-        }
-        return false;
+        return Bukkit.getWorlds().stream().anyMatch(world -> world.getName().equalsIgnoreCase(worldName));
     }
 
     public boolean checkServer(String serverName) {
-        for(ServerInfo server : plugin.getServers()){
-            if(server.getName().equalsIgnoreCase(serverName)) {
-                return true;
-            }
-        }
-        return false;
+        return plugin.getServers().stream().anyMatch(server -> server.getName().equalsIgnoreCase(serverName));
+    }
+
+    public boolean checkParticleStyle(String style) {
+        return Arrays.stream(Styles.values()).anyMatch(styleLoc -> styleLoc.getName().equalsIgnoreCase(style));
+    }
+
+    public boolean checkParticle(String particle) {
+        return Arrays.stream(Particles.values()).anyMatch(particleLoc -> particleLoc.getName().equalsIgnoreCase(particle));
+    }
+
+    public boolean checkCustomStyle(String style) {
+        return Arrays.stream(CustomStyles.values()).anyMatch(styleLoc -> styleLoc.getName().equalsIgnoreCase(style));
     }
 }

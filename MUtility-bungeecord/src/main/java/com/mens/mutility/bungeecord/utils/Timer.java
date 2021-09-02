@@ -14,10 +14,6 @@ public class Timer {
         onFinish = null;
     }
 
-    public void setRunning(boolean running) {
-        this.running = running;
-    }
-
     public void setOnRunning(BiConsumer<Integer, TimerTask> onRunning) {
         this.onRunning = onRunning;
     }
@@ -49,9 +45,5 @@ public class Timer {
                 }
             }
         },0,1000);
-    }
-
-    public void stopTimer() {
-        running = false;
     }
 }

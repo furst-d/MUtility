@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-
+@SuppressWarnings("unused")
 public class JsonBuilder {
 
     public enum ClickAction {
@@ -146,7 +146,6 @@ public class JsonBuilder {
     public void toPlayer( List<ProxiedPlayer> players ) {
         for(ProxiedPlayer p : players)
             this.toPlayer( p );
-
     }
 
     public void toPlayer(ProxiedPlayer player) {

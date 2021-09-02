@@ -5,6 +5,7 @@ import net.md_5.bungee.api.ChatColor;
 
 import java.util.Objects;
 
+@SuppressWarnings("unused")
 public class PluginColors {
     private final MUtilityBungeeCord plugin;
 

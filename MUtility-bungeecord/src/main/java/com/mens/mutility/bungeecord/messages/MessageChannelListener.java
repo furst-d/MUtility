@@ -18,7 +18,6 @@ import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PluginMessageEvent;
 import net.md_5.bungee.api.plugin.Listener;
-import net.md_5.bungee.api.scheduler.ScheduledTask;
 import net.md_5.bungee.chat.ComponentSerializer;
 import net.md_5.bungee.event.EventHandler;
 
@@ -38,8 +37,6 @@ public class MessageChannelListener implements Listener {
     private final DiscordManager discordManager;
     private Anketa survey;
     JsonBuilder surveyNotCreated;
-    ServerInfo target;
-    private ScheduledTask st;
 
     public static List<PortalRequest> portalRequests;
     public static List<TeleportRequest> teleportRequests;

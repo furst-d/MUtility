@@ -10,17 +10,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Random;
 
 public class MyStringUtils {
-    public String getStringFromArgs(String[] args, int startIndex) {
-        StringBuilder str = new StringBuilder();
-        for (int i = startIndex; i < args.length; i++) {
-            str.append(args[i]);
-            if(i != args.length-1) {
-                str.append(" ");
-            }
-        }
-        return str.toString().replace("\"", "'");
-    }
-
     public double getStringWidth(String str) throws IOException, FontFormatException {
         FontRenderContext frc = new FontRenderContext(new AffineTransform(), true, true);
         InputStream is = PageList.class.getResourceAsStream("/minecraft_font.ttf");
@@ -44,7 +33,6 @@ public class MyStringUtils {
     public String getCurrentFormattedDate() {
         LocalDateTime myDateObj = LocalDateTime.now();
         DateTimeFormatter myFormatObj = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        String date = myDateObj.format(myFormatObj);
         return myDateObj.format(myFormatObj);
     }
 }

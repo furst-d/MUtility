@@ -8,13 +8,21 @@ import com.mens.mutility.spigot.commands.system.CommandHelp;
 import com.mens.mutility.spigot.commands.system.enums.ArgumentTypes;
 import com.mens.mutility.spigot.commands.system.enums.CommandExecutors;
 import com.mens.mutility.spigot.commands.system.enums.TabCompleterTypes;
+import com.mens.mutility.spigot.database.Database;
+import com.mens.mutility.spigot.database.DatabaseTables;
 import com.mens.mutility.spigot.messages.MessageChannel;
 import com.mens.mutility.spigot.utils.PageList;
+import com.mens.mutility.spigot.utils.PlayerManager;
 import org.bukkit.entity.Player;
+
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 public class MParticle extends CommandHelp {
     private final MUtilitySpigot plugin;
     private PageList helpList;
+    private final Database db;
+    private final DatabaseTables tables;
     private final MessageChannel messageChannel;
     private final Prefix prefix;
     private final PluginColors colors;
@@ -22,6 +30,8 @@ public class MParticle extends CommandHelp {
     public MParticle(MUtilitySpigot plugin) {
         this.plugin = plugin;
         prefix = new Prefix();
+        db = plugin.getDb();
+        tables = new DatabaseTables();
         helpList = new PageList(10, prefix.getMParticlePrefix(true, true).replace("]", " - nápověda]"), "/mparticle");
         messageChannel = new MessageChannel();
         colors = new PluginColors();
@@ -124,8 +134,9 @@ public class MParticle extends CommandHelp {
         // 4. stupeň
         final CommandData createOnPlayerStyleRedstone = new CommandData(ArgumentTypes.DEFAULT, "redstone", TabCompleterTypes.DEFAULT, "mutility.mparticle.create");
         final CommandData createOnPlayerStyleParticle = new CommandData(ArgumentTypes.STRING, TabCompleterTypes.PARTICLES, "mutility.mparticle.create", CommandExecutors.PLAYER, t -> {
-            System.out.println("on player particle");
-            //TODO
+            String style = t.getArgs()[2];
+            String particle = t.getArgs()[3];
+
         });
         final CommandData createOnPlayerCustomStyle = new CommandData(ArgumentTypes.STRING, TabCompleterTypes.CUSTOM_STYLES, "mutility.mparticle.create");
         final CommandData createOnPlaceStyleRedstone = new CommandData(ArgumentTypes.DEFAULT, "redstone", TabCompleterTypes.DEFAULT, "mutility.mparticle.create.place");
@@ -418,5 +429,36 @@ public class MParticle extends CommandHelp {
         createOnPlaceCustomStyleRedstoneColorRGBY.link(createOnPlaceCustomStyleRedstoneColorRGBZ);
 
         return mparticle;
+    }
+
+    private void createParticle(Player player, int recordId, String style, String customStyle, String particle, int selected, int color, int red, int green, int blue, int place, float posX, float posY, float posZ, String world, String server, double pitch, double yaw) {
+        try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
+            PreparedStatement stm = db.getCon().prepareStatement("INSERT INTO " + tables.getMParticleTable() + " (user_id, record_id, style, custom_style, particle, selected, color, red, green, blue, place, posX, posY, posZ, world, server, pitch, yaw) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            stm.setInt(1, new PlayerManager().getUserId(player.getName()));
+            stm.setInt(2, recordId);
+            stm.setString(3, style);
+            stm.setString(4, customStyle);
+            stm.setString(5, particle);
+            stm.setInt(6, selected);
+            stm.setInt(7, color);
+            stm.setInt(8, red);
+            stm.setInt(9, green);
+            stm.setInt(10, blue);
+            stm.setInt(11, place);
+            stm.setDouble(12, posX);
+            stm.setDouble(13, posY);
+            stm.setDouble(14, posZ);
+            stm.setString(15, world);
+            stm.setString(16, server);
+            stm.setDouble(17, pitch);
+            stm.setDouble(18, yaw);
+            stm.execute();
+            player.sendMessage(prefix.getNavrhyPrefix(true, false) + "Particle byl úspěšně vytvořen!");
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
     }
 }

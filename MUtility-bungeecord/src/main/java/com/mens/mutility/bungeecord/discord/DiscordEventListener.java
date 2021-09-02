@@ -13,8 +13,8 @@ public class DiscordEventListener extends ListenerAdapter {
 
     @Override
     public void onGuildReady(GuildReadyEvent event) {
-        DiscordManager.getEmotes().add(new MyEmote(":schvaleno:", event.getGuild().getEmoteById(plugin.getConfiguration().getLong("Discord.Emotes.Accepted"))));
-        DiscordManager.getEmotes().add(new MyEmote(":zamitnuto:", event.getGuild().getEmoteById(plugin.getConfiguration().getLong("Discord.Emotes.Rejected"))));
+        DiscordManager.getEmotes().add(event.getGuild().getEmoteById(plugin.getConfiguration().getLong("Discord.Emotes.Accepted")));
+        DiscordManager.getEmotes().add(event.getGuild().getEmoteById(plugin.getConfiguration().getLong("Discord.Emotes.Rejected")));
     }
 
 }
