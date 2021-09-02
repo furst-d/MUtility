@@ -1,6 +1,7 @@
 package com.mens.mutility.spigot.utils;
 
 import com.mens.mutility.spigot.MUtilitySpigot;
+import com.mens.mutility.spigot.commands.commands.mparticle.enums.Colors;
 import com.mens.mutility.spigot.commands.commands.mparticle.enums.CustomStyles;
 import com.mens.mutility.spigot.commands.commands.mparticle.enums.Particles;
 import com.mens.mutility.spigot.commands.commands.mparticle.enums.Styles;
@@ -146,7 +147,11 @@ public class Checker {
         return Arrays.stream(Particles.values()).anyMatch(particleLoc -> particleLoc.getName().equalsIgnoreCase(particle));
     }
 
-    public boolean checkCustomStyle(String style) {
+    public boolean checkParticleCustomStyle(String style) {
         return Arrays.stream(CustomStyles.values()).anyMatch(styleLoc -> styleLoc.getName().equalsIgnoreCase(style));
+    }
+
+    public boolean checkParticleColor(String color) {
+        return Arrays.stream(Colors.values()).anyMatch(colorLoc -> colorLoc.getName().equalsIgnoreCase(color));
     }
 }
