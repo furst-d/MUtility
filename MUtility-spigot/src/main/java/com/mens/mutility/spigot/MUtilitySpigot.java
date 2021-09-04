@@ -140,6 +140,7 @@ public final class MUtilitySpigot extends JavaPlugin {
         pm.registerEvents(new OnLeavingEndEvent(this), this);
         pm.registerEvents(new OnCommandPreprocessEvent(this), this);
         pm.registerEvents(new OnPlayerMoveEvent(this), this);
+        pm.registerEvents(new OnPlayerQuitEvent(), this);
     }
 
     /**
