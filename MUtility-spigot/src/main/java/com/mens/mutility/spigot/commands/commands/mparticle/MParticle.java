@@ -84,12 +84,31 @@ public class MParticle extends CommandHelp {
         final CommandData show = new CommandData(ArgumentTypes.DEFAULT, "zobraz", TabCompleterTypes.DEFAULT, "mutility.mparticle.list", CommandExecutors.PLAYER, t -> loadMParticleList((Player) t.getSender(), 1, false));
         final CommandData manage = new CommandData(ArgumentTypes.DEFAULT, "manage", TabCompleterTypes.NONE);
         final CommandData start = new CommandData(ArgumentTypes.DEFAULT, "start", TabCompleterTypes.DEFAULT, "mutility.mparticle.start", CommandExecutors.PLAYER, t -> {
-            System.out.println("Start");
-            //TODO
+            Player player = (Player) t.getSender();
+            int recordId = getSelectedId(player);
+            if(recordId != 0) {
+                if(!isRunning(player, recordId, 0)) {
+                    ParticlePlayer.unregisterPlayer(player);
+                    ParticlePlayer.registerPlayer(player, recordId);
+                    //TODO spuštění particlu
+                    player.sendMessage(prefix.getMParticlePrefix(true, false) + colors.getSecondaryColor() + "Particle " + colors.getPrimaryColor() + recordId + colors.getSecondaryColor() + " byl spuštěn!");
+                } else {
+                    player.sendMessage(prefix.getMParticlePrefix(true, false) + colors.getSecondaryColor() + "Vybraný particle již běží!");
+                }
+            } else {
+                player.sendMessage(prefix.getMParticlePrefix(true, false) + colors.getSecondaryColor() + "Není vybraný žádný particle! Použij " + colors.getPrimaryColor() + "/mparticle list");
+            }
         });
         final CommandData stop = new CommandData(ArgumentTypes.DEFAULT, "stop", TabCompleterTypes.DEFAULT, "mutility.mparticle.stop", CommandExecutors.PLAYER, t -> {
-            System.out.println("Stop");
-            //TODO
+            Player player = (Player) t.getSender();
+            int runningId = getRunningId(player, 0);
+            if(runningId != 0) {
+                ParticlePlayer.unregisterPlayer(player);
+                //TODO vypnutí particlu
+                player.sendMessage(prefix.getMParticlePrefix(true, false) + colors.getSecondaryColor() + "Particle " + colors.getPrimaryColor() + runningId + colors.getSecondaryColor() + " byl vypnut!");
+            } else {
+                player.sendMessage(prefix.getMParticlePrefix(true, false) + colors.getSecondaryColor() + "Není zapnutý žádný particle!");
+            }
         });
 
         // 2. stupeň
@@ -121,16 +140,40 @@ public class MParticle extends CommandHelp {
         final CommandData createOnPlaceCustom = new CommandData(ArgumentTypes.DEFAULT, "vlastni", TabCompleterTypes.DEFAULT, "mutility.mparticle.create.place");
         final CommandData createOnPlaceStyle = new CommandData(ArgumentTypes.STRING, TabCompleterTypes.PARTICLE_STYLES, "mutility.mparticle.create.place");
         final CommandData startOnPlayerID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.mparticle.start", CommandExecutors.PLAYER, (t) -> {
-            System.out.println("Start player id");
-            //TODO
+            Player player = (Player) t.getSender();
+            int recordId = Integer.parseInt(t.getArgs()[2]);
+            if(isRecordId(player, recordId, false)) {
+                if(!isRunning(player, recordId, 0)) {
+                    ParticlePlayer.unregisterPlayer(player);
+                    ParticlePlayer.registerPlayer(player, recordId);
+                    updateSelected(player, recordId);
+                    //TODO spuštění particlu
+                    player.sendMessage(prefix.getMParticlePrefix(true, false) + colors.getSecondaryColor() + "Particle " + colors.getPrimaryColor() + recordId + colors.getSecondaryColor() + " byl spuštěn!");
+                } else {
+                    player.sendMessage(prefix.getMParticlePrefix(true, false) + colors.getSecondaryColor() + "Vybraný particle již běží!");
+                }
+            } else {
+                player.sendMessage(prefix.getMParticlePrefix(true, false) + colors.getSecondaryColor() + "Particle nenalezen!");
+            }
         });
         final CommandData startOnPlaceID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.mparticle.start.place", CommandExecutors.PLAYER, (t) -> {
             System.out.println("Start place id");
             //TODO
         });
         final CommandData stopOnPlayerID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.mparticle.stop", CommandExecutors.PLAYER, (t) -> {
-            System.out.println("Stop player id");
-            //TODO
+            Player player = (Player) t.getSender();
+            int recordId = Integer.parseInt(t.getArgs()[2]);
+            if(isRecordId(player, recordId, false)) {
+                if(isRunning(player, recordId, 0)) {
+                    ParticlePlayer.unregisterPlayer(player);
+                    //TODO vypnutí particlu
+                    player.sendMessage(prefix.getMParticlePrefix(true, false) + colors.getSecondaryColor() + "Particle " + colors.getPrimaryColor() + recordId + colors.getSecondaryColor() + " byl vypnut!");
+                } else {
+                    player.sendMessage(prefix.getMParticlePrefix(true, false) + colors.getSecondaryColor() + "Není zapnutý žádný particle!");
+                }
+            } else {
+                player.sendMessage(prefix.getMParticlePrefix(true, false) + colors.getSecondaryColor() + "Particle nenalezen!");
+            }
         });
         final CommandData stopOnPlaceID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.mparticle.stop.place", CommandExecutors.PLAYER, (t) -> {
             System.out.println("Stop place id");
@@ -695,6 +738,25 @@ public class MParticle extends CommandHelp {
         }
     }
 
+    private void updateSelected(Player player, int recordId) {
+        try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
+            PreparedStatement stm;
+            int userId = playerManager.getUserId(player.getName());
+            stm = db.getCon().prepareStatement("UPDATE " + tables.getMParticleTable() + " SET selected = 0 WHERE user_id = ? AND place = 0");
+            stm.setInt(1, userId);
+            stm.execute();
+            stm = db.getCon().prepareStatement("UPDATE " + tables.getMParticleTable() + " SET selected = 1 WHERE user_id = ? AND record_id = ? AND place = 0");
+            stm.setInt(1, userId);
+            stm.setInt(2, recordId);
+            stm.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void deleteParticle(Player player, int recordId, boolean global) {
         try {
             if(!db.getCon().isValid(0)) {
@@ -964,8 +1026,8 @@ public class MParticle extends CommandHelp {
                 pitch = rs.getDouble(19);
                 yaw = rs.getDouble(20);
                 JsonBuilder jb = new JsonBuilder();
-                JsonBuilder hoverInfo = getMParticleInfoHover(userId, style, customStyle, particle, selected, color, red, green, blue, place, posX, posY, posZ, world, server, pitch, yaw);
-                if(isRunning()) {
+                JsonBuilder hoverInfo = getMParticleInfoHover(player, recordId, userId, style, customStyle, particle, selected, color, red, green, blue, place, posX, posY, posZ, world, server, pitch, yaw);
+                if(isRunning(player, recordId, place)) {
                     jb.text("[")
                             .color(colors.getSecondaryColorHEX())
                             .hoverEvent(JsonBuilder.HoverAction.SHOW_TEXT, stopHover, true)
@@ -1050,10 +1112,10 @@ public class MParticle extends CommandHelp {
         }
     }
 
-    private JsonBuilder getMParticleInfoHover(int userId, String style, String customStyle, String particle, int selected, int color, int red, int green, int blue, int place, double posX, double posY, double posZ, String world, String server, double pitch, double yaw) {
+    private JsonBuilder getMParticleInfoHover(Player player, int recordId, int userId, String style, String customStyle, String particle, int selected, int color, int red, int green, int blue, int place, double posX, double posY, double posZ, String world, String server, double pitch, double yaw) {
         JsonBuilder jb = new JsonBuilder("Status: ")
                 .color(colors.getSecondaryColorHEX());
-        if(isRunning()) {
+        if(isRunning(player, recordId, place)) {
             jb.text("Zapnuto")
                     .color(ChatColor.GREEN);
         } else {
@@ -1123,7 +1185,7 @@ public class MParticle extends CommandHelp {
                     .text(String.format("%.3f", yaw))
                     .color(colors.getPrimaryColorHEX());
         } else {
-                jb.text("\nVybráno: ")
+            jb.text("\nVybráno: ")
                     .color(colors.getSecondaryColorHEX());
             if(selected == 1) {
                 jb.text("Ano")
@@ -1136,8 +1198,39 @@ public class MParticle extends CommandHelp {
         return jb;
     }
 
-    private boolean isRunning() {
-        //TODO kontrola, jestli běží
-        return false;
+    private boolean isRunning(Player player, int recordId, int place) {
+        if(place == 0) {
+            return ParticlePlayer.containsPlayerAndRecord(player, recordId);
+        } else {
+            //TODO
+            return false;
+        }
+    }
+
+    private int getRunningId(Player player, int place) {
+        if(place == 0) {
+            return ParticlePlayer.getRunningId(player);
+        } else {
+            //TODO
+            return 0;
+        }
+    }
+
+    private int getSelectedId(Player player) {
+        int recordId = 0;
+        try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
+            PreparedStatement stm = db.getCon().prepareStatement("SELECT record_id FROM " + tables.getMParticleTable() + " WHERE user_id = ? AND place = 0 AND selected = 1");
+            stm.setInt(1, playerManager.getUserId(player.getName()));
+            ResultSet rs =  stm.executeQuery();
+            if(rs.next()) {
+                recordId = rs.getInt(1);
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return recordId;
     }
 }
