@@ -1,75 +1,84 @@
 package com.mens.mutility.spigot.commands.commands.mparticle.styles;
 
-import com.mens.mutility.spigot.utils.Timer;
+import com.mens.mutility.spigot.chat.Prefix;
+import com.mens.mutility.spigot.commands.commands.mparticle.ParticleInfo;
+import com.mens.mutility.spigot.commands.commands.mparticle.ParticlePlace;
+import com.mens.mutility.spigot.commands.commands.mparticle.ParticlePlayer;
+import com.mens.mutility.spigot.commands.commands.mparticle.RGB;
+import com.mens.mutility.spigot.utils.Checker;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
 
-import java.sql.SQLException;
+import java.util.Objects;
+import java.util.Random;
+import java.util.TimerTask;
 
+@SuppressWarnings("unused")
 public class Ball {
-    public void run(int recordId, Player player, String particle, int red, int green, int blue, int onPlace, Location location) {
-        Timer timer = new Timer();
-        double phi = 0.0D;
-        timer.setOnRunning((sec, tt) -> {
+    private Location loc;
+    private final Random rd;
+    private final Checker checker;
+    private final Prefix prefix;
 
-        });
-        /*try {
-            Particle getParticle = Particles.getParticleFromName(particle);
-            BlockData blockData = Particles.getBlockDataFromName(particle);
-            int id = Methods.getId(id_user_record, onPlace);
+    public Ball() {
+        rd = new Random();
+        checker = new Checker();
+        prefix = new Prefix();
+    }
 
-            new BukkitRunnable() {
-                double phi = 0.0D;
-                @Override
-                public void run() {
+    public void run(ParticleInfo info) {
+        Player player = info.getPlayer();
+        Particle particle = info.getParticle().getParticle();
+        BlockData blockData = info.getParticle().getBlockData();
+        RGB color = info.getColor();
 
-                    if(onPlace == 0) {
-                        loc = player.getLocation();
-                        if(!ParticlePlayer.getPlayer(player, id_user_record)) {
-                            this.cancel();
-                        }
-                        if(Methods.isVanished(player)) {
-                            this.cancel();
-                            player.sendMessage(Prefix.prefix + Errors.inVanished);
-                            stop.runQuietly(player, id_user_record, onPlace);
-                        }
-                    } else if(onPlace == 1) {
-                        loc = location;
-                        if(!ParticlePlace.getPlace(id)) {
-                            this.cancel();
-                        }
+        new java.util.Timer().schedule(new TimerTask() {
+            double phi = 0.0D;
+            final boolean isPlace = info.getLocation() != null;
+
+            @Override
+            public void run() {
+                if(!isPlace) {
+                    loc = player.getLocation();
+                    if(!ParticlePlayer.containsPlayerAndRecord(player, info.getRecordID())) {
+                        this.cancel();
                     }
-                    this.phi += 0.20943951023931953D;
-                    for (double theta = 0.0D; theta <= 6.283185307179586D; theta += 0.06283185307179587D) {
-                        double r = 1.75D;
-                        double x = r * Math.cos(theta) * Math.sin(this.phi);
-                        double y = r * Math.cos(this.phi) + r;
-                        double z = r * Math.sin(theta) * Math.sin(this.phi);
-                        loc.add(x, y, z);
-                        if(getParticle.toString().equalsIgnoreCase("redstone")) {
-
-                            if((red < 0) || (green < 0) || (blue < 0)){
-                                Particle.DustOptions dusatOptions = new Particle.DustOptions(Color.fromRGB(rd.nextInt(255), rd.nextInt(255), rd.nextInt(255)),1);
-                                loc.getWorld().spawnParticle(Particle.REDSTONE, loc, 0, 0.0D, 0.0D, 0.0D, 1.0D, dusatOptions);
-                            } else {
-                                Particle.DustOptions dusatOptions = new Particle.DustOptions(Color.fromRGB(red, green, blue), 1);
-                                loc.getWorld().spawnParticle(Particle.REDSTONE, loc, 0, 0.0D, 0.0D, 0.0D, 1.0D, dusatOptions);
-                            }
-
-                        } else {
-                            loc.getWorld().spawnParticle(getParticle, loc, 0, 0.0D, 0.0D, 0.0D, 1.0D, blockData);
-                        }
-
-                        loc.subtract(x, y, z);
+                    if(checker.checkVanish(player)) {
+                        this.cancel();
+                        player.sendMessage(prefix.getMParticlePrefix(true, false) + "Particle nelze používat ve vanishi!");
+                        ParticlePlayer.unregisterPlayer(player);
+                    }
+                } else {
+                    loc = info.getLocation();
+                    if(!ParticlePlace.containsId(info.getId())) {
+                        this.cancel();
                     }
                 }
-            }.runTaskTimer(Main.plugin, 0, 1);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }*/
+                this.phi += 0.20943951023931953D;
+                double x; double y; double z; double r;
+                for (double theta = 0.0D; theta <= 6.283185307179586D; theta += 0.06283185307179587D) {
+                    r = 1.75D;
+                    x = r * Math.cos(theta) * Math.sin(this.phi);
+                    y = r * Math.cos(this.phi) + r;
+                    z = r * Math.sin(theta) * Math.sin(this.phi);
+                    loc.add(x, y, z);
+                    if(info.getParticle().getName().equalsIgnoreCase("redstone")) {
+                        Particle.DustOptions dustOptions;
+                        if((color.getRed() < 0)) {
+                            dustOptions = new Particle.DustOptions(Color.fromRGB(rd.nextInt(255), rd.nextInt(255), rd.nextInt(255)), 1);
+                        } else {
+                            dustOptions = new Particle.DustOptions(Color.fromRGB(color.getRed(), color.getGreen(), color.getBlue()), 1);
+                        }
+                        Objects.requireNonNull(loc.getWorld()).spawnParticle(Particle.REDSTONE, loc, 0, 0.0D, 0.0D, 0.0D, 1.0D, dustOptions);
+                    } else {
+                        Objects.requireNonNull(loc.getWorld()).spawnParticle(particle, loc, 0, 0.0D, 0.0D, 0.0D, 1.0D, blockData);
+                    }
+                    loc.subtract(x, y, z);
+                }
+            }
+        },0,50);
     }
 }

@@ -6,6 +6,9 @@ import com.mens.mutility.spigot.chat.PluginColors;
 import com.mens.mutility.spigot.chat.Prefix;
 import com.mens.mutility.spigot.chat.json.JsonBuilder;
 import com.mens.mutility.spigot.commands.commands.mparticle.enums.Colors;
+import com.mens.mutility.spigot.commands.commands.mparticle.enums.CustomStyles;
+import com.mens.mutility.spigot.commands.commands.mparticle.enums.Particles;
+import com.mens.mutility.spigot.commands.commands.mparticle.enums.Styles;
 import com.mens.mutility.spigot.commands.system.CommandData;
 import com.mens.mutility.spigot.commands.system.CommandHelp;
 import com.mens.mutility.spigot.commands.system.enums.ArgumentTypes;
@@ -20,9 +23,13 @@ import com.mens.mutility.spigot.utils.PageList;
 import com.mens.mutility.spigot.utils.PlayerManager;
 import com.mens.mutility.spigot.utils.confirmations.Confirmation;
 import net.md_5.bungee.api.ChatColor;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Location;
+import org.bukkit.WorldCreator;
 import org.bukkit.entity.Player;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -90,7 +97,7 @@ public class MParticle extends CommandHelp {
                 if(!isRunning(player, recordId, 0)) {
                     ParticlePlayer.unregisterPlayer(player);
                     ParticlePlayer.registerPlayer(player, recordId);
-                    //TODO spuštění particlu
+                    runClassMethod(getParticleInfo(player, recordId, false));
                     player.sendMessage(prefix.getMParticlePrefix(true, false) + colors.getSecondaryColor() + "Particle " + colors.getPrimaryColor() + recordId + colors.getSecondaryColor() + " byl spuštěn!");
                 } else {
                     player.sendMessage(prefix.getMParticlePrefix(true, false) + colors.getSecondaryColor() + "Vybraný particle již běží!");
@@ -104,7 +111,6 @@ public class MParticle extends CommandHelp {
             int runningId = getRunningId(player, 0);
             if(runningId != 0) {
                 ParticlePlayer.unregisterPlayer(player);
-                //TODO vypnutí particlu
                 player.sendMessage(prefix.getMParticlePrefix(true, false) + colors.getSecondaryColor() + "Particle " + colors.getPrimaryColor() + runningId + colors.getSecondaryColor() + " byl vypnut!");
             } else {
                 player.sendMessage(prefix.getMParticlePrefix(true, false) + colors.getSecondaryColor() + "Není zapnutý žádný particle!");
@@ -135,8 +141,14 @@ public class MParticle extends CommandHelp {
             helpList = getCommandHelp(plugin, t.getSender(), helpList);
             helpList.getList(Integer.parseInt(t.getArgs()[2]), null).toPlayer((Player) t.getSender());
         });
+        final CommandData createOnPlayerWave = new CommandData(ArgumentTypes.DEFAULT, "vlna", TabCompleterTypes.DEFAULT, "mutility.mparticle.create", CommandExecutors.PLAYER, t -> {
+            Player player = (Player) t.getSender();
+            String style = t.getArgs()[2];
+            createParticle(player, getMaxPlayerRecordId(player) + 1, style, null, null, 0, -2, -2, -2, 0, -1, -1, -1, null, null, -1, -1);
+        });
         final CommandData createOnPlayerCustom = new CommandData(ArgumentTypes.DEFAULT, "vlastni", TabCompleterTypes.DEFAULT, "mutility.mparticle.create");
         final CommandData createOnPlayerStyle = new CommandData(ArgumentTypes.STRING, TabCompleterTypes.PARTICLE_STYLES, "mutility.mparticle.create");
+        final CommandData createOnPlaceWave = new CommandData(ArgumentTypes.DEFAULT, "vlna", TabCompleterTypes.DEFAULT, "mutility.mparticle.create.place");
         final CommandData createOnPlaceCustom = new CommandData(ArgumentTypes.DEFAULT, "vlastni", TabCompleterTypes.DEFAULT, "mutility.mparticle.create.place");
         final CommandData createOnPlaceStyle = new CommandData(ArgumentTypes.STRING, TabCompleterTypes.PARTICLE_STYLES, "mutility.mparticle.create.place");
         final CommandData startOnPlayerID = new CommandData(ArgumentTypes.POSITIVE_INTEGER,  TabCompleterTypes.NONE, "mutility.mparticle.start", CommandExecutors.PLAYER, (t) -> {
@@ -147,7 +159,7 @@ public class MParticle extends CommandHelp {
                     ParticlePlayer.unregisterPlayer(player);
                     ParticlePlayer.registerPlayer(player, recordId);
                     updateSelected(player, recordId);
-                    //TODO spuštění particlu
+                    runClassMethod(getParticleInfo(player, recordId, false));
                     player.sendMessage(prefix.getMParticlePrefix(true, false) + colors.getSecondaryColor() + "Particle " + colors.getPrimaryColor() + recordId + colors.getSecondaryColor() + " byl spuštěn!");
                 } else {
                     player.sendMessage(prefix.getMParticlePrefix(true, false) + colors.getSecondaryColor() + "Vybraný particle již běží!");
@@ -166,10 +178,9 @@ public class MParticle extends CommandHelp {
             if(isRecordId(player, recordId, false)) {
                 if(isRunning(player, recordId, 0)) {
                     ParticlePlayer.unregisterPlayer(player);
-                    //TODO vypnutí particlu
                     player.sendMessage(prefix.getMParticlePrefix(true, false) + colors.getSecondaryColor() + "Particle " + colors.getPrimaryColor() + recordId + colors.getSecondaryColor() + " byl vypnut!");
                 } else {
-                    player.sendMessage(prefix.getMParticlePrefix(true, false) + colors.getSecondaryColor() + "Není zapnutý žádný particle!");
+                    player.sendMessage(prefix.getMParticlePrefix(true, false) + colors.getSecondaryColor() + "Particle není zapnutý!");
                 }
             } else {
                 player.sendMessage(prefix.getMParticlePrefix(true, false) + colors.getSecondaryColor() + "Particle nenalezen!");
@@ -294,6 +305,14 @@ public class MParticle extends CommandHelp {
                 t.getSender().sendMessage(prefix.getMParticlePrefix(true, false) + errors.errWrongArgument(t.getArgs()[3],true, false));
             }
         });
+        final CommandData createOnPlaceWaveHere = new CommandData(ArgumentTypes.DEFAULT, "zde", TabCompleterTypes.DEFAULT, "mutility.mparticle.create.place", CommandExecutors.PLAYER, t -> {
+            Player player = (Player) t.getSender();
+            Location loc = player.getLocation();
+            String style = t.getArgs()[2];
+            createParticle(player, getMaxGlobalRecordId() + 1, style, null, null, 0, -2, -2, -2, 1, (float)(loc.getBlockX() + 0.5), (int)(loc.getY()), (float)(loc.getBlockZ() + 0.5), Objects.requireNonNull(loc.getWorld()).getName(), Objects.requireNonNull(plugin.getCurrentServer()).getName(), loc.getPitch(), loc.getYaw());
+        });
+        final CommandData createOnPlaceWaveX = new CommandData(ArgumentTypes.FLOAT, TabCompleterTypes.POSX, "mutility.mparticle.create.place");
+
 
         // 5. stupeň
         final CommandData createOnPlayerStyleRedstoneColor = new CommandData(ArgumentTypes.DEFAULT, "color", TabCompleterTypes.DEFAULT, "mutility.mparticle.create");
@@ -336,6 +355,7 @@ public class MParticle extends CommandHelp {
                 t.getSender().sendMessage(prefix.getMParticlePrefix(true, false) + errors.errWrongArgument(t.getArgs()[2],true, false));
             }
         });
+        final CommandData createOnPlaceWaveY = new CommandData(ArgumentTypes.FLOAT, TabCompleterTypes.POSY, "mutility.mparticle.create.place");
 
         // 6. stupeň
         final CommandData createOnPlayerStyleRedstoneColorFinal = new CommandData(ArgumentTypes.STRING, TabCompleterTypes.PARTICLE_COLORS, "mutility.mparticle.create", CommandExecutors.PLAYER, t -> {
@@ -367,6 +387,15 @@ public class MParticle extends CommandHelp {
             createParticle(player, getMaxGlobalRecordId() + 1, style, customStyle, particle, 0, -2, -2, -2, 1, (float)(loc.getBlockX() + 0.5), (int)(loc.getY()), (float)(loc.getBlockZ() + 0.5), Objects.requireNonNull(loc.getWorld()).getName(), Objects.requireNonNull(plugin.getCurrentServer()).getName(), loc.getPitch(), loc.getYaw());
         });
         final CommandData createOnPlaceCustomStyleParticleX = new CommandData(ArgumentTypes.FLOAT, TabCompleterTypes.POSX, "mutility.mparticle.create.place");
+        final CommandData createOnPlaceWaveZ = new CommandData(ArgumentTypes.FLOAT, TabCompleterTypes.POSZ, "mutility.mparticle.create.place", CommandExecutors.PLAYER, t -> {
+            Player player = (Player) t.getSender();
+            Location loc = player.getLocation();
+            String style = t.getArgs()[2];
+            float x = Float.parseFloat(t.getArgs()[3]);
+            float y = Float.parseFloat(t.getArgs()[4]);
+            float z = Float.parseFloat(t.getArgs()[5]);
+            createParticle(player, getMaxGlobalRecordId() + 1, style, null, null, 0, -2, -2, -2, 1, x, y, z, Objects.requireNonNull(loc.getWorld()).getName(), Objects.requireNonNull(plugin.getCurrentServer()).getName(), loc.getPitch(), loc.getYaw());
+        });
 
         // 7. stupeň
         final CommandData createOnPlayerStyleRedstoneColorRG = new CommandData(ArgumentTypes.POSITIVE_INTEGER, TabCompleterTypes.CUSTOM, "[<Zelená (0-255)>]", "mutility.mparticle.create");
@@ -620,8 +649,10 @@ public class MParticle extends CommandHelp {
         show.link(showPlayerPage);
 
         helpHelpPage.link(helpHelpPageID);
+        createOnPlayer.link(createOnPlayerWave);
         createOnPlayer.link(createOnPlayerCustom);
         createOnPlayer.link(createOnPlayerStyle);
+        createOnPlace.link(createOnPlaceWave);
         createOnPlace.link(createOnPlaceCustom);
         createOnPlace.link(createOnPlaceStyle);
         startOnPlayer.link(startOnPlayerID);
@@ -643,6 +674,8 @@ public class MParticle extends CommandHelp {
         createOnPlaceStyle.link(createOnPlaceStyleRedstone);
         createOnPlaceStyle.link(createOnPlaceStyleParticle);
         createOnPlaceCustom.link(createOnPlaceCustomStyle);
+        createOnPlaceWave.link(createOnPlaceWaveHere);
+        createOnPlaceWave.link(createOnPlaceWaveX);
         manageOnPlayerID.link(manageOnPlayerIDRename);
         manageOnPlaceID.link(manageOnPlaceIDRename);
         showPlayerPage.link(showPlayerPageID);
@@ -660,6 +693,7 @@ public class MParticle extends CommandHelp {
         createOnPlaceCustomStyle.link(createOnPlaceCustomStyleParticle);
         createOnPlaceStyleParticle.link(createOnPlaceStyleParticleHere);
         createOnPlaceStyleParticle.link(createOnPlaceStyleParticleX);
+        createOnPlaceWaveX.link(createOnPlaceWaveY);
         manageOnPlayerIDRename.link(manageOnPlayerIDRenameName);
         manageOnPlaceIDRename.link(manageOnPlaceIDRenameName);
 
@@ -674,6 +708,7 @@ public class MParticle extends CommandHelp {
         createOnPlaceStyleParticleX.link(createOnPlaceStyleParticleY);
         createOnPlaceCustomStyleParticle.link(createOnPlaceCustomStyleParticleHere);
         createOnPlaceCustomStyleParticle.link(createOnPlaceCustomStyleParticleX);
+        createOnPlaceWaveY.link(createOnPlaceWaveZ);
 
         createOnPlayerStyleRedstoneColorR.link(createOnPlayerStyleRedstoneColorRG);
         createOnPlayerCustomStyleRedstoneColor.link(createOnPlayerCustomStyleRedstoneColorFinal);
@@ -715,24 +750,114 @@ public class MParticle extends CommandHelp {
         return mparticle;
     }
 
-    private void renameParticle(Player player, int recordId, boolean global, String name) {
+    public void runClassMethod(ParticleInfo info) {
+        try {
+            Class[] params = new Class[1];
+            params[0] = ParticleInfo.class;
+            Class<?> cls = Class.forName("com.mens.mutility.spigot.commands.commands.mparticle.styles." + StringUtils.capitalize(info.getStyle().getEnglishName()));
+            Object obj = cls.getDeclaredConstructor().newInstance();
+            Method method = cls.getDeclaredMethod("run", params[0]);
+            method.invoke(obj, info);
+        } catch (ClassNotFoundException | InstantiationException | InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private ParticleInfo getParticleInfo(Player player, int identificator, boolean global) {
+        ParticleInfo info = new ParticleInfo();
         try {
             if(!db.getCon().isValid(0)) {
                 db.openConnection();
             }
             PreparedStatement stm;
             if(global) {
-                stm = db.getCon().prepareStatement("UPDATE " + tables.getMParticleTable() + " SET particle_name = ? WHERE record_id = ? AND place = 1");
+                stm = db.getCon().prepareStatement("SELECT * FROM " + tables.getMParticleTable() + " WHERE id = ? AND place = 1");
+                stm.setInt(1, identificator);
+            } else {
+                stm = db.getCon().prepareStatement("SELECT * FROM " + tables.getMParticleTable() + " WHERE record_id = ? AND user_id = ? AND place = 0");
+                stm.setInt(1, identificator);
+                stm.setInt(2, playerManager.getUserId(player.getName()));
+            }
+            ResultSet rs =  stm.executeQuery();
+            int id;
+            int recordId;
+            String style;
+            String customStyle;
+            String particle;
+            int color;
+            int red;
+            int green;
+            int blue;
+            double posX;
+            double posY;
+            double posZ;
+            String world;
+            String server;
+            double pitch;
+            double yaw;
+            if(rs.next()) {
+                id = rs.getInt(1);
+                recordId = rs.getInt(3);
+                style = rs.getString(4);
+                customStyle = rs.getString(5);
+                particle = rs.getString(6);
+                color = rs.getInt(9);
+                red = rs.getInt(10);
+                green = rs.getInt(11);
+                blue = rs.getInt(12);
+                posX = rs.getDouble(14);
+                posY = rs.getDouble(15);
+                posZ = rs.getDouble(16);
+                world = rs.getString(17);
+                server = rs.getString(18);
+                pitch = rs.getDouble(19);
+                yaw = rs.getDouble(20);
+                info.setRecordID(recordId);
+                info.setParticle(Particles.getParticleEnumByName(particle));
+                info.setStyle(Styles.getStyleEnumByName(style));
+                info.setCustomStyle(CustomStyles.getCustomStyleEnumByName(customStyle));
+                if(color == 1) {
+                    info.setColor(new RGB(red, green, blue));
+                }
+                if(world != null) {
+                    info.setId(id);
+                    Location loc = player.getLocation();
+                    loc.setX(posX);
+                    loc.setY(posY);
+                    loc.setZ(posZ);
+                    loc.setWorld(WorldCreator.name(world).createWorld());
+                    loc.setPitch((float) pitch);
+                    loc.setYaw((float) yaw);
+                    info.setLocation(loc);
+                    info.setServer(server);
+                } else {
+                    info.setPlayer(player);
+                }
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return info;
+    }
+
+    private void renameParticle(Player player, int identificator, boolean global, String name) {
+        try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
+            PreparedStatement stm;
+            if(global) {
+                stm = db.getCon().prepareStatement("UPDATE " + tables.getMParticleTable() + " SET particle_name = ? WHERE id = ? AND place = 1");
                 stm.setString(1, name);
-                stm.setInt(2, recordId);
+                stm.setInt(2, identificator);
             } else {
                 stm = db.getCon().prepareStatement("UPDATE " + tables.getMParticleTable() + " SET particle_name = ? WHERE record_id = ? AND user_id = ? AND place = 0");
                 stm.setString(1, name);
-                stm.setInt(2, recordId);
+                stm.setInt(2, identificator);
                 stm.setInt(3, playerManager.getUserId(player.getName()));
             }
             stm.execute();
-            player.sendMessage(prefix.getMParticlePrefix(true, false) + "Particle " + colors.getPrimaryColor() + recordId + colors.getSecondaryColor() + " byl přejmenován na " + colors.getPrimaryColor() + name + colors.getSecondaryColor() + "!");
+            player.sendMessage(prefix.getMParticlePrefix(true, false) + "Particle " + colors.getPrimaryColor() + identificator + colors.getSecondaryColor() + " byl přejmenován na " + colors.getPrimaryColor() + name + colors.getSecondaryColor() + "!");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -757,25 +882,26 @@ public class MParticle extends CommandHelp {
         }
     }
 
-    private void deleteParticle(Player player, int recordId, boolean global) {
+    private void deleteParticle(Player player, int identificator, boolean global) {
         try {
             if(!db.getCon().isValid(0)) {
                 db.openConnection();
             }
             PreparedStatement stm;
             if(global) {
-                stm = db.getCon().prepareStatement("DELETE FROM " + tables.getMParticleTable() + " WHERE record_id = ? AND place = 1");
-                stm.setInt(1, recordId);
+                int recordId = getRecordIdById(identificator);
+                stm = db.getCon().prepareStatement("DELETE FROM " + tables.getMParticleTable() + " WHERE id = ? AND place = 1");
+                stm.setInt(1, identificator);
                 stm.execute();
                 stm = db.getCon().prepareStatement("UPDATE " + tables.getMParticleTable() + " SET record_id = record_id - 1 WHERE record_id > ? AND place = 1");
                 stm.setInt(1, recordId);
             } else {
                 stm = db.getCon().prepareStatement("DELETE FROM " + tables.getMParticleTable() + " WHERE record_id = ? AND user_id = ? AND place = 0");
-                stm.setInt(1, recordId);
+                stm.setInt(1, identificator);
                 stm.setInt(2, playerManager.getUserId(player.getName()));
                 stm.execute();
                 stm = db.getCon().prepareStatement("UPDATE " + tables.getMParticleTable() + " SET record_id = record_id - 1 WHERE record_id > ? AND user_id = ? AND place = 0");
-                stm.setInt(1, recordId);
+                stm.setInt(1, identificator);
                 stm.setInt(2, playerManager.getUserId(player.getName()));
             }
             stm.execute();
@@ -786,6 +912,25 @@ public class MParticle extends CommandHelp {
 
     private boolean isRecordId(Player player, int recordId, boolean global) {
         return recordId <= getMaxRecordId(player, global);
+    }
+
+    private int getRecordIdById(int id) {
+        int recordId = 0;
+        try {
+            if(!db.getCon().isValid(0)) {
+                db.openConnection();
+            }
+            PreparedStatement stm;
+            stm = db.getCon().prepareStatement("SELECT record_id FROM " + tables.getMParticleTable() + " WHERE id = ?");
+            stm.setInt(1, id);
+            ResultSet rs =  stm.executeQuery();
+            if(rs.next()) {
+                recordId = rs.getInt(1);
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return recordId;
     }
 
     private int getMaxRecordId(Player player, boolean global) {
@@ -1132,10 +1277,12 @@ public class MParticle extends CommandHelp {
                     .text(customStyle)
                     .color(colors.getPrimaryColorHEX());
         }
-        jb.text("\nParticle: ")
-                .color(colors.getSecondaryColorHEX())
-                .text(particle)
-                .color(colors.getPrimaryColorHEX());
+        if(particle != null) {
+            jb.text("\nParticle: ")
+                    .color(colors.getSecondaryColorHEX())
+                    .text(particle)
+                    .color(colors.getPrimaryColorHEX());
+        }
         if(color == 1) {
             jb.text("\nBarva: ")
                     .color(colors.getSecondaryColorHEX())

@@ -1,5 +1,7 @@
 package com.mens.mutility.spigot.commands.commands.mparticle.enums;
 
+import java.util.Arrays;
+
 public enum Styles {
     MIC("mic", "ball"),
     DEST("dest", "rain"),
@@ -27,5 +29,9 @@ public enum Styles {
 
     public static String getEnglishNameFromName(String name) {
         return Styles.valueOf(name).getEnglishName();
+    }
+
+    public static Styles getStyleEnumByName(String name) {
+        return Arrays.stream(Styles.values()).filter(s -> s.getName().equals(name)).findFirst().orElse(null);
     }
 }

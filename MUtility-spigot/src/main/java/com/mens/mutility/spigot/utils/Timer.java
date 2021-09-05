@@ -28,7 +28,7 @@ public class Timer {
 
     public void startTimer(int timeInSec) {
         running = true;
-        new java.util.Timer().schedule(new TimerTask(){
+        new java.util.Timer().schedule(new TimerTask() {
             int seconds = 0;
             @Override
             public void run() {

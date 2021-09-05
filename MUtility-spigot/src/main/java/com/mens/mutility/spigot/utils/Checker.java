@@ -154,4 +154,13 @@ public class Checker {
     public boolean checkParticleColor(String color) {
         return Arrays.stream(Colors.values()).anyMatch(colorLoc -> colorLoc.getName().equalsIgnoreCase(color));
     }
+
+    public boolean checkVanish(Player player) {
+        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+            if (!onlinePlayer.canSee(player)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

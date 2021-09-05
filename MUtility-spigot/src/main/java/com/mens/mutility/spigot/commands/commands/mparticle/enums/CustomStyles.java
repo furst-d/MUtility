@@ -1,5 +1,7 @@
 package com.mens.mutility.spigot.commands.commands.mparticle.enums;
 
+import java.util.Arrays;
+
 public enum CustomStyles {
     USI_A_OCAS("usi_a_ocas"),
     KRIDLA("kridla"),
@@ -17,5 +19,9 @@ public enum CustomStyles {
 
     public String getName() {
         return this.name;
+    }
+
+    public static CustomStyles getCustomStyleEnumByName(String name) {
+        return Arrays.stream(CustomStyles.values()).filter(s -> s.getName().equals(name)).findFirst().orElse(null);
     }
 }

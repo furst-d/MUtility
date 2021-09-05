@@ -4,6 +4,8 @@ import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.data.BlockData;
 
+import java.util.Arrays;
+
 public enum Particles {
     ASH(Particle.ASH, "ash", null),
     BARRIER(Particle.BARRIER, "barrier", null),
@@ -102,10 +104,16 @@ public enum Particles {
     public Particle getParticle() {
         return particle;
     }
+
     public String getName() {
         return this.name;
     }
+
     public BlockData getBlockData() {
         return this.blockData;
+    }
+
+    public static Particles getParticleEnumByName(String name) {
+        return Arrays.stream(Particles.values()).filter(p -> p.getName().equals(name)).findFirst().orElse(null);
     }
 }
