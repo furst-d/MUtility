@@ -16,9 +16,6 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.TimerTask;
 
-import static java.lang.Math.cos;
-import static java.lang.Math.sin;
-
 @SuppressWarnings("unused")
 public class Spiral {
     private Location loc;
@@ -35,12 +32,12 @@ public class Spiral {
     public void run(ParticleInfo info) {
         Player player = info.getPlayer();
         Particle particle = info.getParticle().getParticle();
-        BlockData blockData = info.getParticle().getBlockData();
+        BlockData data = info.getParticle().getData();
         RGB color = info.getColor();
 
         new java.util.Timer().schedule(new TimerTask() {
             double t = 0.0D;
-            double r = 1.0D;
+            final double r = 1.0D;
             final boolean isPlace = info.getLocation() != null;
 
             @Override
@@ -75,7 +72,7 @@ public class Spiral {
                     }
                     Objects.requireNonNull(loc.getWorld()).spawnParticle(Particle.REDSTONE, loc, 0, 0.0D, 0.0D, 0.0D, 1.0D, dustOptions);
                 } else {
-                    Objects.requireNonNull(loc.getWorld()).spawnParticle(particle, loc, 0, 0.0D, 0.0D, 0.0D, 1.0D, blockData);
+                    Objects.requireNonNull(loc.getWorld()).spawnParticle(particle, loc, 0, 0.0D, 0.0D, 0.0D, 1.0D, data);
                 }
                 loc.subtract(x, y, z);
                 if (this.t > 10.566370614359172D) {

@@ -1,6 +1,7 @@
 package com.mens.mutility.bungeecord;
 
 import com.google.common.io.ByteStreams;
+import com.mens.mutility.bungeecord.commands.mparticle.MParticle;
 import com.mens.mutility.bungeecord.commands.mstavba.MStavbaVoteManager;
 import com.mens.mutility.bungeecord.database.Database;
 import com.mens.mutility.bungeecord.discord.DiscordManager;
@@ -35,6 +36,7 @@ public final class MUtilityBungeeCord extends Plugin {
         db.openFirstConnection();
         DiscordManager.startBot(this);
         setMstavba();
+        startPlaceParticle();
     }
 
     /**
@@ -121,5 +123,9 @@ public final class MUtilityBungeeCord extends Plugin {
         if(manager.isActive()) {
             manager.startTimer();
         }
+    }
+
+    private void startPlaceParticle() {
+        new MParticle().startSelectedPlace();
     }
 }

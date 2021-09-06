@@ -35,7 +35,7 @@ public class Ring {
     public void run(ParticleInfo info) {
         Player player = info.getPlayer();
         Particle particle = info.getParticle().getParticle();
-        BlockData blockData = info.getParticle().getBlockData();
+        BlockData data = info.getParticle().getData();
         RGB color = info.getColor();
 
         new java.util.Timer().schedule(new TimerTask() {
@@ -75,7 +75,7 @@ public class Ring {
                     }
                     Objects.requireNonNull(loc.getWorld()).spawnParticle(Particle.REDSTONE, loc, 0, 0.0D, 0.0D, 0.0D, 1.0D, dustOptions);
                 } else {
-                    Objects.requireNonNull(loc.getWorld()).spawnParticle(particle, loc, 0, 0.0D, 0.0D, 0.0D, 1.0D, blockData);
+                    Objects.requireNonNull(loc.getWorld()).spawnParticle(particle, loc, 0, 0.0D, 0.0D, 0.0D, 1.0D, data);
                 }
                 loc.subtract(x, y, z);
                 if (this.t > 12.566370614359172D) {

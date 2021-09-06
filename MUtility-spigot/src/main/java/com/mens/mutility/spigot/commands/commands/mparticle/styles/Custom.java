@@ -43,7 +43,7 @@ public class Custom {
 
         Player player = info.getPlayer();
         Particle particle = info.getParticle().getParticle();
-        BlockData blockData = info.getParticle().getBlockData();
+        BlockData data = info.getParticle().getData();
         RGB color = info.getColor();
         String customType = info.getCustomStyle().getName();
 
@@ -109,12 +109,12 @@ public class Custom {
                         this.cancel();
                     }
                 }
-                drawParticles(loc, finalHeight, finalSpace, particle, color, finalShape, blockData);
+                drawParticles(loc, finalHeight, finalSpace, particle, color, finalShape, data);
             }
         }, 0, speed);
     }
 
-    public void drawParticles(Location loc, double height, double space, Particle getParticle, RGB color, boolean[][] shape, BlockData blockData) {
+    public void drawParticles(Location loc, double height, double space, Particle getParticle, RGB color, boolean[][] shape, BlockData data) {
         double defX = loc.getX() - (space * (shape[0].length-1) / 2);
         double x = defX;
         double y = loc.clone().getY() + height;
@@ -135,7 +135,6 @@ public class Custom {
 
                     loc.add(v);
                     loc.add(v2);
-
                     if (getParticle.toString().equalsIgnoreCase("redstone")) {
                         Particle.DustOptions dusatOptions;
                         if ((color.getRed() < 0)) {
@@ -145,9 +144,8 @@ public class Custom {
                         }
                         Objects.requireNonNull(loc.getWorld()).spawnParticle(Particle.REDSTONE, loc, 0, 0.0D, 0.0D, 0.0D, 1.0D, dusatOptions);
                     } else {
-                        Objects.requireNonNull(loc.getWorld()).spawnParticle(getParticle, loc, 0, 0.0D, 0.0D, 0.0D, 1.0D, blockData);
+                        Objects.requireNonNull(loc.getWorld()).spawnParticle(getParticle, loc, 0, 0.0D, 0.0D, 0.0D, 1.0D, data);
                     }
-
                     loc.subtract(v2);
                     loc.subtract(v);
                 }

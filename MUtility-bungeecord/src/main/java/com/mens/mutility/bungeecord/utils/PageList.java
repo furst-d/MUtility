@@ -138,7 +138,7 @@ public class PageList {
     }
 
     private void checkIndexes() {
-        if(getIndex() == getLimit()) {
+        if(getIndex() == getLimit() + 1) {
             setMaxPage(getMaxPage() + 1);
             setIndex(0);
         } else if(getIndex() == -1) {

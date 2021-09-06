@@ -27,7 +27,6 @@ public enum Particles {
     DRIPPING_DRIPSTONE_WATER(Particle.DRIPPING_DRIPSTONE_WATER, "dripping_dripstone_water", null),
     DRIPPING_HONEY(Particle.DRIPPING_HONEY, "dripping_honey", null),
     DRIPPING_OBSIDIAN_TEAR(Particle.DRIPPING_OBSIDIAN_TEAR, "dripping_obsidian_tear", null),
-    DUST_COLOR_TRANSITION(Particle.DUST_COLOR_TRANSITION, "dust_color_transition", null),
     ELECTRIC_SPARK(Particle.ELECTRIC_SPARK, "electric_spark", null),
     ENCHANTMENT_TABLE(Particle.ENCHANTMENT_TABLE, "enchantment_table", null),
     END_ROD(Particle.END_ROD, "end_rod", null),
@@ -80,7 +79,6 @@ public enum Particles {
     SWEEP_ATTACK(Particle.SWEEP_ATTACK, "sweep_attack", null),
     TOTEM(Particle.TOTEM, "totem", null),
     TOWN_AURA(Particle.TOWN_AURA, "town_aura", null),
-    VIBRATION(Particle.VIBRATION, "vibration", null),
     VILLAGER_ANGRY(Particle.VILLAGER_ANGRY, "villager_angry", null),
     VILLAGER_HAPPY(Particle.VILLAGER_HAPPY, "villager_happy", null),
     WARPED_SPORE(Particle.WARPED_SPORE, "warped_spore", null),
@@ -89,16 +87,17 @@ public enum Particles {
     WATER_SPLASH(Particle.WATER_SPLASH, "water_splash", null),
     WATER_WAKE(Particle.WATER_WAKE, "water_wake", null),
     WAX_OFF(Particle.WAX_OFF, "wax_off", null),
-    WAX_ON(Particle.WAX_ON, "wax_on", null);
+    WAX_ON(Particle.WAX_ON, "wax_on", null),
+    WHITE_ASH(Particle.WHITE_ASH, "white_ash", null);
 
     private final Particle particle;
     private final String name;
-    private final BlockData blockData;
+    private final BlockData data;
 
-    Particles(Particle part, String name, BlockData blockData) {
-        this.particle = part;
+    Particles(Particle particle, String name, BlockData data) {
+        this.particle = particle;
         this.name = name;
-        this.blockData = blockData;
+        this.data = data;
     }
 
     public Particle getParticle() {
@@ -109,8 +108,8 @@ public enum Particles {
         return this.name;
     }
 
-    public BlockData getBlockData() {
-        return this.blockData;
+    public BlockData getData() {
+        return data;
     }
 
     public static Particles getParticleEnumByName(String name) {

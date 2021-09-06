@@ -5,6 +5,8 @@ import com.mens.mutility.spigot.MUtilitySpigot;
 import com.mens.mutility.spigot.chat.PluginColors;
 import com.mens.mutility.spigot.chat.Prefix;
 import com.mens.mutility.spigot.chat.json.JsonBuilder;
+import com.mens.mutility.spigot.commands.commands.mparticle.MParticle;
+import com.mens.mutility.spigot.commands.commands.mparticle.ParticlePlace;
 import com.mens.mutility.spigot.commands.commands.mstavba.MStavbaVoteManager;
 import com.mens.mutility.spigot.commands.commands.tpdata.Tpdata;
 import com.mens.mutility.spigot.inventory.TeleportData;
@@ -276,6 +278,23 @@ public class MessageChannelListener implements PluginMessageListener {
                                 });
                             }
                         }
+                    }
+                    break;
+
+                case "mens:particle-place-request":
+                    int particleId = Integer.parseInt(stream.readUTF());
+                    boolean isStart = Boolean.parseBoolean(stream.readUTF());
+                    boolean isRunClass = Boolean.parseBoolean(stream.readUTF());
+                    MParticle mParticle = new MParticle(plugin);
+                    if(isStart) {
+                        ParticlePlace.registerPlace(particleId);
+                        mParticle.updateSelectedPlace(particleId, true);
+                        if(isRunClass) {
+                            mParticle.runClassMethod(mParticle.getParticleInfo(null, particleId, true));
+                        }
+                    } else {
+                        ParticlePlace.unregisterPlace(particleId);
+                        mParticle.updateSelectedPlace(particleId, false);
                     }
                     break;
 

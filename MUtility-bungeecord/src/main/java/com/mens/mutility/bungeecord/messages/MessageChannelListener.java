@@ -5,6 +5,7 @@ import com.mens.mutility.bungeecord.chat.PluginColors;
 import com.mens.mutility.bungeecord.chat.Prefix;
 import com.mens.mutility.bungeecord.chat.json.JsonBuilder;
 import com.mens.mutility.bungeecord.commands.anketa.Anketa;
+import com.mens.mutility.bungeecord.commands.mparticle.MParticle;
 import com.mens.mutility.bungeecord.commands.mstavba.MStavbaVoteManager;
 import com.mens.mutility.bungeecord.discord.DiscordManager;
 import com.mens.mutility.bungeecord.requests.*;
@@ -43,6 +44,7 @@ public class MessageChannelListener implements Listener {
     public static List<RandomTeleportRequest> rtRequests;
     public static List<TeleportDataRequest> teleportDataRequests;
     public static List<EntityPortalRequest> entityPortalRequests;
+    public static List<ParticleUpdateRequest> particleUpdateRequest;
 
     public MessageChannelListener(MUtilityBungeeCord plugin) {
         this.plugin = plugin;
@@ -56,11 +58,13 @@ public class MessageChannelListener implements Listener {
                 .color(colors.getSecondaryColorHEX())
                 .text("/anketa vytvor [<Název ankety>]")
                 .color(colors.getPrimaryColorHEX());
+
         portalRequests = new ArrayList<>();
         teleportRequests = new ArrayList<>();
         rtRequests = new ArrayList<>();
         teleportDataRequests = new ArrayList<>();
         entityPortalRequests = new ArrayList<>();
+        particleUpdateRequest = new ArrayList<>();
     }
 
     @EventHandler
@@ -292,6 +296,7 @@ public class MessageChannelListener implements Listener {
                                 }
                             }
                             break;
+
                         case "nether":
                             EntityPortalRequest request = new EntityPortalRequest(
                                     eType,
@@ -308,6 +313,24 @@ public class MessageChannelListener implements Listener {
                             }
                             break;
                     }
+                    break;
+
+                case "mens:particle-place-request":
+                    int particleId = Integer.parseInt(stream.readUTF());
+                    boolean startParticle = Boolean.parseBoolean(stream.readUTF());
+                    MParticle mParticle = new MParticle();
+                    String sName = mParticle.getServerFromId(particleId);
+                    ProxyServer.getInstance().getServers().values().forEach(s -> {
+                        ParticleUpdateRequest request = new ParticleUpdateRequest(particleId, s, startParticle);
+                        if(s.getName().equals(sName)) {
+                            request.setRunClass(true);
+                        }
+                        if(s.getPlayers().isEmpty()) {
+                            particleUpdateRequest.add(request);
+                        } else {
+                            messageChannel.sendToServer(s, "mens:particle-place-request", String.valueOf(request.getId()), String.valueOf(request.isStart()), String.valueOf(request.isRunClass()));
+                        }
+                    });
                     break;
             }
         } catch (IOException e) {

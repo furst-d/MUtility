@@ -79,7 +79,7 @@ public class OnServerSwitchEvent implements Listener {
             }
 
             List<EntityPortalRequest> requests = MessageChannelListener.entityPortalRequests.stream().filter(request -> request.getServer().getName().equals(event.getPlayer().getServer().getInfo().getName())).collect(Collectors.toList());
-            for(EntityPortalRequest request : requests) {
+            requests.forEach(request -> {
                 String subChannel = "mens:send-entity-to-";
                 switch (request.getWorld()) {
                     case "world":
@@ -91,7 +91,7 @@ public class OnServerSwitchEvent implements Listener {
                 }
                 messageChannel.sendToServer(request.getServer(), subChannel, String.valueOf(request.getX()), String.valueOf(request.getY()), String.valueOf(request.getZ()), request.getEntityTypeName(), request.getNbt());
                 MessageChannelListener.entityPortalRequests.remove(request);
-            }
+            });
         } else {
             MStavbaVoteManager manager = new MStavbaVoteManager(plugin);
             if(manager.isActive()) {
@@ -101,5 +101,11 @@ public class OnServerSwitchEvent implements Listener {
             }
             messageChannel.sendToServer(event.getPlayer(), "mens:mstavba-request");
         }
+
+        List<ParticleUpdateRequest> requests = MessageChannelListener.particleUpdateRequest.stream().filter(request -> request.getServer().getName().equals(event.getPlayer().getServer().getInfo().getName())).collect(Collectors.toList());
+        requests.forEach(request -> {
+            messageChannel.sendToServer(request.getServer(), "mens:particle-place-request", String.valueOf(request.getId()), String.valueOf(request.isStart()), String.valueOf(request.isRunClass()));
+            MessageChannelListener.particleUpdateRequest.remove(request);
+        });
     }
 }
